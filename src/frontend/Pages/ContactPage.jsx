@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography, Box } from "@mui/material";
+import { Typography, Box, TextField, Button } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
@@ -34,6 +34,13 @@ const ContactPage = () => {
           >
             For support, contact us at dreamcloset@gmail.com
           </Typography>
+          <TextField
+            label="Contact"
+            variant="outlined"
+            type="contact"
+            fullWidth
+          />
+          <Button variant="contained">Submit</Button>
         </Box>
         <Footer />
       </Box>
