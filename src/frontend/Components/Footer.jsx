@@ -1,5 +1,6 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, List } from "@mui/material";
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -14,40 +15,46 @@ const Footer = () => {
           gap: "50px",
         }}
       >
-        <Typography
-          variant="h6"
-          color="black"
-          align="center"
-          sx={{
-            fontWeight: "bold",
-            fontFamily: "Helvetica Neue",
-          }}
-        >
-          A Sixth Sense Production
-        </Typography>
-        <Typography
-          variant="h6"
-          color="black"
-          align="center"
-          sx={{
-            fontWeight: "bold",
-            fontFamily: "Helvetica Neue",
-          }}
-        >
-          Terms of Use
-        </Typography>
-        <Typography
-          variant="h6"
-          color="black"
-          align="center"
-          sx={{
-            fontWeight: "bold",
-            fontFamily: "Helvetica Neue",
-          }}
-        >
-          Contact Us
-        </Typography>
+        <List>
+          <Link to="/TOS">
+            <Typography
+              variant="h6"
+              color="black"
+              align="center"
+              sx={{
+                fontWeight: "bold",
+                fontFamily: "Helvetica Neue",
+              }}
+            >
+              Terms of Use
+            </Typography>
+          </Link>
+          <Link to="/ContactPage">
+            <Typography
+              variant="h6"
+              color="black"
+              align="center"
+              sx={{
+                fontWeight: "bold",
+                fontFamily: "Helvetica Neue",
+              }}
+            >
+              Contact Us
+            </Typography>
+          </Link>
+        </List>
       </Box>
+      <Typography
+        variant="h6"
+        color="black"
+        align="center"
+        sx={{
+          fontWeight: "bold",
+          fontFamily: "Helvetica Neue",
+        }}
+      >
+        A Sixth Sense Production
+      </Typography>
     </Box>
   );
 };
