@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography, Box, TextField, Button } from "@mui/material";
+import { Typography, Box, TextField, Button, Grid } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
@@ -8,9 +8,9 @@ const ContactPage = () => {
   return (
     <>
       <Header />
-      <Box>
+      <Grid container direction="column" justify="center" alignItems="center">
         <Typography
-          variant="h1"
+          variant="h3"
           marginTop={"70px"}
           marginLeft={"15px"}
           align="left"
@@ -25,7 +25,7 @@ const ContactPage = () => {
         <Box>
           <EmailIcon />
           <Typography
-            variant="h4"
+            variant="h6"
             marginLeft={"15px"}
             sx={{
               fontFamily: "Helvetica",
@@ -35,15 +35,23 @@ const ContactPage = () => {
             For support, contact us at dreamcloset@gmail.com
           </Typography>
           <TextField
-            label="Contact"
-            variant="outlined"
+            variant="filled"
+            id="contact"
+            margin="normal"
             type="contact"
             fullWidth
+            required
+            sx={{
+              width: "100%",
+              height: "500%",
+              maxWidth: "500px",
+              backgroundColor: "grey",
+            }}
           />
           <Button variant="contained">Submit</Button>
         </Box>
         <Footer />
-      </Box>
+      </Grid>
     </>
   );
 };
