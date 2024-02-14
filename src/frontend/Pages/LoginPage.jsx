@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   TextField,
@@ -16,8 +16,13 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 const LoginPage = () => {
   const defaultTheme = createTheme();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleLogin = async (event) => {
     event.preventDefault();
+    console.log("email", email);
+    console.log("password", password);
   };
 
   return (
@@ -47,7 +52,7 @@ const LoginPage = () => {
             <Typography component="h1" variant="h5">
               Sign In
             </Typography>
-            <Box>
+            <Box component="form" onSubmit={handleLogin} sx={{ mt: 3 }}>
               <TextField
                 margin="normal"
                 required
@@ -57,6 +62,8 @@ const LoginPage = () => {
                 name="email"
                 autoComplete="email"
                 autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <TextField
                 margin="normal"
@@ -67,6 +74,8 @@ const LoginPage = () => {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
@@ -80,13 +89,13 @@ const LoginPage = () => {
               >
                 Sign in
               </Button>
-              <Grid container>
-                <Grid item xs>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
                   <Link href="#" variant="body2">
                     Forgot Password
                   </Link>
                 </Grid>
-                <Grid item>
+                <Grid container justifyContent="flex-end">
                   <Link href="#" variant="body2">
                     {"Don't have an account? Sign Up"}
                   </Link>
