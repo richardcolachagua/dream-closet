@@ -29,6 +29,10 @@ const HomePage = () => {
           Just search for a certain type of article of clothing, and get
           results.
         </Typography>
+        <Typography>
+          Example: "A red-orange colored strapless dress for a wedding with a
+          slit on the left side"
+        </Typography>
       </Box>
       <Box>
         <UserDescriptionInput />

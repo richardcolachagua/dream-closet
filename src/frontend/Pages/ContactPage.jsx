@@ -8,50 +8,36 @@ const ContactPage = () => {
   return (
     <>
       <Header />
-      <Grid container direction="column" justify="center" alignItems="center">
-        <Typography
-          variant="h3"
-          marginTop={"70px"}
-          marginLeft={"15px"}
-          align="left"
-          sx={{
-            fontWeight: "bold",
-            color: "white",
-            fontFamily: "Helvetica",
-          }}
-        >
-          Contact us
+      <Box sx={{ padding: "50px" }}>
+        <Typography variant="h3" sx={{ fontWeight: "bold", color: "white" }}>
+          Contact Us
         </Typography>
-        <Box>
-          <EmailIcon />
-          <Typography
-            variant="h6"
-            marginLeft={"15px"}
-            sx={{
-              fontFamily: "Helvetica",
-              color: "white",
-            }}
-          >
-            For support, contact us at dreamcloset@gmail.com
-          </Typography>
-          <TextField
-            variant="filled"
-            id="contact"
-            margin="normal"
-            type="contact"
-            fullWidth
-            required
-            sx={{
-              width: "100%",
-              height: "500%",
-              maxWidth: "500px",
-              backgroundColor: "grey",
-            }}
-          />
-          <Button variant="contained">Submit</Button>
+        <Box sx={{ marginTop: 4 }}>
+          <Grid container spaceing={2}>
+            <Grid item xs={12}>
+              <TextField label="Your Name" variant="outlined" fullWidth />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField label="Your Email" variant="outlined" fullWidth />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Your Message"
+                multiline
+                rows={4}
+                variant="outlined"
+                fullWidth
+              />
+            </Grid>
+          </Grid>
         </Box>
-        <Footer />
-      </Grid>
+        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
+          <Button variant="contained" color="primary">
+            Send Message
+          </Button>
+        </Box>
+      </Box>
+      <Footer />
     </>
   );
 };
