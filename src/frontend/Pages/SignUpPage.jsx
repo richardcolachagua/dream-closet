@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   TextField,
@@ -10,12 +10,41 @@ import {
   CssBaseline,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import * as Yup from "yup";
+import { useFormik } from "formik";
 
 const SignUpPage = () => {
-  const defaultTheme = createTheme();
+  const [error, setError] = useState(""); // State for managing error messages
+
+  // Form  validation schema using Yup
+  const validationSchema = Yup.object().shape({
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: Yup.string()
+      .required("Password is required")
+      .min(8, "Password must be at least 8 characters"),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("Confirm Password is required"),
+  });
+
+  // Formik for managing form state and submission
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      //Handle form submission
+      console.log("Form submitted", values);
+    },
+  });
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={createTheme()}>
       <Grid
         container
         direction="column"
@@ -29,7 +58,6 @@ const SignUpPage = () => {
           sx={{ backgroundColor: "white", borderRadius: 1 }}
         >
           <CssBaseline />
-
           <Box
             sx={{
               marginTop: 8,
@@ -41,51 +69,64 @@ const SignUpPage = () => {
             <Typography component="h1" variant="h5">
               Sign Up
             </Typography>
-            <Box component="form" noValidate onSubmit={""} sx={{ mt: 3 }}>
+            {/* Signup form*/}
+            <form onSubmit={formik.handleSubmit}>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    autoComplete="given-name"
-                    name="firstName"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="First Name"
-                    autoFocus
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="lastName"
-                    label="Last Name"
-                    name="lastName"
-                    autoComplete="family-name"
-                  />
-                </Grid>
                 <Grid item xs={12}>
                   <TextField
                     required
                     fullWidth
                     id="email"
-                    label="Email Address"
                     name="email"
+                    label="Email Address"
                     autoComplete="email"
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     required
                     fullWidth
+                    id="password"
                     name="password"
                     label="Password"
                     type="password"
-                    id="password"
                     autoComplete="new-password"
+                    value={formik.values.password}
+                    onChange={
+                      formik.touched.password && Boolean(formik.errors.password)
+                    }
+                    helperText={
+                      formik.touched.password && formik.errors.password
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="confirmPassword"
+                    name="Confirm Password"
+                    label="Confirm Password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.confirmPassword &&
+                      Boolean(formik.errors.confirmPassword)
+                    }
+                    helperText={
+                      formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword
+                    }
                   />
                 </Grid>
               </Grid>
+              {/* Button for form submission */}
               <Button
                 type="submit"
                 fullWidth
@@ -94,14 +135,21 @@ const SignUpPage = () => {
               >
                 Sign Up
               </Button>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Link href="#" variant="body2">
-                    Already have an account? Sign in
-                  </Link>
-                </Grid>
+              {/* Error message display */}
+              {error && (
+                <Typography variant="body2" color="error">
+                  {error.message}
+                </Typography>
+              )}
+            </form>
+            {/* Link to login page */}
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="#" variant="body2">
+                  Already have an account? Sign in
+                </Link>
               </Grid>
-            </Box>
+            </Grid>
           </Box>
         </Container>
       </Grid>
