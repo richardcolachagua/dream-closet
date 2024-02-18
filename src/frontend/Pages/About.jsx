@@ -7,17 +7,35 @@ const About = () => {
   return (
     <>
       <Header />
-      <Box sx={{ padding: "50px" }}>
+      <Box
+        sx={{
+          padding: "50px",
+          width: "50%",
+          height: "40%",
+          bgcolor: "purple",
+          marginBottom: "50px",
+          borderRadius: "16px",
+          border: "2px solid white",
+        }}
+      >
         <Typography variant="h3" sx={{ color: "white", fontWeight: "bold" }}>
           What is Dream Closet?
         </Typography>
-        <Typography variant="h3" sx={{ color: "white" }}>
+        <Typography variant="body1" sx={{ color: "white" }}>
           Dream Closet is an AI-driven application that helps you find clothing
           items matching your description across various onilne stores. Simply
           describe the clothing item you're looking for, and Dream Closet will
           fetch matching results from different websites.
         </Typography>
-
+      </Box>
+      <Box
+        sx={{
+          padding: "50px",
+          bgcolor: "purple",
+          borderRadius: "16px",
+          border: "2px solid white",
+        }}
+      >
         <Typography
           variant="h3"
           sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
