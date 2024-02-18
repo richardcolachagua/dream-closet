@@ -4,8 +4,6 @@ import {
   TextField,
   Box,
   Typography,
-  FormControlLabel,
-  Checkbox,
   Link,
   Grid,
   Container,
@@ -28,17 +26,60 @@ AWS.config.update({
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string().required("Password is required"),
+});
+
 const LoginPage = () => {
   const defaultTheme = createTheme();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState("");
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema,
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const { email, password } = values;
+        //Retrieve user record from DynamoDB based on email
+        const params = {
+          TableName: "YOUR_DYNAMO_TABLE_NAME",
+          Key: { email },
+        };
+        const { Item } = await dynamoDB.get(params).promise();
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    console.log("email", email);
-    console.log("password", password);
-  };
+        if (!Item) {
+          setLoading(false);
+          setError("User not found");
+          return;
+        }
+        //Compare hashed passwords
+        //Note: Ensure you're using a secure hashing algorithm (e.g., bcrypt) for password hashing
+
+        if (Item.password !== password) {
+          setLoading(false);
+          setError("Invalid password");
+          return;
+        }
+        //Authentification successful
+        setError(false);
+        setError("");
+        console.log("Login Successful");
+        //Redirect user to dashboard or home page
+      } catch (error) {
+        setLoading(false);
+        console.error("Login failed", error);
+        setError("An error occured. Please try again later.");
+      }
+    },
+  });
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -67,56 +108,67 @@ const LoginPage = () => {
             <Typography component="h1" variant="h5">
               Sign In
             </Typography>
-            <Box component="form" onSubmit={handleLogin} sx={{ mt: 3 }}>
+            <form onSubmit={formik.handleSubmit}>
               <TextField
                 margin="normal"
-                required
                 fullWidth
                 id="email"
-                label="Email Address"
                 name="email"
+                label="Email Address"
                 autoComplete="email"
                 autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
               />
               <TextField
                 margin="normal"
-                required
                 fullWidth
                 name="password"
                 label="Password"
                 type="password"
-                id="password"
                 autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.password && Boolean(formik.errors.password)
+                }
+                helperText={formik.touched.password && formik.errors.password}
               />
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
+              {error && (
+                <Typography variant="body2" color="error">
+                  {error}
+                </Typography>
+              )}
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
               >
-                Sign in
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Sign in"
+                )}
               </Button>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Link href="#" variant="body2">
-                    Forgot Password
-                  </Link>
-                </Grid>
-                <Grid container justifyContent="flex-end">
-                  <Link href="#" variant="body2">
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
+            </form>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="#" variant="body2">
+                  Forgot Password
+                </Link>
               </Grid>
-            </Box>
+            </Grid>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="#" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
           </Box>
         </Container>
       </Grid>
