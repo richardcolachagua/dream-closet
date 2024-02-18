@@ -10,8 +10,23 @@ import {
   Grid,
   Container,
   CssBaseline,
+  CircularProgress,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import AWS from "aws-sdk";
+import * as Yup from "yup";
+import { useFormik } from "formik";
+
+// Initialize AWS SDK with AWS credentials and region
+
+AWS.config.update({
+  region: "YOUR_AWS_REGION",
+  credentials: new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: "YOUR_IDENTITY_POOL_ID",
+  }),
+});
+
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 const LoginPage = () => {
   const defaultTheme = createTheme();
