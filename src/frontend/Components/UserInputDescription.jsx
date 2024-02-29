@@ -5,31 +5,50 @@ import {
   Box,
   ImageList,
   ImageListItem,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 function UserDescriptionInput() {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]);
+  const [sortBy, setSortBy] = useState("relevance"); // State for sorting
+  const [filterBy, setFilterBy] = useState("all");
 
-  const handleInputChange = (event) => {
-    setDescription(event.target.value);
-  };
-
+  // Fetch images based on description, sorting, and filtering
   const fetchImages = async () => {
+    // Construct API URL with query parameters for sorting and filtering
+    const url = `http://localhost:5000/search?description=${description}&sortBy=${sortBy}&filterBy=${filterBy}`;
+
     try {
-      const response = await fetch(
-        `http://localhost:5000/search?description=${description}`
-      );
+      const response = await fetch(url);
       const data = await response.json();
       setImages(data);
     } catch (error) {
       console.error("Error fetching images", error);
+      // Display error message to the user
+      // Optionally, retry the request or provide a way for the user to retry
     }
   };
 
+  // useEffect to fetch images whenever description, sorting, or filtering changes
   useEffect(() => {
     fetchImages();
-  }, [description]);
+  }, [description, sortBy, filterBy]);
+
+  // Event Handler for description input change
+  const handleInputChange = (event) => {
+    setDescription(event.target.value);
+  };
+
+  const handleSortChange = (event) => {
+    setSortBy(event.target.value);
+  };
+
+  // Event Handler for filtering selection change
+  const handleFilterChange = (event) => {
+    setFilterBy(event.target.value);
+  };
 
   return (
     <Box
@@ -47,6 +66,29 @@ function UserDescriptionInput() {
         onChange={handleInputChange}
         sx={{ width: "100%", maxWidth: "500px", backgroundColor: "grey" }}
       />
+      <Select
+        value={sortBy}
+        onChange={handleSortChange}
+        variant="filled"
+        sx={{
+          backgroundColor: "white",
+          marginRight: "10px",
+        }}
+      >
+        <MenuItem value="relevance">Relevance</MenuItem>
+        <MenuItem value="price">Price</MenuItem>
+        <MenuItem value="rating">Rating</MenuItem>
+      </Select>
+      <Select
+        value={filterBy}
+        onChange={handleFilterChange}
+        variant="filled"
+        sx={{ backgroundColor: "white", marginRight: "10px" }}
+      >
+        <MenuItem value="all">All</MenuItem>
+        <MenuItem value="in-stock">In Stock</MenuItem>
+        <MenuItem value="sale">On Sale</MenuItem>
+      </Select>
       <Button
         variant="contained"
         color="primary"
