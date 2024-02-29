@@ -65,6 +65,7 @@ function UserDescriptionInput() {
         value={description}
         onChange={handleInputChange}
         sx={{ width: "100%", maxWidth: "500px", backgroundColor: "grey" }}
+        aria-label="Search input"
       />
       <Select
         value={sortBy}
@@ -99,6 +100,8 @@ function UserDescriptionInput() {
             bgcolor: "primary.dark",
           },
         }}
+        aria-label="Search button"
+        tabIndex="O" // Ensure the button is focusable
       >
         Search
       </Button>
