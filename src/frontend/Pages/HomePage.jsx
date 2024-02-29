@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Typography, Box } from "@mui/material";
 import UserDescriptionInput from "../Components/UserInputDescription";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
+import GalleryView from "../Components/GalleryView";
 
 const HomePage = () => {
+  const [images, setImages] = useState([]);
+
   return (
     <>
       <Header />
@@ -35,8 +38,10 @@ const HomePage = () => {
         </Typography>
       </Box>
       <Box>
-        <UserDescriptionInput />
+        <UserDescriptionInput setImages={setImages} />
       </Box>
+      {/* Render GalleryView only when images are available */}
+      {images.length > 0 && <GalleryView images={images} />}
       <Footer />
     </>
   );

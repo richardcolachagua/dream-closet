@@ -1,0 +1,17 @@
+.wrapper:active {
+    transform: scale(.85) translate(-50%, -50%);
+  }
+  
+  .wrapper:active img {
+    transform: scale(1.1);
+  }
+  
+  @keyframes fadeIn {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
