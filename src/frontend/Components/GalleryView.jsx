@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import "./style.css"; // Import CSS file for animations
 
 const GalleryView = () => {
   const [isDown, setIsDown] = useState(false);
@@ -26,7 +25,7 @@ const GalleryView = () => {
     setCurrentXtmp(deltaX);
     setCurrentYtmp(deltaY);
 
-    setIsTouch(true); // Note: Consider how to handle touch events
+    //setIsTouch(true); // Note: Consider how to handle touch events
   };
 
   const onUp = () => {

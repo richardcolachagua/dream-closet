@@ -1,18 +1,18 @@
-const http = require("http");
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
-const server = http.createServer((request, response) => {
-  if (request.method === "POST") {
-    let body = "";
-    request.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-    request.on("end", () => {
-      console.log("Recieved your description", body);
-      response.end("Recieved your description");
-    });
-  } else {
-    response.end("Send a POST request with your description");
-  }
+const app = express();
+const PORT = process.env.PORT || 8000;
+
+//enable CORS for all routes
+app.use(cors());
+
+// Body parser middleware
+app.use(bodyParser.json());
+
+// Your routes and other middleware go here
+
+app.listen(PORT, () => {
+  console.log(`server is running on port ${PORT}`);
 });
-
-server.listen(8000);
