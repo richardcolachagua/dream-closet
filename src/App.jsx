@@ -4,6 +4,7 @@ import ContactPage from "./frontend/Pages/ContactPage";
 import LoginPage from "./frontend/Pages/LoginPage";
 import SignUpPage from "./frontend/Pages/SignUpPage";
 import About from "./frontend/Pages/About";
+import NotFoundPage from "./frontend/Pages/PageNotFound";
 import { Box } from "@mui/material";
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/LoginPage" element={<LoginPage />} />
         <Route path="/SignUpPage" element={<SignUpPage />} />
         <Route path="/About" element={<About />} />
+        <Route path="/*" element={<NotFoundPage />} />
       </Routes>
     </Box>
   );
