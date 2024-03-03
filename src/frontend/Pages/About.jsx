@@ -44,6 +44,8 @@ const cardStyle = {
   color: "white",
   fontWeight: "bold",
   marginTop: 4,
+  width: 300,
+  height: 350,
 };
 
 const About = () => {
@@ -121,19 +123,31 @@ const About = () => {
   return (
     <>
       <Header />
-      <Grid container spacing={2} sx={{ padding: 2 }}>
-        <Grid item sx={{ width: 500, height: 350 }}>
+      <Grid
+        container
+        direction="column"
+        alignContent="center"
+        spacing={2}
+        sx={{ padding: 2 }}
+      >
+        <Grid item sx={{ width: 400, height: 350 }}>
           <Card variant="outlined">{cardOne}</Card>
         </Grid>
 
-        <Grid item sx={{ width: 500, height: 350 }}>
+        <Grid item sx={{ width: 400, height: 350 }}>
           <Card variant="outlined">{cardTwo}</Card>
         </Grid>
-        <Grid item sx={{ width: 500, height: 350 }}>
+        <Grid item sx={{ width: 400, height: 350 }}>
           <Card variant="outlined">{cardThree}</Card>
         </Grid>
       </Grid>
-      <Grid container spacing={2} justifyContent="center" sx={{ padding: 8 }}>
+      <Grid
+        container
+        direction="row"
+        spacing={2}
+        alignContent="center"
+        sx={{ padding: 8 }}
+      >
         {features.map((features, index) => (
           <Grid item key={index}>
             <Card variant="outlined" sx={{ bgcolor: "white" }}>
