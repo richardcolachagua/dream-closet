@@ -40,7 +40,7 @@ const features = [
 ];
 
 const cardStyle = {
-  bgcolor: " black",
+  bgcolor: "red",
   color: "white",
   fontWeight: "bold",
   marginTop: 4,
@@ -56,80 +56,86 @@ const About = () => {
   };
 
   const cardOne = (
-    <React.Fragment>
-      <CardContent
-        sx={{
-          bgcolor: "black",
-        }}
+    <CardContent
+      sx={{
+        bgcolor: "black",
+      }}
+    >
+      {" "}
+      <Typography
+        variant="h3"
+        sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
       >
-        {" "}
-        <Typography
-          variant="h3"
-          sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
-        >
-          What is Dream Closet?
-        </Typography>
-        <Typography variant="body1" sx={{ color: "white" }}>
-          Dream Closet is an AI-driven application that helps you find clothing
-          items matching your description across various onilne stores. Simply
-          describe the clothing item you're looking for, and Dream Closet will
-          fetch matching results from different websites.
-        </Typography>
-      </CardContent>
-    </React.Fragment>
+        What is Dream Closet?
+      </Typography>
+      <Typography variant="body1" sx={{ color: "white" }}>
+        Dream Closet is an AI-driven application that helps you find clothing
+        items matching your description across various onilne stores. Simply
+        describe the clothing item you're looking for, and Dream Closet will
+        fetch matching results from different websites.
+      </Typography>
+    </CardContent>
   );
 
   const cardTwo = (
-    <React.Fragment>
-      <CardContent
-        sx={{
-          bgcolor: "black",
-        }}
+    <CardContent
+      sx={{
+        bgcolor: "black",
+      }}
+    >
+      {" "}
+      <Typography
+        variant="h3"
+        sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
       >
-        {" "}
-        <Typography
-          variant="h3"
-          sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
-        >
-          How Does It Work?
-        </Typography>
-        <Typography variant="body1" sx={{ color: "white" }}>
-          Dream Closet employs advanced algorithms to understand your
-          preferences. The more you use Dream Closet, the better it gets at
-          understanding your taste in clothing, providing more accurate results
-        </Typography>
-      </CardContent>
-    </React.Fragment>
+        How Does It Work?
+      </Typography>
+      <Typography variant="body1" sx={{ color: "white" }}>
+        Dream Closet employs advanced algorithms to understand your preferences.
+        The more you use Dream Closet, the better it gets at understanding your
+        taste in clothing, providing more accurate results
+      </Typography>
+    </CardContent>
   );
 
   const cardThree = (
-    <React.Fragment>
-      <CardContent
-        sx={{
-          bgcolor: "black",
-        }}
+    <CardContent
+      sx={{
+        bgcolor: "black",
+      }}
+    >
+      <Typography
+        variant="h3"
+        sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
       >
-        <Typography
-          variant="h3"
-          sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
-        >
-          Features Overview
-        </Typography>
-        <Typography variant="body1" sx={{ color: "white" }}>
-          Dream Closet employs advanced algorithms to understand your
-          preferences. The more you use Dream Closet, the better it gets at
-          understadning your taste in clothing, providing more accurate results
-        </Typography>
-      </CardContent>
-    </React.Fragment>
+        Features Overview
+      </Typography>
+      <Typography variant="body1" sx={{ color: "white" }}>
+        Dream Closet employs advanced algorithms to understand your preferences.
+        The more you use Dream Closet, the better it gets at understadning your
+        taste in clothing, providing more accurate results
+      </Typography>
+    </CardContent>
   );
 
   return (
     <>
       <Header />
       <Grid container spacing={2} sx={{ padding: 2 }}>
-        {features.map((feature, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+        <Grid item sx={{ width: 500, height: 350 }}>
+          <Card variant="outlined">{cardOne}</Card>
+        </Grid>
+
+        <Grid item sx={{ width: 500, height: 350 }}>
+          <Card variant="outlined">{cardTwo}</Card>
+        </Grid>
+        <Grid item sx={{ width: 500, height: 350 }}>
+          <Card variant="outlined">{cardThree}</Card>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} justifyContent="center" sx={{ padding: 8 }}>
+        {features.map((features, index) => (
+          <Grid item key={index}>
             <Card variant="outlined" sx={{ bgcolor: "white" }}>
               <CardContent sx={cardStyle}>
                 <Typography
