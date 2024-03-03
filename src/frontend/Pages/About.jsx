@@ -19,23 +19,28 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 const features = [
   {
     title: "AI-driven clothing search",
-    description: "Description for AI-driven clothing search",
+    description:
+      "Our AI-powered search engine revolutionizes the way you shop for clothes online by accurately interpreting your descriptions and swiftly fetching matching items from an extensive selection of retailers.",
   },
   {
     title: "Multi-store integration",
-    description: "Description for Multi-store integration",
+    description:
+      "With seamless integration across multiple online stores, our platform ensures you have access to a diverse range of fashion items, empowering you to find the perfect pieces to suit your style preferences.",
   },
   {
     title: "Personalized recommendations",
-    description: "Description for Personalized recommendations.",
+    description:
+      "Receive personalized clothing recommendations tailored to your unique taste and browsing habits, ensuring you discover new styles that resonate with your individual fashion sense.",
   },
   {
     title: "Advanced filtering options",
-    description: "Description for Advanced filtering options.",
+    description:
+      "Utilize our advanced filtering options to refine your search results based on specific criteria such as size, color, brand, and price range, allowing you to quickly pinpoint the exact items you're looking for.",
   },
   {
     title: "Save favorite items",
-    description: "Description for Save favorite items.",
+    description:
+      "Easily bookmark your favorite clothing items with our convenient save feature, enabling you to create curated collections and revisit them later for effortless shopping and outfit planning.",
   },
 ];
 
@@ -44,17 +49,18 @@ const cardStyle = {
   color: "white",
   fontWeight: "bold",
   marginTop: 4,
-  width: 300,
+  width: 200,
   height: 350,
 };
 
 const About = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [startIndex, setStartIndex] = useState(0);
 
-  const updateIndex = (newIndex) => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex + newIndex + features.length) % features.length
-    );
+  const updateIndex = (increment) => {
+    const newStartIndex = startIndex + increment;
+    if (newStartIndex >= 0 && newStartIndex <= features.length - 3) {
+      setStartIndex(newStartIndex);
+    }
   };
 
   const cardOne = (
@@ -63,7 +69,6 @@ const About = () => {
         bgcolor: "black",
       }}
     >
-      {" "}
       <Typography
         variant="h3"
         sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
@@ -85,7 +90,6 @@ const About = () => {
         bgcolor: "black",
       }}
     >
-      {" "}
       <Typography
         variant="h3"
         sx={{ color: "white", fontWeight: "bold", marginTop: 4 }}
@@ -145,10 +149,24 @@ const About = () => {
         container
         direction="row"
         spacing={2}
-        alignContent="center"
-        sx={{ padding: 8 }}
+        justifyContent="center"
+        sx={{ padding: 2 }}
       >
-        {features.map((features, index) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignContent: "center",
+            margin: 8,
+          }}
+        >
+          <IconButton
+            onClick={() => updateIndex(-1)}
+            aria-label="Go to previous features"
+          >
+            <ArrowBackIosNewIcon />
+          </IconButton>
+        </Box>
+        {features.slice(startIndex, startIndex + 3).map((feature, index) => (
           <Grid item key={index}>
             <Card variant="outlined" sx={{ bgcolor: "white" }}>
               <CardContent sx={cardStyle}>
@@ -156,37 +174,30 @@ const About = () => {
                   variant="h5"
                   sx={{ fontWeight: "bold", marginTop: 4 }}
                 >
-                  {features.title}
+                  {feature.title}
                 </Typography>
-                <Typography variant="body1">{features.description}</Typography>
+                <Typography variant="body1">{feature.description}</Typography>
               </CardContent>
             </Card>
           </Grid>
         ))}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            margin: 4,
+          }}
+        >
+          <IconButton
+            onMouseEnter={() => updateIndex(1)}
+            onMouseLeave={() => setStartIndex(startIndex)}
+            aria-label="Go to next features"
+          >
+            <ArrowForwardIosIcon />
+          </IconButton>
+        </Box>
       </Grid>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: 4,
-        }}
-      >
-        <IconButton
-          onClick={() => updateIndex(-1)}
-          aria-label="Go to previous feature"
-        >
-          <ArrowBackIosNewIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => updateIndex(1)}
-          aria-label=" Go to next feature"
-        >
-          <ArrowForwardIosIcon />
-        </IconButton>
-      </Box>
-
       {/* FAQ Section */}
       <Box
         sx={{
