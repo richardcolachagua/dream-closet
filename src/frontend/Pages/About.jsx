@@ -49,8 +49,8 @@ const cardStyle = {
   color: "white",
   fontWeight: "bold",
   marginTop: 4,
-  width: 200,
-  height: 350,
+  width: 400,
+  height: 600,
 };
 
 const About = () => {
@@ -168,15 +168,23 @@ const About = () => {
         </Box>
         {features.slice(startIndex, startIndex + 3).map((feature, index) => (
           <Grid item key={index}>
-            <Card variant="outlined" sx={{ bgcolor: "white" }}>
+            <Card
+              sx={{
+                borderRadius: 4,
+                textAlign: "left",
+                animation: "fadeIn 1s forwards", // Apply fade-in animation
+              }}
+            >
               <CardContent sx={cardStyle}>
                 <Typography
                   variant="h5"
-                  sx={{ fontWeight: "bold", marginTop: 4 }}
+                  sx={{ fontWeight: "bold", marginTop: 50 }}
                 >
                   {feature.title}
                 </Typography>
-                <Typography variant="body1">{feature.description}</Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                  {feature.description}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -184,14 +192,12 @@ const About = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "center",
             alignItems: "center",
-            margin: 4,
+            margin: 8,
           }}
         >
           <IconButton
-            onMouseEnter={() => updateIndex(1)}
-            onMouseLeave={() => setStartIndex(startIndex)}
+            onClick={() => updateIndex(1)}
             aria-label="Go to next features"
           >
             <ArrowForwardIosIcon />
