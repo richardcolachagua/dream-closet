@@ -67,7 +67,7 @@ function UserDescriptionInput() {
         sx={{ width: "100%", maxWidth: "500px", backgroundColor: "grey" }}
         aria-label="Search input"
       />
-      {/* <Select
+      <Select
         value={sortBy}
         onChange={handleSortChange}
         variant="filled"
@@ -89,7 +89,7 @@ function UserDescriptionInput() {
         <MenuItem value="all">All</MenuItem>
         <MenuItem value="in-stock">In Stock</MenuItem>
         <MenuItem value="sale">On Sale</MenuItem>
-      </Select> */}
+      </Select>
       <Button
         variant="contained"
         color="primary"

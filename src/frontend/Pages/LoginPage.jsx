@@ -11,20 +11,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import AWS from "aws-sdk";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-
-// Initialize AWS SDK with AWS credentials and region
-
-AWS.config.update({
-  region: "YOUR_AWS_REGION",
-  credentials: new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: "YOUR_IDENTITY_POOL_ID",
-  }),
-});
-
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -45,41 +33,16 @@ const LoginPage = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
-      try {
-        setLoading(true);
-        const { email, password } = values;
-        //Retrieve user record from DynamoDB based on email
-        const params = {
-          TableName: "YOUR_DYNAMO_TABLE_NAME",
-          Key: { email },
-        };
-        const { Item } = await dynamoDB.get(params).promise();
+     try {
+      setLoading(true);
+      const response = await axios.post('/api/login', values);
 
-        if (!Item) {
-          setLoading(false);
-          setError("User not found");
-          return;
-        }
-        //Compare hashed passwords
-        //Note: Ensure you're using a secure hashing algorithm (e.g., bcrypt) for password hashing
+      // Handle response from backend
 
-        if (Item.password !== password) {
-          setLoading(false);
-          setError("Invalid password");
-          return;
-        }
-        //Authentification successful
-        setError(false);
-        setError("");
-        console.log("Login Successful");
-        //Redirect user to dashboard or home page
-      } catch (error) {
-        setLoading(false);
-        console.error("Login failed", error);
-        setError("An error occured. Please try again later.");
-      }
-    },
-  });
+      if (response.data.sucess) {
+        // Authentication successful
+        
+    
 
   return (
     <ThemeProvider theme={defaultTheme}>

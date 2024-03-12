@@ -16,7 +16,7 @@ import { useFormik } from "formik";
 const SignUpPage = () => {
   const [error, setError] = useState(""); // State for managing error messages
 
-  // Form  validation schema using Yup
+  // Form validation schema using Yup
   const validationSchema = Yup.object().shape({
     email: Yup.string()
       .email("Invalid email address")
@@ -38,7 +38,7 @@ const SignUpPage = () => {
     },
     validationSchema,
     onSubmit: (values) => {
-      //Handle form submission
+      // Handle form submission
       console.log("Form submitted", values);
     },
   });
@@ -69,7 +69,7 @@ const SignUpPage = () => {
             <Typography component="h1" variant="h5">
               Sign Up
             </Typography>
-            {/* Signup form*/}
+            {/* Signup form */}
             <form onSubmit={formik.handleSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -96,7 +96,8 @@ const SignUpPage = () => {
                     type="password"
                     autoComplete="new-password"
                     value={formik.values.password}
-                    onChange={
+                    onChange={formik.handleChange}
+                    error={
                       formik.touched.password && Boolean(formik.errors.password)
                     }
                     helperText={

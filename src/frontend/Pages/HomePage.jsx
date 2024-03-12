@@ -6,11 +6,12 @@ import Footer from "../Components/Footer";
 import GalleryView from "../Components/GalleryView";
 
 const HomePage = () => {
+  // State to hold the array of images
   const [images, setImages] = useState([]);
 
   return (
     <>
-      <Header />
+      <Header /> {/* Render the Header component */}
       <Box sx={{ padding: "50px" }}>
         <Typography
           variant="h3"
@@ -21,7 +22,7 @@ const HomePage = () => {
             fontFamily: "Courier New, Andalé Mono, Courier, Lucida, Monaco",
           }}
         >
-          Dream Closet
+          Dream Closet {/* Display the title */}
         </Typography>
         <Typography
           variant="h6"
@@ -30,19 +31,20 @@ const HomePage = () => {
         >
           The clothing search engine to find exactly what you're looking for.
           Just search for a certain type of article of clothing, and get
-          results.
+          results. {/* Description of the website */}
         </Typography>
         <Typography>
           Example: "A red-orange colored strapless dress for a wedding with a
-          slit on the left side"
+          slit on the left side" {/* Example user input */}
         </Typography>
       </Box>
       <Box>
-        <UserDescriptionInput setImages={setImages} />
+        <UserDescriptionInput setImages={setImages} />{" "}
+        {/* Render UserDescriptionInput component and pass setImages function */}
       </Box>
       {/* Render GalleryView only when images are available */}
       {images.length > 0 && <GalleryView images={images} />}
-      <Footer />
+      <Footer /> {/* Render the Footer component */}
     </>
   );
 };
