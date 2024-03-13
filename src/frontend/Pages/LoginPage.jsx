@@ -13,6 +13,9 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import axios from "axios";
+import { withRouter } from "react-router-dom";
+import Header from "../Components/Header";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -21,7 +24,7 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
-const LoginPage = () => {
+const LoginPage = ({ history }) => {
   const defaultTheme = createTheme();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("");
@@ -33,19 +36,33 @@ const LoginPage = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
-     try {
-      setLoading(true);
-      const response = await axios.post('/api/login', values);
+      try {
+        setLoading(true);
+        const response = await axios.post("/api/login", values);
 
-      // Handle response from backend
-
-      if (response.data.sucess) {
-        // Authentication successful
-        
-    
+        // Handle response from backend
+        if (response.data.success) {
+          // Authentication successful
+          setError("");
+          console.log("Login Successful");
+          // Redirect use to home page
+          history.push("/homepage");
+        } else {
+          //authentication failed
+          setLoading(false);
+          setError(response.data.error);
+        }
+      } catch (error) {
+        setLoading(false);
+        console.error("Login failed", error);
+        setError("An error occurred. Please try again later.");
+      }
+    },
+  });
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <Header />
       <Grid
         container
         direction="column"
@@ -82,6 +99,7 @@ const LoginPage = () => {
                 autoFocus
                 value={formik.values.email}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 error={formik.touched.email && Boolean(formik.errors.email)}
                 helperText={formik.touched.email && formik.errors.email}
               />
@@ -94,6 +112,7 @@ const LoginPage = () => {
                 autoComplete="current-password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 error={
                   formik.touched.password && Boolean(formik.errors.password)
                 }
