@@ -12,6 +12,7 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import axios from "axios";
 
 const SignUpPage = () => {
   const [error, setError] = useState(""); // State for managing error messages
@@ -37,9 +38,13 @@ const SignUpPage = () => {
       confirmPassword: "",
     },
     validationSchema,
-    onSubmit: (values) => {
-      // Handle form submission
-      console.log("Form submitted", values);
+    onSubmit: async (values) => {
+      try {
+        const response = await axios.post("/api/signup", values);
+      } catch (error) {
+        console.error("Error registering user", error);
+        setError("An error occurred. Please try again.");
+      }
     },
   });
 
@@ -139,7 +144,7 @@ const SignUpPage = () => {
               {/* Error message display */}
               {error && (
                 <Typography variant="body2" color="error">
-                  {error.message}
+                  {error}
                 </Typography>
               )}
             </form>
