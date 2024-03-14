@@ -12,22 +12,31 @@ import {
 function UserDescriptionInput() {
   const [description, setDescription] = useState("");
   const [images, setImages] = useState([]);
-  const [sortBy, setSortBy] = useState("relevance"); // State for sorting
+  const [sortBy, setSortBy] = useState("relevance");
   const [filterBy, setFilterBy] = useState("all");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Fetch images based on description, sorting, and filtering
   const fetchImages = async () => {
+    setLoading(true);
     // Construct API URL with query parameters for sorting and filtering
     const url = `http://localhost:5000/search?description=${description}&sortBy=${sortBy}&filterBy=${filterBy}`;
 
     try {
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
       const data = await response.json();
       setImages(data);
     } catch (error) {
-      console.error("Error fetching images", error);
+      setError("Failed to load images. Please try again later.");
+
       // Display error message to the user
       // Optionally, retry the request or provide a way for the user to retry
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,6 +103,7 @@ function UserDescriptionInput() {
         variant="contained"
         color="primary"
         onClick={fetchImages}
+        disabled={!description.trim() || loading} // Disable button
         sx={{
           bgcolor: "primary.main",
           "&:hover": {
@@ -101,7 +111,7 @@ function UserDescriptionInput() {
           },
         }}
         aria-label="Search button"
-        tabIndex="O" // Ensure the button is focusable
+        tabIndex="0" // Ensure the button is focusable
       >
         Search
       </Button>
@@ -112,6 +122,8 @@ function UserDescriptionInput() {
           </ImageListItem>
         ))}
       </ImageList>
+      {error && <p style={{ color: "red" }}>{error}</p>}{" "}
+      {/* Display error message */}
     </Box>
   );
 }

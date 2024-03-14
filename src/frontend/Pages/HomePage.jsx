@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Typography, Box } from "@mui/material";
+import { Typography, Box, Pagination, Stack } from "@mui/material";
 import UserDescriptionInput from "../Components/UserInputDescription";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
@@ -44,6 +44,9 @@ const HomePage = () => {
       </Box>
       {/* Render GalleryView only when images are available */}
       {images.length > 0 && <GalleryView images={images} />}
+      <Stack spacing={2}>
+        <Pagination count={100} color="primary" />
+      </Stack>
       <Footer /> {/* Render the Footer component */}
     </>
   );
