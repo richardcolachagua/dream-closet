@@ -41,9 +41,19 @@ const SignUpPage = () => {
     onSubmit: async (values) => {
       try {
         const response = await axios.post("/api/signup", values);
+        console.log("User registered successfully:", response.data);
       } catch (error) {
-        console.error("Error registering user", error);
-        setError("An error occurred. Please try again.");
+        if (
+          error.repsonse &&
+          error.response.data &&
+          error.response.data.error === "Email address already exists"
+        ) {
+          // Handle duplicate email error
+          setError("Email address already exists");
+        } else {
+          // Handle other errors
+          setError("An error occurred. Please try again.");
+        }
       }
     },
   });
