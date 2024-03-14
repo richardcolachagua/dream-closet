@@ -13,6 +13,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import axios from "axios";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
 
 const SignUpPage = () => {
   const [error, setError] = useState(""); // State for managing error messages
@@ -60,6 +62,7 @@ const SignUpPage = () => {
 
   return (
     <ThemeProvider theme={createTheme()}>
+      <Header />
       <Grid
         container
         direction="column"
@@ -75,13 +78,20 @@ const SignUpPage = () => {
           <CssBaseline />
           <Box
             sx={{
-              marginTop: 8,
+              marginTop: 6,
+              marginBottom: 5,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
             }}
           >
-            <Typography component="h1" variant="h5">
+            <Typography
+              component="h1"
+              variant="h5"
+              sx={{
+                marginBottom: 2,
+              }}
+            >
               Sign Up
             </Typography>
             {/* Signup form */}
@@ -169,6 +179,7 @@ const SignUpPage = () => {
           </Box>
         </Container>
       </Grid>
+      <Footer />
     </ThemeProvider>
   );
 };

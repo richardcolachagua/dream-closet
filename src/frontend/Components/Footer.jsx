@@ -4,15 +4,14 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <Box sx={{ p: 1, mt: 50, backgroundColor: "white" }}>
+    <Box sx={{ backgroundColor: "white" }}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          m: "16px",
-          p: "16px",
-          gap: "50px",
+          m: "3px",
+          p: "3px",
         }}
       >
         <List>

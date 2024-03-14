@@ -17,11 +17,10 @@ const authController = {
       const { email, password } = req.body;
 
       // Check if the email already exists in the database
-
       const existingUser = await dynamoDB
         .get({
           TableName: "users",
-          Key: "email",
+          Key: { email },
         })
         .promise();
 
