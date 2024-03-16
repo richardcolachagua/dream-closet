@@ -8,6 +8,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import axios from "axios";
 
 function UserDescriptionInput() {
   const [description, setDescription] = useState("");
@@ -16,25 +17,21 @@ function UserDescriptionInput() {
   const [filterBy, setFilterBy] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Fetch images based on description, sorting, and filtering
   const fetchImages = async () => {
     setLoading(true);
     // Construct API URL with query parameters for sorting and filtering
-    const url = `http://localhost:5000/search?description=${description}&sortBy=${sortBy}&filterBy=${filterBy}`;
+    const url = `http://localhost:5000/images?description=${description}&sortBy=${sortBy}&filterBy=${filterBy}&page=${currentPage}&itemsPerPage=${itemsPerPage}`;
 
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = await response.json();
-      setImages(data);
+      const response = await axios.get(url);
+      setImages(response.data);
     } catch (error) {
-      setError("Failed to load images. Please try again later.");
-
-      // Display error message to the user
-      // Optionally, retry the request or provide a way for the user to retry
+      console.error("Error fetching images", error);
+      // Handle error state or dipslay error message to the user
     } finally {
       setLoading(false);
     }
@@ -117,8 +114,8 @@ function UserDescriptionInput() {
       </Button>
       <ImageList cols={3}>
         {images.map((item, index) => (
-          <ImageListItem key={item.src || index}>
-            <img src={item.src || item} alt={item.alt || "Clothing item"} />
+          <ImageListItem key={index}>
+            <img src={item.src} alt={item.alt} />
           </ImageListItem>
         ))}
       </ImageList>
