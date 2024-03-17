@@ -73,6 +73,7 @@ function UserDescriptionInput() {
         sx={{ width: "100%", maxWidth: "500px", backgroundColor: "grey" }}
         aria-label="Search input"
       />
+      {/* Select dropdown for sorting */}
       <Select
         value={sortBy}
         onChange={handleSortChange}
@@ -86,6 +87,7 @@ function UserDescriptionInput() {
         <MenuItem value="price">Price</MenuItem>
         <MenuItem value="rating">Rating</MenuItem>
       </Select>
+      {/* Select dropdown for filtering */}
       <Select
         value={filterBy}
         onChange={handleFilterChange}
@@ -96,11 +98,12 @@ function UserDescriptionInput() {
         <MenuItem value="in-stock">In Stock</MenuItem>
         <MenuItem value="sale">On Sale</MenuItem>
       </Select>
+      {/* Search button to trigger image fetching */}
       <Button
         variant="contained"
         color="primary"
         onClick={fetchImages}
-        disabled={!description.trim() || loading} // Disable button
+        disabled={!description.trim() || loading} // Disable button when input is empty or loading
         sx={{
           bgcolor: "primary.main",
           "&:hover": {
@@ -112,6 +115,7 @@ function UserDescriptionInput() {
       >
         Search
       </Button>
+      {/* Display fetched images in an ImageList */}
       <ImageList cols={3}>
         {images.map((item, index) => (
           <ImageListItem key={index}>
