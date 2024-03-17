@@ -18,6 +18,14 @@ const imageController = {
         .promise();
 
       res.json(images);
-    } catch (err) {}
+    } catch (error) {
+      console.error("Image retrevial failed", error);
+      res.status(500).json({
+        success: false,
+        error: "An error ocurred while retrieving images",
+      });
+    }
   },
 };
+
+module.exports = imageController;

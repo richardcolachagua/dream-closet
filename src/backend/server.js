@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes");
+const imageRoutes = require("./routes/imageRoutes");
 const cors = require("cors");
 
 const app = express();
@@ -12,7 +13,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
-app.use(bodyParser.json());
+app.use("/auth", authRoutes); // Use the authentication routes
+app.use("/images", imageRoutes); // Use the image retrieval routes
 
 // Your routes and other middleware go here
 const PORT = process.env.PORT || 5000;
