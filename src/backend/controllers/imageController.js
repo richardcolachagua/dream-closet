@@ -4,25 +4,36 @@ const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const imageController = {
   retrieveImages: async (req, res) => {
     try {
-      const { sortBy, filterBy, page, itemsPerPage } = req.query;
+      const {
+        sortBy = "createdAt",
+        filterBy,
+        page = 1,
+        itemsPerPage = 10,
+      } = req.query;
 
-      // Implement logic to fetch images based on sorting, filtering, and pagination parametesrs
-      // Use DynamoDB queries or any other data source you have
+      const pageNumber = parseInt(page, 10);
+      const itemsPerPageNumber = parseInt(itemsPerPage, 10);
 
-      //Example logic:
+      const allImages = [];
 
-      const images = await dynamoDB
-        .scan({
-          TableName: "images",
-        })
-        .promise();
+      const startIndex = (pageNumber - 1) * itemsPerPageNumber;
+      const endIndex = startIndex + itemsPerPageNumber;
+      const paginatedImages = allImages.slice(startIndex, endIndex);
 
-      res.json(images);
+      const response = {
+        currentPage: pageNumber,
+        itemsPerPage: itemsPerPageNumber,
+        totalItems: allImages.length,
+        totalPages: Math.ceil(allImages.length / itemsPerPageNumber),
+        images: paginatedImages,
+      };
+
+      res.json(response);
     } catch (error) {
-      console.error("Image retrevial failed", error);
+      console.error("Image retrieval failed", error);
       res.status(500).json({
         success: false,
-        error: "An error ocurred while retrieving images",
+        error: "An error occurred while retrieving images",
       });
     }
   },
