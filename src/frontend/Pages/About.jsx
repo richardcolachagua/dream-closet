@@ -8,6 +8,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Stack,
 } from "@mui/material";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
@@ -15,6 +16,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const About = () => {
   const [startIndex, setStartIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const updateIndex = (increment) => {
     const newStartIndex = startIndex + increment;
@@ -91,23 +97,94 @@ const About = () => {
             </Grid>
           ))}
         </Grid>
-
-        <Typography variant="h3" gutterBottom>
-          Frequently Asked Questions (FAQ)
-        </Typography>
-        <Accordion>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="body1">
-              How do I search for clothing items?
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography variant="body1">
-              Simply describe the clothing item you're looking for in the search
-              bar.
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
+        <Typography sx={{ justifyContent: "right" }}>FAQ</Typography>
+        <Stack direction="row" p={4} spacing={4}>
+          <img
+            src="/assets/AI-driven_clothing_search.png"
+            width="400"
+            height="300"
+            alt="ai-driven-clothing"
+          />
+          <div>
+            <Accordion
+              expanded={expanded === "panel1"}
+              onChange={handleChange("panel1")}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1bh-content"
+                id="panel1bh-header"
+              >
+                <Typography fontWeight="bold">
+                  Is this a paid service?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>
+                  Nulla facilisi. Phasellus sollicitudin nulla et quam mattis
+                  feugiat. Aliquam eget maximus est, id dignissim quam.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion
+              expanded={expanded === "panel2"}
+              onChange={handleChange("panel2")}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel2bh-content"
+                id="panel2bh-header"
+              >
+                <Typography fontWeight="bold">Users</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>
+                  Donec placerat, lectus sed mattis semper, neque lectus feugiat
+                  lectus, varius pulvinar diam eros in elit. Pellentesque
+                  convallis laoreet laoreet.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion
+              expanded={expanded === "panel3"}
+              onChange={handleChange("panel3")}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel3bh-content"
+                id="panel3bh-header"
+              >
+                <Typography fontWeight="bold">Advanced settings</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>
+                  Nunc vitae orci ultricies, auctor nunc in, volutpat nisl.
+                  Integer sit amet egestas eros, vitae egestas augue. Duis vel
+                  est augue.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion
+              expanded={expanded === "panel4"}
+              onChange={handleChange("panel4")}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel4bh-content"
+                id="panel4bh-header"
+              >
+                <Typography fontWeight="bold">Personal data</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>
+                  Nunc vitae orci ultricies, auctor nunc in, volutpat nisl.
+                  Integer sit amet egestas eros, vitae egestas augue. Duis vel
+                  est augue.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          </div>
+        </Stack>
       </Box>
       <Footer />
     </>
