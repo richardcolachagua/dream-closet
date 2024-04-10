@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress, Button } from "@mui/material";
 
-const GalleryView = () => {
+const GalleryView = ({ images }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isDown, setIsDown] = useState(false);
   const [prevX, setPrevX] = useState(0);
   const [prevY, setPrevY] = useState(0);
@@ -9,6 +10,18 @@ const GalleryView = () => {
   const [currentY, setCurrentY] = useState(-400 / 2);
   const [currentXtmp, setCurrentXtmp] = useState(0);
   const [currentYtmp, setCurrentYtmp] = useState(0);
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
 
   const onDown = (e) => {
     setPrevX(e.clientX);
@@ -35,46 +48,45 @@ const GalleryView = () => {
   };
 
   return (
-    <section>
+    <Box>
+      <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+        <Typography variant="h4">Gallery</Typography>
+      </Box>
       <Box
         className="wrapper"
-        sx={
-          {
-            // Your wrapper styles without animations
-          }
-        }
+        sx={{
+          display: " flex",
+          justifyContent: " center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
         onMouseDown={onDown}
         onMouseMove={onMove}
         onMouseUp={onUp}
       >
-        <Box
-          className="images"
-          sx={
-            {
-              // Your images container styles without animations
-            }
-          }
-        >
-          <Box
-            className="column"
-            sx={
-              {
-                // Your column styles without animations
-              }
-            }
-          >
-            {/* Render your images here */}
+        {images.length === 0 ? (
+          <Box sx={{ my: 2 }}>
+            <CircularProgress />
           </Box>
-          {/* More columns */}
-        </Box>
+        ) : (
+          <>
+            <img
+              src={images[currentIndex].src}
+              alt={images[currentIndex].alt}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                transform: `translate(${currentX}px, ${currentY}px)`,
+              }}
+            />
+            <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+              <Button onClick={handlePrev}>Previous </Button>
+              <Button onClick={handleNext}>Next</Button>
+            </Box>
+          </>
+        )}
       </Box>
-      <Typography variant="h1" sx={{}}>
-        AI
-      </Typography>
-      <Typography variant="h2" sx={{}}>
-        Gallery
-      </Typography>
-    </section>
+    </Box>
   );
 };
 
