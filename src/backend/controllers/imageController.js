@@ -14,12 +14,19 @@ const imageController = {
       const pageNumber = parseInt(page, 10);
       const itemsPerPageNumber = parseInt(itemsPerPage, 10);
 
-      const allImages = [];
+      // Placeholder: Fetch images from DynamoDB or another data source
+      // This should be replaced with actual logic to fetch images based on sorting, filtering, and pagination
+      // For demonstration, we'll use a mock array of images
+      const allImages = [
+        // Mock array of image objects
+      ];
 
+      // Implement pagination logic
       const startIndex = (pageNumber - 1) * itemsPerPageNumber;
       const endIndex = startIndex + itemsPerPageNumber;
       const paginatedImages = allImages.slice(startIndex, endIndex);
 
+      // Format response
       const response = {
         currentPage: pageNumber,
         itemsPerPage: itemsPerPageNumber,
