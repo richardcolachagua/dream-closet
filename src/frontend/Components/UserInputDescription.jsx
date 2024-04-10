@@ -51,11 +51,6 @@ function UserDescriptionInput() {
     setSortBy(event.target.value);
   };
 
-  // Event Handler for filtering selection change
-  const handleFilterChange = (event) => {
-    setFilterBy(event.target.value);
-  };
-
   return (
     <Box
       sx={{
@@ -88,16 +83,7 @@ function UserDescriptionInput() {
         <MenuItem value="rating">Rating</MenuItem>
       </Select>
       {/* Select dropdown for filtering */}
-      <Select
-        value={filterBy}
-        onChange={handleFilterChange}
-        variant="filled"
-        sx={{ backgroundColor: "white", marginRight: "10px" }}
-      >
-        <MenuItem value="all">All</MenuItem>
-        <MenuItem value="in-stock">In Stock</MenuItem>
-        <MenuItem value="sale">On Sale</MenuItem>
-      </Select>
+
       {/* Search button to trigger image fetching */}
       <Button
         variant="contained"
@@ -115,6 +101,16 @@ function UserDescriptionInput() {
       >
         Search
       </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => {
+          setDescription("");
+          setImages([]);
+        }}
+      >
+        Clear
+      </Button>
       {/* Display fetched images in an ImageList */}
       <ImageList cols={3}>
         {images.map((item, index) => (
@@ -123,7 +119,7 @@ function UserDescriptionInput() {
           </ImageListItem>
         ))}
       </ImageList>
-      {error && <p style={{ color: "red" }}>{error}</p>}{" "}
+      {error && <p style={{ color: "red" }}>{error}</p>}
       {/* Display error message */}
     </Box>
   );
