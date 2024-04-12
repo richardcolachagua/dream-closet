@@ -9,7 +9,7 @@ import { Box } from "@mui/material";
 
 function App() {
   return (
-    <Box sx={{ backgroundColor: "#000", height: "100vh" }}>
+    <Box sx={{ backgroundColor: "black", height: "100vh" }}>
       <Routes>
         <Route path="/HomePage" element={<HomePage />} />
         <Route path="/ContactPage" element={<ContactPage />} />

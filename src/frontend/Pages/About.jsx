@@ -33,7 +33,7 @@ const About = () => {
     {
       title: "AI-driven clothing search",
       description:
-        "Our AI-powered search engine revolutionizes the way you shop for clothes online by accurately interpreting your descriptions and swiftly fetching matching items from an extensive selection of retailers.",
+        "Our AI-powered search engine revolutionizes the way you shop for clothes online by accurately interpreting your descriptions and fetching matching items from an extensive selection of retailers.",
     },
     {
       title: "Multi-store integration",
@@ -50,7 +50,15 @@ const About = () => {
   return (
     <>
       <Header />
-      <Box p={4}>
+      <Box
+        p={4}
+        sx={{
+          backgroundColor: "black",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Typography
           variant="h2"
           gutterBottom
