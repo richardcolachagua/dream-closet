@@ -4,6 +4,7 @@ import {
   Typography,
   Card,
   CardContent,
+  CardMedia,
   Grid,
   Accordion,
   AccordionSummary,
@@ -94,6 +95,12 @@ const About = () => {
                 variant="outlined"
                 sx={{ backgroundColor: "black", borderColor: "red" }}
               >
+                <CardMedia
+                  component="img"
+                  height="450"
+                  image="/assets/AI-driven_clothing_search2.png"
+                  alt="AI Clothing Search"
+                />
                 <CardContent sx={{ textAlign: "center", color: "red" }}>
                   <Typography
                     variant="h5"
