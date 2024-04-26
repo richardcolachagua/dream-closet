@@ -55,26 +55,43 @@ const About = () => {
         p={4}
         sx={{
           backgroundColor: "black",
-          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
+          padding: 5,
+          textAlign: "center",
         }}
       >
-        <Typography
-          variant="h2"
-          gutterBottom
-          color="white"
-          sx={{ fontWeight: "bold" }}
-        >
-          About Us
-        </Typography>
-        <Typography variant="body1" paragraph color="white">
-          Dream Closet is an AI-driven application that helps you find clothing
-          items matching your description across various online stores. Simply
-          describe the clothing item you're looking for, and Dream Closet will
-          fetch matching results from different websites.
-        </Typography>
-        <Typography variant="body1" paragraph color="white">
+        <Box>
+          <Typography
+            variant="h2"
+            gutterBottom
+            color="white"
+            sx={{ fontWeight: "bold" }}
+          >
+            What is Dream Closet?
+          </Typography>
+          <Typography variant="h4" paragraph color="white">
+            Dream Closet is an AI-driven application that helps you find
+            clothing items matching your description across various online
+            stores. Simply describe the clothing item you're looking for, and
+            Dream Closet will fetch matching results from different websites.
+          </Typography>
+          <Card
+            sx={{
+              backgroundColor: "black",
+              maxWidth: 500,
+              maxHeight: 500,
+            }}
+          >
+            <CardMedia
+              sx={{ height: 500, width: 500 }}
+              image="/assets/AI-driven_clothing_search_3.png"
+              title="what is dream cloest"
+            />
+          </Card>
+        </Box>
+
+        <Typography variant="h4" paragraph color="white">
           Dream Closet employs advanced algorithms to understand your
           preferences. The more you use Dream Closet, the better it gets at
           understanding your taste in clothing, providing more accurate results.
@@ -103,13 +120,13 @@ const About = () => {
                 />
                 <CardContent sx={{ textAlign: "center", color: "red" }}>
                   <Typography
-                    variant="h5"
+                    variant="h3"
                     gutterBottom
                     sx={{ fontWeight: "bold" }}
                   >
                     {feature.title}
                   </Typography>
-                  <Typography variant="body1">{feature.description}</Typography>
+                  <Typography variant="h6">{feature.description}</Typography>
                 </CardContent>
               </Card>
             </Grid>
