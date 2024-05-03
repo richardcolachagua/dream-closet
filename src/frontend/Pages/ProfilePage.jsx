@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,6 +13,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
+import { Button, TextField } from "@mui/material";
 import Header from "../Components/Header";
 
 const drawerWidth = 240;
@@ -57,12 +58,11 @@ export default function PermanentDrawerLeft() {
             {["Profile Page", "Change Password", "", "Delete Account"].map(
               (text, index) => (
                 <ListItem key={text} disablePadding>
-                  <ListItemButton>
-                    <ListItemIcon>
-                      {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                    </ListItemIcon>
-                    <ListItemText primary={text} />
-                  </ListItemButton>
+                  {text === "Profile Page" ? (
+                    <ProfilePageComponent />
+                  ) : (
+                    text === "Change Password"
+                  )}
                 </ListItem>
               )
             )}
@@ -86,50 +86,51 @@ export default function PermanentDrawerLeft() {
           sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
         >
           <Toolbar />
+          <ProfilePageComponent />
         </Box>
       </Box>
     </>
   );
 }
 
-// function ProfilePage({ userProfile, onUpdate }) {
-//   const [profile, setProfile] = useState(userProfile);
+function ProfilePageComponent({ userProfile, onUpdate }) {
+  const [profile, setProfile] = useState(userProfile);
 
-//   const handleChange = (event) => {
-//     const { name, value } = event.target;
-//     setProfile({ ...profile, [name]: value });
-//   };
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setProfile({ ...profile, [name]: value });
+  };
 
-//   const handleSubmit = () => {
-//     fetch("/api/user/profile", {
-//       method: "PUT",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(profile),
-//     })
-//       .then((response) => response.json())
-//       .then((data) => onUpdate(data));
-//   };
-//   return (
-//     <form>
-//       <Textfield
-//         name="username"
-//         label="Username"
-//         value={profile.username}
-//         onChange={handleChange}
-//         sx={{ mb: 2 }}
-//       />
-//       <Textfield
-//         name="email"
-//         label="Email"
-//         value={profile.email}
-//         onChange={handleChange}
-//         sx={{ mb: 2 }}
-//       />
-//       <Button variant="contained" onClick={handleSubmit}>
-//         Update Profile
-//       </Button>
-//     </form>
-//   );
-// }
+  const handleSubmit = () => {
+    fetch("/api/user/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(profile),
+    })
+      .then((response) => response.json())
+      .then((data) => onUpdate(data));
+  };
+  return (
+    <form>
+      <TextField
+        name="username"
+        label="Username"
+        //value={profile.username}
+        onChange={handleChange}
+        sx={{ mb: 2 }}
+      />
+      <TextField
+        name="email"
+        label="Email"
+        //value={profile.email}
+        onChange={handleChange}
+        sx={{ mb: 2 }}
+      />
+      <Button variant="contained" onClick={handleSubmit}>
+        Update Profile
+      </Button>
+    </form>
+  );
+}
