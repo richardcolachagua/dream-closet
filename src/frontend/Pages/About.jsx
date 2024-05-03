@@ -14,6 +14,7 @@ import {
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { motion, AnimatePresence } from "framer-motion";
 
 const About = () => {
   const [startIndex, setStartIndex] = useState(0);
@@ -106,31 +107,41 @@ const About = () => {
           Features Overview
         </Typography>
         <Grid container spacing={2}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card
-                variant="outlined"
-                sx={{ backgroundColor: "black", borderColor: "red" }}
-              >
-                <CardMedia
-                  component="img"
-                  height="450"
-                  image="/assets/AI-driven_clothing_search2.png"
-                  alt="AI Clothing Search"
-                />
-                <CardContent sx={{ textAlign: "center", color: "red" }}>
-                  <Typography
-                    variant="h3"
-                    gutterBottom
-                    sx={{ fontWeight: "bold" }}
+          <AnimatePresence>
+            {features.map((feature, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <Card
+                    variant="outlined"
+                    sx={{ backgroundColor: "black", borderColor: "red" }}
                   >
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="h6">{feature.description}</Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+                    <CardMedia
+                      component="img"
+                      height="450"
+                      image="/assets/AI-driven_clothing_search2.png"
+                      alt="AI Clothing Search"
+                    />
+                    <CardContent sx={{ textAlign: "center", color: "red" }}>
+                      <Typography
+                        variant="h3"
+                        gutterBottom
+                        sx={{ fontWeight: "bold" }}
+                      >
+                        {feature.title}
+                      </Typography>
+                      <Typography variant="h6">
+                        {feature.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Grid>
+            ))}
+          </AnimatePresence>
         </Grid>
         <Box>
           <Typography
