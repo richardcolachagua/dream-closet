@@ -5,11 +5,11 @@ import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import { Link as RouterLink } from "react-router-dom";
 
-const pages = ["Homepage", "About", "Contactpage"];
+const pages = ["Home Page"];
 
 function ResponsiveAppBar() {
   return (
-    <AppBar position="static" color="transparent" sx={{ boxShadow: "none" }}>
+    <AppBar position="static">
       <Toolbar sx={{ justifyContent: "space-between", padding: "0 30 px" }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           {pages.map((page, index) => (
@@ -21,6 +21,8 @@ function ResponsiveAppBar() {
                 marginRight: "10px",
                 color: "white",
                 textTransform: "none",
+                fontSize: "15px",
+                fontWeight: "bold",
               }}
             >
               {page}

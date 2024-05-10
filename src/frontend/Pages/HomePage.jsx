@@ -1,9 +1,17 @@
 import React, { useState } from "react";
-import { Typography, Box, Pagination, Stack } from "@mui/material";
-import UserDescriptionInput from "../Components/UserInputDescription";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Stack,
+} from "@mui/material";
 import Header from "../Components/Header";
-import Footer from "../Components/Footer";
-import GalleryView from "../Components/GalleryView";
 
 const HomePage = () => {
   // State to hold the array of images
@@ -24,15 +32,24 @@ const HomePage = () => {
         >
           Dream Closet {/* Display the title */}
         </Typography>
-        <Typography
-          variant="h6"
-          align="center"
-          sx={{ fontFamily: "Courier", color: "white" }}
-        >
-          The clothing search engine to find exactly what you're looking for.
-          Just search for a certain type of article of clothing, and get
-          results. {/* Description of the website */}
-        </Typography>
+        <Stack direction="row" p={4} spacing={4}>
+          <Typography
+            variant="h6"
+            align="center"
+            sx={{ fontFamily: "Courier", color: "white" }}
+          >
+            Dream Closet employs advanced algorithms to understand your
+            preferences. The more you use Dream Closet, the better it gets at
+            understanding your taste in clothing, providing more accurate
+            results.
+          </Typography>
+          <img
+            src="/assets/AI-driven_clothing_search.png"
+            width="550"
+            height="300"
+            alt="ai-driven-clothing"
+          />
+        </Stack>
         <Typography
           variant="h6"
           align="center"
@@ -42,13 +59,6 @@ const HomePage = () => {
           slit on the left side" {/* Example user input */}
         </Typography>
       </Box>
-      <Box>
-        <UserDescriptionInput setImages={setImages} />
-        {/* Render UserDescriptionInput component and pass setImages function */}
-      </Box>
-      {/* Render GalleryView only when images are available */}
-      {images.length > 0 && <GalleryView images={images} />}
-      <Footer /> {/* Render the Footer component */}
     </>
   );
 };
