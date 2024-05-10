@@ -14,10 +14,11 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import axios from "axios";
 import Header from "../Components/Header";
-import Footer from "../Components/Footer";
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
   const [error, setError] = useState(""); // State for managing error messages
+  const navigate = useNavigate();
 
   // Form validation schema using Yup
   const validationSchema = Yup.object().shape({
@@ -44,6 +45,7 @@ const SignUpPage = () => {
       try {
         const response = await axios.post("/api/signup", values);
         console.log("User registered successfully:", response.data);
+        navigate("");
       } catch (error) {
         if (
           error.repsonse &&
@@ -90,6 +92,7 @@ const SignUpPage = () => {
               variant="h5"
               sx={{
                 marginBottom: 2,
+                fontWeight: "bold",
               }}
             >
               Sign Up
@@ -158,6 +161,7 @@ const SignUpPage = () => {
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                onClick={formik.handleSubmit}
               >
                 Sign Up
               </Button>
@@ -171,7 +175,12 @@ const SignUpPage = () => {
             {/* Link to login page */}
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link
+                  href="/loginpage"
+                  variant="body2"
+                  to="/LoginPage"
+                  sx={{ Link: "/loginpage" }}
+                >
                   Already have an account? Sign in
                 </Link>
               </Grid>
@@ -179,7 +188,6 @@ const SignUpPage = () => {
           </Box>
         </Container>
       </Grid>
-      <Footer />
     </ThemeProvider>
   );
 };
