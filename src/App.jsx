@@ -10,17 +10,15 @@ import ProfilePage from "./frontend/Pages/ProfilePage";
 
 function App() {
   return (
-    <Box sx={{ backgroundColor: "black", height: "1000vh" }}>
-      <Routes>
-        <Route path="/HomePage" element={<HomePage />} />
-        <Route path="/ContactPage" element={<ContactPage />} />
-        <Route path="/LoginPage" element={<LoginPage />} />
-        <Route path="/SignUpPage" element={<SignUpPage />} />
-        {/* <Route path="/About" element={<About />} /> */}
-        <Route path="/*" element={<NotFoundPage />} />
-        <Route path="/profilepage" element={<ProfilePage />} />
-      </Routes>
-    </Box>
+    <Routes>
+      <Route path="/HomePage" element={<HomePage />} />
+      <Route path="/ContactPage" element={<ContactPage />} />
+      <Route path="/LoginPage" element={<LoginPage />} />
+      <Route path="/SignUpPage" element={<SignUpPage />} />
+      {/* <Route path="/About" element={<About />} /> */}
+      <Route path="/*" element={<NotFoundPage />} />
+      <Route path="/profilepage" element={<ProfilePage />} />
+    </Routes>
   );
 }
 

@@ -9,7 +9,7 @@ const pages = ["Home Page"];
 
 function ResponsiveAppBar() {
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Toolbar sx={{ justifyContent: "space-between", padding: "0 30 px" }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           {pages.map((page, index) => (
@@ -33,14 +33,26 @@ function ResponsiveAppBar() {
           <Button
             component={RouterLink}
             to="/login"
-            sx={{ marginRight: "10px", color: "white", textTransform: "none" }}
+            sx={{
+              marginRight: "10px",
+              color: "white",
+              textTransform: "none",
+              fontSize: "15px",
+              fontWeight: "bold",
+            }}
           >
             Login
           </Button>
           <Button
             component={RouterLink}
             to="/signup"
-            sx={{ color: "white", textTransform: "none" }}
+            sx={{
+              marginRight: "10px",
+              color: "white",
+              textTransform: "none",
+              fontSize: "15px",
+              fontWeight: "bold",
+            }}
           >
             Sign Up
           </Button>

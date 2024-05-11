@@ -63,132 +63,145 @@ const SignUpPage = () => {
   });
 
   return (
-    <ThemeProvider theme={createTheme()}>
-      <Header />
-      <Grid
-        container
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        style={{ minHeight: "100vh" }}
-      >
-        <Container
-          component="main"
-          maxWidth="xs"
-          sx={{ backgroundColor: "white", borderRadius: 1 }}
+    <Box
+      sx={{
+        backgroundImage: `url(/assets/backgroundImage.png)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+      }}
+    >
+      <ThemeProvider theme={createTheme()}>
+        <Header />
+        <Grid
+          container
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          style={{ minHeight: "100vh" }}
         >
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 6,
-              marginBottom: 5,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
+          <Container
+            component="main"
+            maxWidth="xs"
+            sx={{ backgroundColor: "white", borderRadius: 2 }}
           >
-            <Typography
-              component="h1"
-              variant="h5"
+            <CssBaseline />
+            <Box
               sx={{
-                marginBottom: 2,
-                fontWeight: "bold",
+                marginTop: 6,
+                marginBottom: 5,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              Sign Up
-            </Typography>
-            {/* Signup form */}
-            <form onSubmit={formik.handleSubmit}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    name="email"
-                    label="Email Address"
-                    autoComplete="email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="password"
-                    name="password"
-                    label="Password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={formik.values.password}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.password && Boolean(formik.errors.password)
-                    }
-                    helperText={
-                      formik.touched.password && formik.errors.password
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="confirmPassword"
-                    name="Confirm Password"
-                    label="Confirm Password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={formik.values.confirmPassword}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.confirmPassword &&
-                      Boolean(formik.errors.confirmPassword)
-                    }
-                    helperText={
-                      formik.touched.confirmPassword &&
-                      formik.errors.confirmPassword
-                    }
-                  />
-                </Grid>
-              </Grid>
-              {/* Button for form submission */}
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                onClick={formik.handleSubmit}
+              <Typography
+                component="h1"
+                variant="h5"
+                sx={{
+                  marginBottom: 2,
+                  fontWeight: "bold",
+                }}
               >
                 Sign Up
-              </Button>
-              {/* Error message display */}
-              {error && (
-                <Typography variant="body2" color="error">
-                  {error}
-                </Typography>
-              )}
-            </form>
-            {/* Link to login page */}
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link
-                  href="/loginpage"
-                  variant="body2"
-                  to="/LoginPage"
-                  sx={{ Link: "/loginpage" }}
+              </Typography>
+              {/* Signup form */}
+              <form onSubmit={formik.handleSubmit}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="email"
+                      name="email"
+                      label="Email Address"
+                      autoComplete="email"
+                      value={formik.values.email}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.email && Boolean(formik.errors.email)
+                      }
+                      helperText={formik.touched.email && formik.errors.email}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="password"
+                      name="password"
+                      label="Password"
+                      type="password"
+                      autoComplete="new-password"
+                      value={formik.values.password}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.password &&
+                        Boolean(formik.errors.password)
+                      }
+                      helperText={
+                        formik.touched.password && formik.errors.password
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="confirmPassword"
+                      name="Confirm Password"
+                      label="Confirm Password"
+                      type="password"
+                      autoComplete="new-password"
+                      value={formik.values.confirmPassword}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.confirmPassword &&
+                        Boolean(formik.errors.confirmPassword)
+                      }
+                      helperText={
+                        formik.touched.confirmPassword &&
+                        formik.errors.confirmPassword
+                      }
+                    />
+                  </Grid>
+                </Grid>
+                {/* Button for form submission */}
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  onClick={formik.handleSubmit}
                 >
-                  Already have an account? Sign in
-                </Link>
+                  Sign Up
+                </Button>
+                {/* Error message display */}
+                {error && (
+                  <Typography variant="body2" color="error">
+                    {error}
+                  </Typography>
+                )}
+              </form>
+              {/* Link to login page */}
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link
+                    href="/loginpage"
+                    variant="body2"
+                    to="/LoginPage"
+                    sx={{ Link: "/loginpage" }}
+                  >
+                    Already have an account? Sign in
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
-          </Box>
-        </Container>
-      </Grid>
-    </ThemeProvider>
+            </Box>
+          </Container>
+        </Grid>
+      </ThemeProvider>
+    </Box>
   );
 };
 

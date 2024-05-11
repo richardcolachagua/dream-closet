@@ -61,100 +61,110 @@ const LoginPage = ({ history }) => {
   });
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Header />
-      <Grid
-        container
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        style={{ minHeight: "100vh" }}
-      >
-        <Container
-          component="main"
-          maxWidth="xs"
-          sx={{ backgroundColor: "white", borderRadius: 1 }}
+    <Box
+      sx={{
+        backgroundImage: `url(/assets/backgroundImage.png)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+      }}
+    >
+      <ThemeProvider theme={defaultTheme}>
+        <Header />
+        <Grid
+          container
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          style={{ minHeight: "100vh" }}
         >
-          <CssBaseline />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              paddingBottom: "20px",
-              paddingTop: "20px",
-            }}
+          <Container
+            component="main"
+            maxWidth="xs"
+            sx={{ backgroundColor: "white", borderRadius: 1 }}
           >
-            <Typography component="h1" variant="h5">
-              Sign In
-            </Typography>
-            <form onSubmit={formik.handleSubmit}>
-              <TextField
-                margin="normal"
-                fullWidth
-                id="email"
-                name="email"
-                label="Email Address"
-                autoComplete="email"
-                autoFocus
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-              />
-              <TextField
-                margin="normal"
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                autoComplete="current-password"
-                value={formik.values.password}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.password && Boolean(formik.errors.password)
-                }
-                helperText={formik.touched.password && formik.errors.password}
-              />
-              {error && (
-                <Typography variant="body2" color="error">
-                  {error}
-                </Typography>
-              )}
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Sign in"
+            <CssBaseline />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                paddingBottom: "20px",
+                paddingTop: "20px",
+              }}
+            >
+              <Typography component="h1" variant="h5">
+                Sign In
+              </Typography>
+              <form onSubmit={formik.handleSubmit}>
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  id="email"
+                  name="email"
+                  label="Email Address"
+                  autoComplete="email"
+                  autoFocus
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                />
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.password && Boolean(formik.errors.password)
+                  }
+                  helperText={formik.touched.password && formik.errors.password}
+                />
+                {error && (
+                  <Typography variant="body2" color="error">
+                    {error}
+                  </Typography>
                 )}
-              </Button>
-            </form>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="#" variant="body2">
-                  Forgot Password
-                </Link>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Sign in"
+                  )}
+                </Button>
+              </form>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="#" variant="body2">
+                    Forgot Password
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="#" variant="body2">
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
-          </Box>
-        </Container>
-      </Grid>
-    </ThemeProvider>
+            </Box>
+          </Container>
+        </Grid>
+      </ThemeProvider>
+    </Box>
   );
 };
 

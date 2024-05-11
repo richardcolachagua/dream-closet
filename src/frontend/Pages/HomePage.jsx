@@ -1,22 +1,8 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  Grid,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Stack,
-} from "@mui/material";
+import React from "react";
+import { Box, Typography, Stack } from "@mui/material";
 import Header from "../Components/Header";
 
 const HomePage = () => {
-  // State to hold the array of images
-  const [images, setImages] = useState([]);
-
   return (
     <>
       <Header /> {/* Render the Header component */}
