@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Typography, Stack } from "@mui/material";
 import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import AnimatedSearchBar from "../Components/AnimatedSearchBar";
 
 const HomePage = () => {
   const defaultTheme = createTheme();
@@ -73,6 +74,7 @@ const HomePage = () => {
               Example: "A red-orange colored strapless dress for a wedding with
               a slit on the left side" {/* Example user input */}
             </Typography>
+            <AnimatedSearchBar />
           </Box>
         </ThemeProvider>
       </Box>
