@@ -1,6 +1,6 @@
 import "./styles.css";
-import { useState } from "react";
-import { initialTabs as tabs } from "./ingredients";
+import React, { useState } from "react";
+import { initialTabs as tabs } from "./ingredients.ts";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Layout() {

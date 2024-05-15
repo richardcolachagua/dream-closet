@@ -3,6 +3,8 @@ import { Box, Typography, Stack } from "@mui/material";
 import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
+import Layout from "../Components/Shared-Layout-Animation/Layout.tsx";
+import LayoutContainer from "../Components/Shared-Layout-Animation/LayoutContainer.jsx";
 
 const HomePage = () => {
   const defaultTheme = createTheme();
@@ -33,7 +35,7 @@ const HomePage = () => {
               Dream Closet
             </Typography>{" "}
             <Typography
-              variant="h4"
+              variant="h5"
               align="center"
               sx={{
                 fontWeight: "bold",
@@ -41,7 +43,7 @@ const HomePage = () => {
                 fontFamily: "sans-serif",
               }}
             >
-              The Ultimate Fashion Seach Engine
+              The Ultimate Fashion Search Engine
             </Typography>
             <Stack direction="row" p={4}>
               <Typography
@@ -75,6 +77,10 @@ const HomePage = () => {
               a slit on the left side" {/* Example user input */}
             </Typography>
             <AnimatedSearchBar />
+            <div>
+              <Layout />
+              <LayoutContainer />
+            </div>
           </Box>
         </ThemeProvider>
       </Box>

@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import { Link as RouterLink } from "react-router-dom";
 
-const pages = ["Home Page"];
+const pages = ["HomePage"];
 
 function ResponsiveAppBar() {
   return (
@@ -32,7 +32,7 @@ function ResponsiveAppBar() {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button
             component={RouterLink}
-            to="/login"
+            to="/loginpage"
             sx={{
               marginRight: "10px",
               color: "white",
@@ -45,7 +45,7 @@ function ResponsiveAppBar() {
           </Button>
           <Button
             component={RouterLink}
-            to="/signup"
+            to="/signuppage"
             sx={{
               marginRight: "10px",
               color: "white",
