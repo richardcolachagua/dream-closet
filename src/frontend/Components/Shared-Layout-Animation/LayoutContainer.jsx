@@ -1,5 +1,5 @@
 import React from "react";
-import Layout from "./Layout";
+import Layout from "./Layout.tsx";
 
 const LayoutContainer = () => {
   const containerStyle = {
@@ -10,7 +10,7 @@ const LayoutContainer = () => {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
+    height: "70vh",
   };
   return (
     <div style={containerStyle}>

@@ -3,7 +3,6 @@ import { Box, Typography, Stack } from "@mui/material";
 import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
-import Layout from "../Components/Shared-Layout-Animation/Layout.tsx";
 import LayoutContainer from "../Components/Shared-Layout-Animation/LayoutContainer.jsx";
 
 const HomePage = () => {
@@ -22,7 +21,7 @@ const HomePage = () => {
       >
         <ThemeProvider theme={defaultTheme}>
           <Header /> {/* Render the Header component */}
-          <Box sx={{ padding: "50px" }}>
+          <Box sx={{ padding: "30px" }}>
             <Typography
               variant="h1"
               align="center"
@@ -76,11 +75,10 @@ const HomePage = () => {
               Example: "A red-orange colored strapless dress for a wedding with
               a slit on the left side" {/* Example user input */}
             </Typography>
-            <AnimatedSearchBar />
-            <div>
-              <Layout />
+            <Box>
+              <AnimatedSearchBar />
               <LayoutContainer />
-            </div>
+            </Box>
           </Box>
         </ThemeProvider>
       </Box>

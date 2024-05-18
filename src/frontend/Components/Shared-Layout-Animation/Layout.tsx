@@ -1,6 +1,6 @@
 import "./styles.css";
 import React, { useState } from "react";
-import { initialTabs as tabs } from "./ingredients.ts";
+import { intitalTabs as tabs } from "./features.ts";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Layout() {
@@ -33,7 +33,17 @@ export default function Layout() {
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {selectedTab ? selectedTab.icon : "😋"}
+            {selectedTab ? ( <>
+            <h2>
+              {selectedTab.label}
+            </h2>
+            <img src={selectedTab.imagePath} alt={selectedTab.label}/>
+            <p>
+              {selectedTab.description}
+            </p>
+            </> 
+            ) : (
+            "😋")}
           </motion.div>
         </AnimatePresence>
       </main>
