@@ -4,7 +4,7 @@
     width: 800px;
     height: 400px;
     border-radius: 10px;
-    background: black;
+    background: white;
     overflow: hidden;
     box-shadow: 0 1px 1px hsl(0deg 0% 0% / 0.075),
       0 2px 2px hsl(0deg 0% 0% / 0.075), 0 4px 4px hsl(0deg 0% 0% / 0.075),
@@ -36,7 +36,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 128px;
+    font-size: 10px;
     flex-grow: 1;
     user-select: none;
   }

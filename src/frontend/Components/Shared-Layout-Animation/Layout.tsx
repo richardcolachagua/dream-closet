@@ -1,4 +1,5 @@
 import "./styles.css";
+import styles from './Layout.module.css';
 import React, { useState } from "react";
 import { intitalTabs as tabs } from "./features.ts";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,10 +35,7 @@ export default function Layout() {
             transition={{ duration: 0.2 }}
           >
             {selectedTab ? ( <>
-            <h2>
-              {selectedTab.label}
-            </h2>
-            <img src={selectedTab.imagePath} alt={selectedTab.label}/>
+            <img src={selectedTab.imagePath} alt={selectedTab.label} className={styles.image}/>
             <p>
               {selectedTab.description}
             </p>
