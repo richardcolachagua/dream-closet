@@ -28,9 +28,13 @@ import { Feature } from "./types"
   
  export const allFeatures: Feature[ ] = features;
 
+// Destructure the features array into individual variables
  const [aiDrivenSearch, multiStoreIntegration, personalizedRecommendations] = allFeatures;
-export const intitalTabs = [aiDrivenSearch, multiStoreIntegration, personalizedRecommendations];
 
+// Define the initial tabs
+ export const intitalTabs = [aiDrivenSearch, multiStoreIntegration, personalizedRecommendations];
+
+ // Define a function to get the next feature
 export function getNextFeature(features: Feature[]): Feature | undefined {
   const existing = new Set(features);
   return allFeatures.find((feature) => !existing.has(feature));

@@ -2,6 +2,7 @@ import React from "react";
 import Layout from "./Layout.tsx";
 
 const LayoutContainer = () => {
+  // Define the container style
   const containerStyle = {
     "--accent": "##8855ff",
     background: "var(--accent",
