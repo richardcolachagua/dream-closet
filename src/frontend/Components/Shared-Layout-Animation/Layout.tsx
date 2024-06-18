@@ -1,11 +1,11 @@
-import "./styles.css";
 import React, { useState } from "react";
 import { intitalTabs as tabs } from "./features.ts";
 import { motion, AnimatePresence } from "framer-motion";
+import styles from "./Layout.module.css";
+import "./styles.css";
 
 export default function Layout() {
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
-  const styles = require('./Layout.module.css');
 
   return (
     <div className="window">
