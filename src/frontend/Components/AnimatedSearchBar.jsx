@@ -29,7 +29,7 @@ const AnimatedSearchBar = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "10vh",
+        height: "15vh",
       }}
     >
       <input
@@ -37,7 +37,8 @@ const AnimatedSearchBar = () => {
         placeholder={prompt}
         style={{
           padding: "15px",
-          fontSize: "16px",
+          fontSize: "20px",
+          fontFamily: "helvetica",
           border: "10px",
           borderBottom: "2px solid #ccc",
           width: "500px",

@@ -4,6 +4,7 @@ import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
 import LayoutContainer from "../Components/Shared-Layout-Animation/LayoutContainer.jsx";
+import Footer from "../Components/Footer.jsx";
 
 const HomePage = () => {
   const defaultTheme = createTheme();
@@ -20,38 +21,38 @@ const HomePage = () => {
         }}
       >
         <ThemeProvider theme={defaultTheme}>
-          <Header /> {/* Render the Header component */}
+          <Header />
           <Box sx={{ padding: "30px" }}>
             <Typography
-              variant="h1"
               align="center"
               sx={{
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "sans-serif",
+                fontSize: "100px",
               }}
             >
               Dream Closet
-            </Typography>{" "}
+            </Typography>
             <Typography
-              variant="h5"
+              variant="h6"
               align="center"
               sx={{
                 fontWeight: "bold",
                 color: "white",
-                fontFamily: "sans-serif",
+                fontFamily: "helvetica normal",
               }}
             >
-              The Ultimate Fashion Search Engine
+              The Ultimate Fashion Search Engine, The New Way To Shop
             </Typography>
             <Stack direction="row" p={4}>
               <Typography
-                variant="h5"
+                variant="h4"
                 align="center"
                 sx={{
                   fontWeight: "bold",
-                  color: "white",
-                  fontFamily: "sans-serif",
+                  color: "turquoise",
+                  fontFamily: "Times New Roman",
                   padding: "50px",
                 }}
               >
@@ -60,11 +61,16 @@ const HomePage = () => {
                 at understanding your taste in clothing, providing more accurate
                 results.
               </Typography>
-              <img
+              <Box
+                component="img"
                 src="/assets/AI-driven_clothing_search.png"
-                width="550"
-                height="300"
                 alt="ai-driven-clothing"
+                sx={{
+                  width: "400px",
+                  height: "600px",
+                  alignSelf: "center",
+                  marginTop: "auto",
+                }}
               />
             </Stack>
             <Typography
@@ -80,7 +86,16 @@ const HomePage = () => {
               <LayoutContainer />
             </Box>
           </Box>
+          <Typography
+            variant="h5"
+            align="center"
+            padding="15px"
+            sx={{ fontFamily: "sans-serif", color: "white" }}
+          >
+            The more you use it, the more it recognizes your taste in clothing.
+          </Typography>
         </ThemeProvider>
+        <Footer />
       </Box>
     </>
   );

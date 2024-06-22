@@ -39,9 +39,8 @@ export default function Layout() {
             transition={{ duration: 0.2 }}
           >
             {selectedTab ? ( <>
-            <img src={selectedTab.imagePath} alt={selectedTab.label} className={styles.image}/>
             {selectedTab.description && ( 
-            <p>
+            <p className="text text-large text-margin text-center text-bold">
               {selectedTab.description}
             </p>
             )}
