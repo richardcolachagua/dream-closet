@@ -1,10 +1,11 @@
 import React from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import { Box, Typography, Stack, Grid } from "@mui/material";
 import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
 import LayoutContainer from "../Components/Shared-Layout-Animation/LayoutContainer.jsx";
 import Footer from "../Components/Footer.jsx";
+import ProfileFeatures from "../Components/Profile-Features/Profile-Features.jsx";
 
 const HomePage = () => {
   const defaultTheme = createTheme();
@@ -89,11 +90,14 @@ const HomePage = () => {
           <Typography
             variant="h5"
             align="center"
-            padding="15px"
-            sx={{ fontFamily: "sans-serif", color: "white" }}
+            paddingBottom="100px"
+            sx={{ fontFamily: "Times New Roman", color: "white" }}
           >
-            The more you use it, the more it recognizes your taste in clothing.
+            The more you use Dream Closet, the more it recognizes your taste in
+            clothing.
           </Typography>
+
+          <ProfileFeatures />
         </ThemeProvider>
         <Footer />
       </Box>

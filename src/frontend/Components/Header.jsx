@@ -33,9 +33,10 @@ function ResponsiveAppBar() {
           <Button
             component={RouterLink}
             to="/loginpage"
+            variant="contained"
             sx={{
               marginRight: "10px",
-              color: "white",
+              backgroundColor: "turquoise",
               textTransform: "none",
               fontSize: "15px",
               fontWeight: "bold",
@@ -45,6 +46,7 @@ function ResponsiveAppBar() {
           </Button>
           <Button
             component={RouterLink}
+            variant="outlined"
             to="/signuppage"
             sx={{
               marginRight: "10px",
@@ -52,6 +54,9 @@ function ResponsiveAppBar() {
               textTransform: "none",
               fontSize: "15px",
               fontWeight: "bold",
+              borderColor: "#0063cc",
+              border: "1px solid",
+              borderRadius: "5px",
             }}
           >
             Sign Up

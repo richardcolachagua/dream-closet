@@ -1,6 +1,5 @@
 import React from "react";
-import { Typography, Box, TextField, Button, Grid } from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
+import { Typography, Box } from "@mui/material";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
 
@@ -8,33 +7,30 @@ const ContactPage = () => {
   return (
     <>
       <Header />
-      <Box sx={{ padding: "50px" }}>
-        <Typography variant="h3" sx={{ fontWeight: "bold", color: "white" }}>
+      <Box
+        sx={{
+          backgroundColor: "black",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          minHeight: "100vh",
+          paddingLeft: "90px",
+          padding: "90px",
+        }}
+      >
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: "bold",
+            color: "white",
+            fontFamily: "Times New Roman",
+          }}
+        >
           Contact Us
         </Typography>
-        <Box sx={{ marginTop: 4 }}>
-          <Grid container spaceing={2}>
-            <Grid item xs={12}>
-              <TextField label="Your Name" variant="outlined" fullWidth />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Your Email" variant="outlined" fullWidth />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Your Message"
-                multiline
-                rows={4}
-                variant="outlined"
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
-          <Button variant="contained" color="primary">
-            Send Message
-          </Button>
+        <Box sx={{ marginTop: 2 }}>
+          <Typography sx={{ color: "white" }}>
+            Contact richardcwebdev@gmail.com for any questions
+          </Typography>
         </Box>
       </Box>
       <Footer />

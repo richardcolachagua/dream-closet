@@ -8,7 +8,8 @@ const LayoutContainer = () => {
     background: "var(--accent",
     display: "flex",
     alignItems: "center",
-    height: "70vh",
+    justifyContent: "center",
+    height: "60vh",
   };
 
   return (
