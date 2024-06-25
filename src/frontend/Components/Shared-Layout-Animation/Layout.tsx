@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { intitalTabs as tabs } from "./features.ts";
 import { motion, AnimatePresence } from "framer-motion";
 import "./styles.css";
+import styles from './Layout.module.css';
+
 
 export default function Layout() {
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
@@ -38,11 +40,13 @@ export default function Layout() {
             transition={{ duration: 0.2 }}
           >
             {selectedTab ? ( <>
+
             {selectedTab.description && ( 
             <p className="text text-large text-margin text-center text-bold">
               {selectedTab.description}
             </p>
-            )}
+            )}              
+            {/* <img src={selectedTab.imagePath} alt={selectedTab.label} className={styles.image} /> */}
             </> 
             ) : (
             "😋")}

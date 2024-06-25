@@ -88,10 +88,14 @@ const HomePage = () => {
             </Box>
           </Box>
           <Typography
-            variant="h5"
+            variant="h3"
             align="center"
             paddingBottom="100px"
-            sx={{ fontFamily: "Times New Roman", color: "white" }}
+            sx={{
+              fontFamily: "Times New Roman",
+              color: "white",
+              fontWeight: "bold",
+            }}
           >
             The more you use Dream Closet, the more it recognizes your taste in
             clothing.

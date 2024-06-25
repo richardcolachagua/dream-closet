@@ -10,13 +10,21 @@ export default function ProfileFeatures() {
   return (
     <Box
       sx={{
-        backgroundImage: `url(/assets/black_technology_gradient_4518e426.png)`,
+        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.8)),url(/assets/HD-wallpaper-black-vgradient.jpg)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundColor: "grey",
         minHeight: "30vh",
         padding: "15px",
+        "&::before": {
+          content: '""',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,10)", // Adjust opacity as needed
+        },
       }}
     >
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
@@ -25,7 +33,8 @@ export default function ProfileFeatures() {
             fontSize="large"
             sx={{
               color: "white",
-              backgroundColor: "black",
+              backgroundColor: "grey",
+              borderRadius: "5px",
             }}
           />
           <Typography
@@ -37,7 +46,12 @@ export default function ProfileFeatures() {
           >
             Save Clothes
           </Typography>
-          <Typography color="white">
+          <Typography
+            color="white"
+            sx={{
+              fontFamily: "Times New Roman",
+            }}
+          >
             Save individual clothes from any search to refer back to.
           </Typography>
         </Grid>
@@ -46,7 +60,8 @@ export default function ProfileFeatures() {
             fontSize="large"
             sx={{
               color: "white",
-              backgroundColor: "black",
+              backgroundColor: "grey",
+              borderRadius: "5px",
             }}
           />
           <Typography
@@ -74,7 +89,8 @@ export default function ProfileFeatures() {
             fontSize="large"
             sx={{
               color: "white",
-              backgroundColor: "black",
+              backgroundColor: "grey",
+              borderRadius: "5px",
             }}
           />
           <Typography
