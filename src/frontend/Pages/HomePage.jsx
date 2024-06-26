@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Stack, Grid } from "@mui/material";
+import { Box, Typography, Stack } from "@mui/material";
 import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import {
@@ -7,29 +7,48 @@ import {
   Typography,
   Button,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
   lastName: Yup.string().required("Last Name is required"),
   email: Yup.string().required("Email is required"),
-  password: Yup.string().required("Password is required"),
+  currentPassword: Yup.string().required("Current password is required"),
+  newPassword: Yup.string().required("New password is required"),
+  confirmNewPassword: Yup.string()
+    .oneOf([Yup.ref("newPassword"), null], "Passwords must match")
+    .when("newPassword", {
+      is: (val) => val && val.length > 0,
+      then: Yup.string().required(
+        "Confirm Password is required when setting a new password"
+      ),
+    }),
 });
 
 const ProfilePage = () => {
-  const initialValues = {
-    firsName: "",
-    lastName: "",
-    email: "",
-    password: "",
+  const [successMessage, setSuccessMessage] = useState();
+
+  const existingUserData = {
+    firsName: "John",
+    lastName: "Doe",
+    email: "john,doe@example.com.",
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
   };
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(values);
+      console.log("Updated Profile", values);
+      setSuccessMessage("Profile Successfully updated");
     } catch (err) {
       console.error("Failed to update profile", err);
+      setFieldError(
+        "currentPassword",
+        "Failed to authenticate. Please check your current password."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -38,10 +57,10 @@ const ProfilePage = () => {
   return (
     <Box sx={{ maxWidth: 600, mx: "auto", p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Personal Information
+        Update Your Profile
       </Typography>
       <Formik
-        initialValues={initialValues}
+        initialValues={existingUserData}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
@@ -77,14 +96,43 @@ const ProfilePage = () => {
             />
             <Field
               as={TextField}
-              name="password"
-              label="Password"
+              name="currentPassword"
+              label="Current Password"
               type="password"
               fullWidth
-              error={touched.password && Boolean(errors.password)}
-              helperText={touched.password && errors.password}
+              error={touched.currentPassword && Boolean(errors.currentPassword)}
+              helperText={touched.currentPassword && errors.currentPassword}
               sx={{ mb: 2 }}
             />
+            <Field
+              as={TextField}
+              name="newPassword"
+              label="New Password (optional)"
+              type="password"
+              fullWidth
+              error={touched.newPassword && Boolean(errors.newPassword)}
+              helperText={touched.newPassword && errors.newPassword}
+              sx={{ mb: 2 }}
+            />
+            <Field
+              as={TextField}
+              name="confirmNewPassword"
+              label="Confirm New Password"
+              type="password"
+              fullWidth
+              error={
+                touched.confirmNewPassword && Boolean(errors.confirmNewPassword)
+              }
+              helperText={
+                touched.confirmNewPassword && errors.confirmNewPassword
+              }
+              sx={{ mb: 2 }}
+            />
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {successMessage}
+              </Alert>
+            )}
             <Button
               type="submit"
               variant="contained"
