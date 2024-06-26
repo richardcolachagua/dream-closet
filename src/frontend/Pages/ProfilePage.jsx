@@ -40,6 +40,25 @@ const ProfilePage = () => {
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
+      const changedValues = Object.keys(values).reduce((acc, key) => {
+        if (
+          values[key] !== existingUserData[key] &&
+          key !== "currentPassword"
+        ) {
+          acc[key] = values[key];
+        }
+        return acc;
+      }, {});
+
+      if (Object.keys(changedValues).length === 0) {
+        setFieldError(
+          "currentPassword",
+          "No changes detected. Please modify at least one field to update."
+        );
+        setSubmitting(false);
+        return;
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log("Updated Profile", values);
       setSuccessMessage("Profile Successfully updated");
@@ -64,7 +83,7 @@ const ProfilePage = () => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ errors, touched, isSubmitting }) => (
+        {({ errors, touched, isSubmitting, values }) => (
           <Form>
             <Field
               as={TextField}
@@ -96,16 +115,6 @@ const ProfilePage = () => {
             />
             <Field
               as={TextField}
-              name="currentPassword"
-              label="Current Password"
-              type="password"
-              fullWidth
-              error={touched.currentPassword && Boolean(errors.currentPassword)}
-              helperText={touched.currentPassword && errors.currentPassword}
-              sx={{ mb: 2 }}
-            />
-            <Field
-              as={TextField}
               name="newPassword"
               label="New Password (optional)"
               type="password"
@@ -114,18 +123,31 @@ const ProfilePage = () => {
               helperText={touched.newPassword && errors.newPassword}
               sx={{ mb: 2 }}
             />
+            {values.newPassword && (
+              <Field
+                as={TextField}
+                name="confirmNewPassword"
+                label="Confirm New Password"
+                type="password"
+                fullWidth
+                error={
+                  touched.confirmNewPassword &&
+                  Boolean(errors.confirmNewPassword)
+                }
+                helperText={
+                  touched.confirmNewPassword && errors.confirmNewPassword
+                }
+                sx={{ mb: 2 }}
+              />
+            )}
             <Field
               as={TextField}
-              name="confirmNewPassword"
-              label="Confirm New Password"
+              name="currentPassword"
+              label="Current Password"
               type="password"
               fullWidth
-              error={
-                touched.confirmNewPassword && Boolean(errors.confirmNewPassword)
-              }
-              helperText={
-                touched.confirmNewPassword && errors.confirmNewPassword
-              }
+              error={touched.currentPassword && Boolean(errors.currentPassword)}
+              helperText={touched.currentPassword && errors.currentPassword}
               sx={{ mb: 2 }}
             />
             {successMessage && (
