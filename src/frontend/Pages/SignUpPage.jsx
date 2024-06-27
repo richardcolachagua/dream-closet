@@ -22,6 +22,8 @@ const SignUpPage = () => {
 
   // Form validation schema using Yup
   const validationSchema = Yup.object().shape({
+    firstName: Yup.string().required("First Name is required"),
+    lastName: Yup.string().required("Last Name is required"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
@@ -36,6 +38,8 @@ const SignUpPage = () => {
   // Formik for managing form state and submission
   const formik = useFormik({
     initialValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -109,6 +113,44 @@ const SignUpPage = () => {
               {/* Signup form */}
               <form onSubmit={formik.handleSubmit}>
                 <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="firstName"
+                      name="firstName"
+                      label="First Name"
+                      autoComplete="given-name"
+                      value={formik.values.firstName}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.firstName &&
+                        Boolean(formik.errors.firstName)
+                      }
+                      helperText={
+                        formik.touched.firstName && formik.errors.firstName
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      required
+                      fullWidth
+                      id="lastName"
+                      name="lastName"
+                      label="Last Name"
+                      autoComplete="family-name"
+                      value={formik.values.lastName}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.lastName &&
+                        Boolean(formik.errors.lastName)
+                      }
+                      helperText={
+                        formik.touched.lastName && formik.errors.lastName
+                      }
+                    />
+                  </Grid>
                   <Grid item xs={12}>
                     <TextField
                       required
