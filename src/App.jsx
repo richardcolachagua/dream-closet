@@ -5,6 +5,7 @@ import LoginPage from "./frontend/Pages/LoginPage";
 import SignUpPage from "./frontend/Pages/SignUpPage";
 import NotFoundPage from "./frontend/Pages/PageNotFound";
 import ProfilePage from "./frontend/Pages/ProfilePage";
+import PrivacyPolicyPage from "./frontend/Pages/PrivacyPolicyPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       {/* <Route path="/About" element={<About />} /> */}
       <Route path="/*" element={<NotFoundPage />} />
       <Route path="/profilepage" element={<ProfilePage />} />
+      <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
     </Routes>
   );
 }
