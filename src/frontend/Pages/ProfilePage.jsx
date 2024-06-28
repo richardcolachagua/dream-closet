@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer.jsx";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Box,
   TextField,
@@ -8,6 +11,7 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Container,
 } from "@mui/material";
 
 const validationSchema = Yup.object().shape({
@@ -27,6 +31,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const ProfilePage = () => {
+  const defaultTheme = createTheme();
   const [successMessage, setSuccessMessage] = useState();
 
   const existingUserData = {
@@ -74,99 +79,116 @@ const ProfilePage = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 600, mx: "auto", p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Update Your Profile
-      </Typography>
-      <Formik
-        initialValues={existingUserData}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ errors, touched, isSubmitting, values }) => (
-          <Form>
-            <Field
-              as={TextField}
-              name="firstName"
-              label="First Name"
-              fullWidth
-              error={touched.firstName && Boolean(errors.firstName)}
-              helperText={touched.firstName && errors.firstName}
-              sx={{ mb: 2 }}
-            />
+    <>
+      <Container>
+        <ThemeProvider theme={defaultTheme}>
+          <Header />
 
-            <Field
-              as={TextField}
-              name="lastName"
-              label="Last Name"
-              fullWidth
-              error={touched.lastName && Boolean(errors.lastName)}
-              helperText={touched.lastName && errors.lastName}
-              sx={{ mb: 2 }}
-            />
-            <Field
-              as={TextField}
-              name="email"
-              label="Email"
-              fullWidth
-              error={touched.email && Boolean(errors.email)}
-              helperText={touched.email && errors.email}
-              sx={{ mb: 2 }}
-            />
-            <Field
-              as={TextField}
-              name="newPassword"
-              label="New Password (optional)"
-              type="password"
-              fullWidth
-              error={touched.newPassword && Boolean(errors.newPassword)}
-              helperText={touched.newPassword && errors.newPassword}
-              sx={{ mb: 2 }}
-            />
-            {values.newPassword && (
-              <Field
-                as={TextField}
-                name="confirmNewPassword"
-                label="Confirm New Password"
-                type="password"
-                fullWidth
-                error={
-                  touched.confirmNewPassword &&
-                  Boolean(errors.confirmNewPassword)
-                }
-                helperText={
-                  touched.confirmNewPassword && errors.confirmNewPassword
-                }
-                sx={{ mb: 2 }}
-              />
-            )}
-            <Field
-              as={TextField}
-              name="currentPassword"
-              label="Current Password"
-              type="password"
-              fullWidth
-              error={touched.currentPassword && Boolean(errors.currentPassword)}
-              helperText={touched.currentPassword && errors.currentPassword}
-              sx={{ mb: 2 }}
-            />
-            {successMessage && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {successMessage}
-              </Alert>
-            )}
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              fullWidth
+          <Box sx={{ maxWidth: 600, mx: "auto", p: 3 }}>
+            <Typography variant="h4" sx={{ mb: 3 }}>
+              Update Your Profile
+            </Typography>
+            <Formik
+              initialValues={existingUserData}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
             >
-              {isSubmitting ? <CircularProgress size={24} /> : "Update Profile"}
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </Box>
+              {({ errors, touched, isSubmitting, values }) => (
+                <Form>
+                  <Field
+                    as={TextField}
+                    name="firstName"
+                    label="First Name"
+                    fullWidth
+                    error={touched.firstName && Boolean(errors.firstName)}
+                    helperText={touched.firstName && errors.firstName}
+                    sx={{ mb: 2 }}
+                  />
+
+                  <Field
+                    as={TextField}
+                    name="lastName"
+                    label="Last Name"
+                    fullWidth
+                    error={touched.lastName && Boolean(errors.lastName)}
+                    helperText={touched.lastName && errors.lastName}
+                    sx={{ mb: 2 }}
+                  />
+                  <Field
+                    as={TextField}
+                    name="email"
+                    label="Email"
+                    fullWidth
+                    error={touched.email && Boolean(errors.email)}
+                    helperText={touched.email && errors.email}
+                    sx={{ mb: 2 }}
+                  />
+                  <Field
+                    as={TextField}
+                    name="newPassword"
+                    label="New Password (optional)"
+                    type="password"
+                    fullWidth
+                    error={touched.newPassword && Boolean(errors.newPassword)}
+                    helperText={touched.newPassword && errors.newPassword}
+                    sx={{ mb: 2 }}
+                  />
+                  {values.newPassword && (
+                    <Field
+                      as={TextField}
+                      name="confirmNewPassword"
+                      label="Confirm New Password"
+                      type="password"
+                      fullWidth
+                      error={
+                        touched.confirmNewPassword &&
+                        Boolean(errors.confirmNewPassword)
+                      }
+                      helperText={
+                        touched.confirmNewPassword && errors.confirmNewPassword
+                      }
+                      sx={{ mb: 2 }}
+                    />
+                  )}
+                  <Field
+                    as={TextField}
+                    name="currentPassword"
+                    label="Current Password"
+                    type="password"
+                    fullWidth
+                    error={
+                      touched.currentPassword && Boolean(errors.currentPassword)
+                    }
+                    helperText={
+                      touched.currentPassword && errors.currentPassword
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  {successMessage && (
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                      {successMessage}
+                    </Alert>
+                  )}
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    fullWidth
+                  >
+                    {isSubmitting ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "Update Profile"
+                    )}
+                  </Button>
+                </Form>
+              )}
+            </Formik>
+          </Box>
+        </ThemeProvider>
+        <Footer />
+      </Container>
+    </>
   );
 };
 
