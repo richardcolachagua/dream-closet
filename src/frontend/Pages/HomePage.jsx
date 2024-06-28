@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import { Container, Typography, Stack } from "@mui/material";
 import Header from "../Components/Header";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
@@ -12,25 +12,39 @@ const HomePage = () => {
 
   return (
     <>
-      <Box
+      <Container
+        maxWidth={false}
+        disableGutters
         sx={{
           backgroundImage: `url(/assets/black_technology_gradient.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
           minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "auto",
+          padding: { xs: "15px", sm: "20px", md: "30px" },
         }}
       >
         <ThemeProvider theme={defaultTheme}>
           <Header />
-          <Box sx={{ padding: "30px" }}>
+          <Container
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              flexDirection: "column",
+              padding: " 30px",
+            }}
+          >
             <Typography
               align="center"
               sx={{
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "sans-serif",
-                fontSize: "100px",
+                fontSize: { xs: "40px", sm: "60px", md: "80px", lg: "100px" },
               }}
             >
               Dream Closet
@@ -42,11 +56,17 @@ const HomePage = () => {
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "helvetica normal",
+                fontSize: { xs: "10px", sm: "20px", md: "30px", lg: "40px" },
               }}
             >
               The Ultimate Fashion Search Engine, The New Way To Shop
             </Typography>
-            <Stack direction="row" p={4}>
+            <Stack
+              direction={{ xs: "column", md: "row" }}
+              spacing={4}
+              alignItems="center"
+              p={4}
+            >
               <Typography
                 variant="h4"
                 align="center"
@@ -54,23 +74,25 @@ const HomePage = () => {
                   fontWeight: "bold",
                   color: "turquoise",
                   fontFamily: "Times New Roman",
-                  padding: "50px",
+                  padding: { xs: "20px", md: "50px" },
+                  fontSize: { xs: "20px", sm: "30px", md: "40px", lg: "50px" },
                 }}
               >
-                Dream Closet employs advanced algorithms to understand your
-                preferences. The more you use Dream Closet, the better it gets
-                at understanding your taste in clothing, providing more accurate
-                results.
+                Dream Closet is a clothing search engine that allows you to
+                search for exactly what you are looking for. Looking for a
+                specific set of heels? Dream Closet can find it. Looking for a
+                blue and white spotted button down shirt for the summer? Dream
+                Cloest can help you find it. Sign up today to get started.
               </Typography>
-              <Box
+              <Container
                 component="img"
                 src="/assets/AI-driven_clothing_search.png"
                 alt="ai-driven-clothing"
                 sx={{
-                  width: "400px",
-                  height: "600px",
-                  alignSelf: "center",
-                  marginTop: "auto",
+                  width: { xs: "100%", sm: "400px" },
+                  height: "auto",
+                  maxWidth: "100%",
+                  objectFit: "contain",
                 }}
               />
             </Stack>
@@ -82,11 +104,11 @@ const HomePage = () => {
               Example: "A red-orange colored strapless dress for a wedding with
               a slit on the left side" {/* Example user input */}
             </Typography>
-            <Box>
+            <Container>
               <AnimatedSearchBar />
               <LayoutContainer />
-            </Box>
-          </Box>
+            </Container>
+          </Container>
           <Typography
             variant="h3"
             align="center"
@@ -95,6 +117,13 @@ const HomePage = () => {
               fontFamily: "Times New Roman",
               color: "white",
               fontWeight: "bold",
+              fontSize: { xs: "24px", sm: "30px", md: "36px", lg: "48px" },
+              padding: {
+                xs: "30px 15px",
+                sm: "40px 20px",
+                md: "50px 30px",
+                lg: "60px 40px",
+              },
             }}
           >
             The more you use Dream Closet, the more it recognizes your taste in
@@ -104,7 +133,7 @@ const HomePage = () => {
           <ProfileFeatures />
         </ThemeProvider>
         <Footer />
-      </Box>
+      </Container>
     </>
   );
 };

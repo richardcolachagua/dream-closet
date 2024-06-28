@@ -3,9 +3,7 @@ import HomePage from "./frontend/Pages/HomePage";
 import ContactPage from "./frontend/Pages/ContactPage";
 import LoginPage from "./frontend/Pages/LoginPage";
 import SignUpPage from "./frontend/Pages/SignUpPage";
-// import About from "./frontend/Pages/About";
 import NotFoundPage from "./frontend/Pages/PageNotFound";
-import { Box } from "@mui/material";
 import ProfilePage from "./frontend/Pages/ProfilePage";
 
 function App() {

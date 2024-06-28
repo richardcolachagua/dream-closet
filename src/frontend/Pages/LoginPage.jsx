@@ -4,7 +4,6 @@ import {
   TextField,
   Box,
   Typography,
-  Link,
   Grid,
   Container,
   CssBaseline,
@@ -15,6 +14,7 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import axios from "axios";
 import Header from "../Components/Header";
+import { Link } from "react-router-dom";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -154,8 +154,17 @@ const LoginPage = ({ history }) => {
               </Grid>
               <Grid container justifyContent="flex-end">
                 <Grid item>
-                  <Link href="#" variant="body2">
-                    {"Don't have an account? Sign Up"}
+                  <Link to="/SignUpPage" variant="body2">
+                    <Typography
+                      color="black"
+                      align="center"
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica Neue",
+                      }}
+                    >
+                      Don't have an account? Sign Up
+                    </Typography>
                   </Link>
                 </Grid>
               </Grid>
