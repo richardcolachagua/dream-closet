@@ -13,6 +13,7 @@ import {
   Alert,
   Container,
 } from "@mui/material";
+import Searches from "../Components/Searches.jsx";
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
@@ -80,12 +81,33 @@ const ProfilePage = () => {
 
   return (
     <>
-      <Container>
+      <Container
+        sx={{
+          backgroundImage: `url(/assets/technology_gradient_with_black_at_the_top.png)`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+          maxWidth: 600,
+          mx: "auto",
+          p: 3,
+        }}
+      >
         <ThemeProvider theme={defaultTheme}>
           <Header />
 
-          <Box sx={{ maxWidth: 600, mx: "auto", p: 3 }}>
-            <Typography variant="h4" sx={{ mb: 3 }}>
+          <Box>
+            <Typography
+              variant="h2"
+              sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+            >
+              Welcome Richard
+            </Typography>
+
+            <Typography
+              variant="h4"
+              sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+            >
               Update Your Profile
             </Typography>
             <Formik
@@ -174,6 +196,13 @@ const ProfilePage = () => {
                     variant="contained"
                     disabled={isSubmitting}
                     fullWidth
+                    sx={{
+                      marginRight: "10px",
+                      backgroundColor: "turquoise",
+                      textTransform: "none",
+                      fontSize: "15px",
+                      fontWeight: "bold",
+                    }}
                   >
                     {isSubmitting ? (
                       <CircularProgress size={24} />
@@ -185,9 +214,12 @@ const ProfilePage = () => {
               )}
             </Formik>
           </Box>
-        </ThemeProvider>
-        <Footer />
+        </ThemeProvider>{" "}
+        <Container>
+          <Searches />
+        </Container>{" "}
       </Container>
+      <Footer />
     </>
   );
 };
