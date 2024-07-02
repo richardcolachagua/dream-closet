@@ -27,8 +27,17 @@ export default function ProfileFeatures() {
         },
       }}
     >
-      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-        <Grid item xs={6}>
+      <Grid
+        container
+        rowSpacing={1}
+        columnSpacing={{
+          xs: 1,
+          sm: 2,
+          md: 3,
+          padding: { xs: "15px", sm: "20px", md: "30px" },
+        }}
+      >
+        <Grid item xs={12} sm={6} md={4}>
           <BookmarkIcon
             fontSize="large"
             sx={{
@@ -55,7 +64,7 @@ export default function ProfileFeatures() {
             Save individual clothes from any search to refer back to.
           </Typography>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <ManageSearchIcon
             fontSize="large"
             sx={{
@@ -84,7 +93,7 @@ export default function ProfileFeatures() {
             indiviual clothes.
           </Typography>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6} md={4}>
           <AccountBoxIcon
             fontSize="large"
             sx={{

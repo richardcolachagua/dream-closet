@@ -35,7 +35,7 @@ const HomePage = () => {
               flexGrow: 1,
               display: "flex",
               flexDirection: "column",
-              padding: " 30px",
+              padding: "30px",
             }}
           >
             <Typography
@@ -74,7 +74,7 @@ const HomePage = () => {
                   fontWeight: "bold",
                   color: "turquoise",
                   fontFamily: "Times New Roman",
-                  padding: { xs: "20px", md: "50px" },
+                  padding: { xs: "10px", md: "30px" },
                   fontSize: { xs: "20px", sm: "30px", md: "40px", lg: "50px" },
                 }}
               >
@@ -97,15 +97,32 @@ const HomePage = () => {
               />
             </Stack>
             <Typography
-              variant="h6"
+              variant="h3"
               align="center"
-              sx={{ fontFamily: "sans-serif", color: "white" }}
+              sx={{
+                fontFamily: "Times New Roman",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: {
+                  xs: "2rem",
+                  sm: "3rem",
+                  md: "4rem",
+                },
+                padding: {
+                  xs: "30px 15px",
+                  sm: "40px 20px",
+                  md: "50px 30px",
+                  lg: "60px 40px",
+                },
+              }}
             >
               Example: "A red-orange colored strapless dress for a wedding with
               a slit on the left side" {/* Example user input */}
             </Typography>
-            <Container>
+            <Container sx={{ padding: "20px" }}>
               <AnimatedSearchBar />
+            </Container>
+            <Container sx={{ padding: "10px" }}>
               <LayoutContainer />
             </Container>
           </Container>
@@ -117,7 +134,11 @@ const HomePage = () => {
               fontFamily: "Times New Roman",
               color: "white",
               fontWeight: "bold",
-              fontSize: { xs: "24px", sm: "30px", md: "36px", lg: "48px" },
+              fontSize: {
+                xs: "2rem",
+                sm: "3rem",
+                md: "4rem",
+              },
               padding: {
                 xs: "30px 15px",
                 sm: "40px 20px",
