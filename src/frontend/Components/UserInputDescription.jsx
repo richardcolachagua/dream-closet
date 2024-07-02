@@ -9,6 +9,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import axios from "axios";
+import SaveSearchButton from "./SaveSearchButton";
 
 function UserDescriptionInput() {
   const [description, setDescription] = useState("");
@@ -50,6 +51,8 @@ function UserDescriptionInput() {
   const handleSortChange = (event) => {
     setSortBy(event.target.value);
   };
+
+  const handleSaveSearch = () => {};
 
   return (
     <Box
@@ -111,6 +114,7 @@ function UserDescriptionInput() {
       >
         Clear
       </Button>
+      <SaveSearchButton onClick={handleSaveSearch} />
       {/* Display fetched images in an ImageList */}
       <ImageList cols={3}>
         {images.map((item, index) => (
