@@ -7,13 +7,15 @@ import {
   Card,
   CardContent,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 
 const Searches = () => {
-  const [savedSearches, setSavedSearches] = useState();
-  const [savedItems, setSavedItems] = useState();
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [savedItems, setSavedItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     //Fetch saved searches and items from your backend
@@ -23,23 +25,28 @@ const Searches = () => {
 
   const fetchSavedSearches = async () => {
     // Implement API call to fetch saved searches
-    // setSavedSearches(result);
     try {
+      setIsLoading(true);
       const response = await axios.get("/api/saved-searches");
       setSavedSearches(response.data);
     } catch (error) {
       console.error("Error fetching saved searches", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchSavedItems = async () => {
     // Implement API call to fetch saved items
-    // setSavedItems(result);
+
     try {
+      setIsLoading(true);
       const response = await axios.get("/api/saved-items");
       setSavedItems(response.data);
     } catch (error) {
       console.error("Error fetching saved items", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,62 +71,92 @@ const Searches = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <Container>
+        <Box
+          display="flex"
+          justifyContent="content"
+          alignItems="center"
+          height="200px"
+        >
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Typography
-        variant="h2"
+        variant="h4"
         sx={{ mb: 3, fontWeight: "bold", color: "white" }}
       >
         Your Saved Searches
       </Typography>
       <Box mb={4}>
         <Typography
-          variant="h4"
+          variant="h5"
           sx={{ mb: 3, fontWeight: "bold", color: "white" }}
         >
           Saved Items
         </Typography>
         <Grid container spacing={2}>
-          {savedItems.map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">{item.name}</Typography>
-                  <Typography variant="body2">{item.description}</Typography>
-                  <IconButton onClick={() => handleDeleteItem(item.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </CardContent>
-              </Card>
+          {savedItems.length > 0 ? (
+            savedItems.map((item) => (
+              <Grid item xs={12} sm={6} md={4} key={item.id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">{item.name}</Typography>
+                    <Typography variant="body2">{item.description}</Typography>
+                    <IconButton onClick={() => handleDeleteItem(item.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Typography variant="body1" color="white">
+                No saved items found.
+              </Typography>
             </Grid>
-          ))}
+          )}
         </Grid>
       </Box>
 
       <Box>
         <Typography
-          variant="h4"
+          variant="h5"
           sx={{ mb: 3, fontWeight: "bold", color: "white" }}
         >
           Saved Searches
         </Typography>
         <Grid container spacing={2}>
-          {savedSearches.map((search) => (
-            <Grid item xs={12} sm={6} md={4} key={search.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">{search.query}</Typography>
-                  <Typography variant="body2">
-                    {" "}
-                    Date: {new Date(search.date).toLocaleDateString()}{" "}
-                  </Typography>
-                  <IconButton onClick={() => handleDeleteSearch(search.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </CardContent>
-              </Card>
+          {savedSearches.length > 0 ? (
+            savedSearches.map((search) => (
+              <Grid item xs={12} sm={6} md={4} key={search.id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">{search.query}</Typography>
+                    <Typography variant="body2">
+                      Date: {new Date(search.date).toLocaleDateString()}{" "}
+                    </Typography>
+                    <IconButton onClick={() => handleDeleteSearch(search.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Typography variant="body1" color="white">
+                No saved searches found.
+              </Typography>
             </Grid>
-          ))}
+          )}
         </Grid>
       </Box>
     </Container>
