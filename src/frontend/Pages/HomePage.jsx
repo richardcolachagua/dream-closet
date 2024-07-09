@@ -12,25 +12,26 @@ const HomePage = () => {
 
   return (
     <>
-      <Container
-        maxWidth={false}
-        disableGutters
-        sx={{
-          backgroundImage: `url(/assets/black_technology_gradient.png)`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundAttachment: "fixed",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "auto",
-          padding: { xs: "15px", sm: "20px", md: "30px" },
-        }}
-      >
-        <ThemeProvider theme={defaultTheme}>
-          <Header />
+      <ThemeProvider theme={defaultTheme}>
+        <Header />
+        <Container
+          maxWidth={false}
+          disableGutters
+          sx={{
+            backgroundImage: `url(/assets/black_technology_gradient.png)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundAttachment: "fixed",
+            width: "100vw",
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <Container
+            maxWidth={false}
+            disableGutters
             sx={{
               flexGrow: 1,
               display: "flex",
@@ -152,9 +153,9 @@ const HomePage = () => {
           </Typography>
 
           <ProfileFeatures />
-        </ThemeProvider>
-        <Footer />
-      </Container>
+          <Footer />
+        </Container>
+      </ThemeProvider>
     </>
   );
 };

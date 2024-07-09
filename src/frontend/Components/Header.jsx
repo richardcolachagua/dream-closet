@@ -6,7 +6,7 @@ const pages = ["HomePage"];
 
 function ResponsiveAppBar() {
   return (
-    <AppBar position="static" sx={{ backgroundColor: "black" }}>
+    <AppBar position="static" sx={{ backgroundColor: "red" }}>
       <Toolbar
         sx={{
           width: "100%",

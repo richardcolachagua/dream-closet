@@ -34,7 +34,6 @@ export default function ProfileFeatures() {
           xs: 1,
           sm: 2,
           md: 3,
-          padding: { xs: "15px", sm: "20px", md: "30px" },
         }}
       >
         <Grid item xs={12} sm={6} md={4}>
