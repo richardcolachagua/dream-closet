@@ -5,7 +5,7 @@ import { Feature } from "./types"
       icon: "🤖",
       label: "AI-driven clothing search",
       description:
-        "Our AI-powered search engine revolutionizes the way you shop for clothes online by accurately interpreting your descriptions and fetching matching items from an extensive selection of retailers.",
+        "Our AI-powered search engine revolutionizes the way you shop online by accurately interpreting your descriptions & fetching matching items from an extensive selection of retailers.",
         imagePath: "/assets/AI-driven_clothing_search.png"
     },
     {

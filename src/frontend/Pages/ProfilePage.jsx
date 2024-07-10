@@ -12,6 +12,7 @@ import {
   CircularProgress,
   Alert,
   Container,
+  CssBaseline,
 } from "@mui/material";
 import axios from "axios";
 import Searches from "../Components/Searches.jsx";
@@ -89,17 +90,20 @@ const ProfilePage = () => {
 
   return (
     <>
-      <Container
-        maxWidth="md"
+      {" "}
+      <Box
         sx={{
-          backgroundColor: "black",
-          p: 3,
+          backgroundImage: `url(/assets/backgroundImage.png)`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          minHeight: "100vh",
         }}
       >
         <ThemeProvider theme={defaultTheme}>
           <Header />
-
           <Box my={4}>
+            <CssBaseline />
             <Typography
               variant="h3"
               sx={{ mb: 3, fontWeight: "bold", color: "white" }}
@@ -223,10 +227,10 @@ const ProfilePage = () => {
               </Button>
             </form>
           </Box>
-        </ThemeProvider>{" "}
-        <Container>
-          <Searches />
-        </Container>{" "}
+        </ThemeProvider>
+      </Box>
+      <Container>
+        <Searches />
       </Container>
       <Footer />
     </>

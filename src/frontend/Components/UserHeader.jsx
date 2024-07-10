@@ -2,7 +2,7 @@ import React from "react";
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
-const pages = ["HomePage"];
+const pages = ["UserPage"];
 
 function Header() {
   return (
@@ -45,7 +45,7 @@ function Header() {
               fontWeight: "bold",
             }}
           >
-            Login
+            Profile
           </Button>
           <Button
             component={RouterLink}
@@ -62,7 +62,7 @@ function Header() {
               borderRadius: "5px",
             }}
           >
-            Sign Up
+            Logout
           </Button>
         </Box>
       </Toolbar>
