@@ -8,11 +8,16 @@ import {
   CardContent,
   IconButton,
   CircularProgress,
+  CssBaseline,
+  Stack,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const Searches = () => {
+  const defaultTheme = createTheme();
+
   const [savedSearches, setSavedSearches] = useState([]);
   const [savedItems, setSavedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,79 +92,97 @@ const Searches = () => {
   }
 
   return (
-    <Container>
-      <Typography
-        variant="h4"
-        sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+    <>
+      <Container
+        sx={{
+          backgroundColor: "black",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          minHeight: "100vh",
+        }}
       >
-        Your Saved Searches
-      </Typography>
-      <Box mb={4}>
-        <Typography
-          variant="h5"
-          sx={{ mb: 3, fontWeight: "bold", color: "white" }}
-        >
-          Saved Items
-        </Typography>
-        <Grid container spacing={2}>
-          {savedItems.length > 0 ? (
-            savedItems.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{item.name}</Typography>
-                    <Typography variant="body2">{item.description}</Typography>
-                    <IconButton onClick={() => handleDeleteItem(item.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <Typography variant="body1" color="white">
-                No saved items found.
+        <ThemeProvider theme={defaultTheme}>
+          <CssBaseline />
+          <Typography
+            variant="h4"
+            sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+          >
+            Your Saved Searches
+          </Typography>
+          <Stack direction="row" spacing={40}>
+            <Box mb={4}>
+              <Typography
+                variant="h5"
+                sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+              >
+                Saved Items
               </Typography>
-            </Grid>
-          )}
-        </Grid>
-      </Box>
-
-      <Box>
-        <Typography
-          variant="h5"
-          sx={{ mb: 3, fontWeight: "bold", color: "white" }}
-        >
-          Saved Searches
-        </Typography>
-        <Grid container spacing={2}>
-          {savedSearches.length > 0 ? (
-            savedSearches.map((search) => (
-              <Grid item xs={12} sm={6} md={4} key={search.id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{search.query}</Typography>
-                    <Typography variant="body2">
-                      Date: {new Date(search.date).toLocaleDateString()}{" "}
+              <Grid container spacing={2}>
+                {savedItems.length > 0 ? (
+                  savedItems.map((item) => (
+                    <Grid item xs={12} sm={6} md={4} key={item.id}>
+                      <Card>
+                        <CardContent>
+                          <Typography variant="h6">{item.name}</Typography>
+                          <Typography variant="body2">
+                            {item.description}
+                          </Typography>
+                          <IconButton onClick={() => handleDeleteItem(item.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))
+                ) : (
+                  <Grid item xs={12}>
+                    <Typography variant="body1" color="white">
+                      No saved items found.
                     </Typography>
-                    <IconButton onClick={() => handleDeleteSearch(search.id)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </CardContent>
-                </Card>
+                  </Grid>
+                )}
               </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <Typography variant="body1" color="white">
-                No saved searches found.
+            </Box>
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+              >
+                Saved Searches
               </Typography>
-            </Grid>
-          )}
-        </Grid>
-      </Box>
-    </Container>
+              <Grid container spacing={2}>
+                {savedSearches.length > 0 ? (
+                  savedSearches.map((search) => (
+                    <Grid item xs={12} sm={6} md={4} key={search.id}>
+                      <Card>
+                        <CardContent>
+                          <Typography variant="h6">{search.query}</Typography>
+                          <Typography variant="body2">
+                            Date: {new Date(search.date).toLocaleDateString()}{" "}
+                          </Typography>
+                          <IconButton
+                            onClick={() => handleDeleteSearch(search.id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))
+                ) : (
+                  <Grid item xs={12}>
+                    <Typography variant="body1" color="white">
+                      No saved searches found.
+                    </Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+          </Stack>
+        </ThemeProvider>
+      </Container>
+    </>
   );
 };
 
