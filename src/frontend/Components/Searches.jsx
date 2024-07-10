@@ -93,7 +93,7 @@ const Searches = () => {
 
   return (
     <>
-      <Container
+      <Box
         sx={{
           backgroundColor: "black",
           backgroundSize: "cover",
@@ -110,7 +110,7 @@ const Searches = () => {
           >
             Your Saved Searches
           </Typography>
-          <Stack direction="row" spacing={40}>
+          <Stack fullWidth direction="row" spacing={50}>
             <Box mb={4}>
               <Typography
                 variant="h5"
@@ -181,7 +181,7 @@ const Searches = () => {
             </Box>
           </Stack>
         </ThemeProvider>
-      </Container>
+      </Box>
     </>
   );
 };

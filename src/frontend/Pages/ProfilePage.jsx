@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Header from "../Components/Header";
 import Footer from "../Components/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -17,6 +16,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Searches from "../Components/Searches.jsx";
+import UserHeader from "../Components/ProfileHeader.jsx";
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
@@ -100,7 +100,7 @@ const ProfilePage = () => {
         }}
       >
         <ThemeProvider theme={defaultTheme}>
-          <Header />
+          <UserHeader />
           <Box my={4}>
             <Typography
               variant="h3"

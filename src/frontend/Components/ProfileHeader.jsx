@@ -2,9 +2,9 @@ import React from "react";
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
-const pages = ["UserPage"];
+const pages = ["Dream Closet"];
 
-function Header() {
+function ProfileHeader() {
   return (
     <AppBar position="static" sx={{ backgroundColor: "red" }}>
       <Toolbar
@@ -70,4 +70,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default ProfileHeader;

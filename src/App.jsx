@@ -6,6 +6,9 @@ import SignUpPage from "./frontend/Pages/SignUpPage";
 import NotFoundPage from "./frontend/Pages/PageNotFound";
 import ProfilePage from "./frontend/Pages/ProfilePage";
 import PrivacyPolicyPage from "./frontend/Pages/PrivacyPolicyPage";
+import ProfileHeader from "./frontend/Components/ProfileHeader";
+import UserDescriptionInput from "./frontend/Components/UserInputDescription";
+import GalleryView from "./frontend/Components/GalleryView";
 
 function App() {
   return (
@@ -18,6 +21,9 @@ function App() {
       <Route path="/*" element={<NotFoundPage />} />
       <Route path="/profilepage" element={<ProfilePage />} />
       <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
+      <Route path="/userheader" element={<ProfileHeader />} />
+      <Route path="/userinput" element={<UserDescriptionInput />} />
+      <Route path="/galleryview" element={<GalleryView />} />
     </Routes>
   );
 }

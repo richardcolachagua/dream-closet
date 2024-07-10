@@ -9,7 +9,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import axios from "axios";
-import SaveSearchButton from "./SaveSearchButton";
+import SaveForLaterButton from "./SaveForLaterIcon";
 
 function UserDescriptionInput() {
   const [description, setDescription] = useState("");
@@ -114,7 +114,7 @@ function UserDescriptionInput() {
       >
         Clear
       </Button>
-      <SaveSearchButton onClick={handleSaveSearch} />
+      <SaveForLaterButton onClick={handleSaveSearch} />
       {/* Display fetched images in an ImageList */}
       <ImageList cols={3}>
         {images.map((item, index) => (

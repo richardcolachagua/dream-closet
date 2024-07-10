@@ -1,6 +1,6 @@
 import React from "react";
 import IconButton from "@mui/material/IconButton";
-import BookmarkBorderIcon from "@mui/material/BookmarkBorderIcon";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 
 function SaveForLaterButton({ itemId, onSave }) {
   const handleSaveForLater = async () => {
