@@ -7,7 +7,6 @@ import NotFoundPage from "./frontend/Pages/PageNotFound";
 import ProfilePage from "./frontend/Pages/ProfilePage";
 import PrivacyPolicyPage from "./frontend/Pages/PrivacyPolicyPage";
 import ProfileHeader from "./frontend/Components/ProfileHeader";
-import UserDescriptionInput from "./frontend/Components/UserInputDescription";
 import SearchPage from "./frontend/Pages/SearchPage";
 
 function App() {
@@ -22,7 +21,6 @@ function App() {
       <Route path="/profilepage" element={<ProfilePage />} />
       <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
       <Route path="/userheader" element={<ProfileHeader />} />
-      <Route path="/userinput" element={<UserDescriptionInput />} />
       <Route path="/Searchpage" element={<SearchPage />} />
     </Routes>
   );

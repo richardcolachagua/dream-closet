@@ -15,7 +15,7 @@ import {
   Grid,
 } from "@mui/material";
 import axios from "axios";
-import Searches from "../Components/Searches.jsx";
+import Searches from "../Components/Search-Components/SearchResults.jsx";
 import UserHeader from "../Components/ProfileHeader.jsx";
 
 const validationSchema = Yup.object().shape({
