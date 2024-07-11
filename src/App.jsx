@@ -8,7 +8,7 @@ import ProfilePage from "./frontend/Pages/ProfilePage";
 import PrivacyPolicyPage from "./frontend/Pages/PrivacyPolicyPage";
 import ProfileHeader from "./frontend/Components/ProfileHeader";
 import UserDescriptionInput from "./frontend/Components/UserInputDescription";
-import GalleryView from "./frontend/Components/GalleryView";
+import SearchPage from "./frontend/Pages/SearchPage";
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
       <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
       <Route path="/userheader" element={<ProfileHeader />} />
       <Route path="/userinput" element={<UserDescriptionInput />} />
-      <Route path="/galleryview" element={<GalleryView />} />
+      <Route path="/Searchpage" element={<SearchPage />} />
     </Routes>
   );
 }
