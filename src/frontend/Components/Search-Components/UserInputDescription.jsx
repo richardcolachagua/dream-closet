@@ -1,9 +1,29 @@
-import React, { useState } from "react";
-import { TextField, Button, Box } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  TextField,
+  Button,
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
 
-function UserDescriptionInput() {
+function UserDescriptionInput({
+  onSearchStart,
+  onSearchResults,
+  onSearchError,
+}) {
   const [description, setDescription] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [showRecentSearches, setShowRecentSearches] = useState(false);
+  // const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    //Load recent searches from localstorage or api
+    const loadSearches =
+      JSON.parse(localStorage.getItem("recentSearches")) || [];
+    setRecentSearches(loadSearches);
+  }, []);
 
   const handleInputChange = (event) => {
     setDescription(event.target.value);
@@ -14,6 +34,7 @@ function UserDescriptionInput() {
       alert("Please enter a description.");
       return;
     }
+    onSearchStart();
     try {
       // Replace '/api/submit-description' with your actual API endpoint
       const response = await fetch("/api/submit-description", {
@@ -24,11 +45,21 @@ function UserDescriptionInput() {
         body: JSON.stringify({ description }),
       });
       const data = await response.json();
-      setSubmitted(true);
-      console.log(data);
+      onSearchResults(data);
+
+      //Add to recent searches
+      const updatedSearches = [description, ...recentSearches.slice(0, 4)];
+      setRecentSearches(updatedSearches);
+      localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
     } catch (error) {
       console.error("Error submitting description:", error);
+      onSearchError("Error submitting description");
     }
+  };
+
+  const handleRecentSearchClick = (search) => {
+    setDescription(search);
+    handleSubmit();
   };
 
   return (
@@ -40,38 +71,56 @@ function UserDescriptionInput() {
         "& > :not(style)": { m: 1 },
       }}
     >
-      {submitted ? (
-        <p>Thank you for your submission!</p>
-      ) : (
-        <>
-          <TextField
-            label="I am looking for a..."
-            variant="filled"
-            value={description}
-            onChange={handleInputChange}
-            sx={{
-              width: "90%",
-              maxWidth: "500px",
-              backgroundColor: "white",
-              border: "10px",
-              borderBottom: "2px solid #ccc",
-              borderRadius: "10px",
-            }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            sx={{
-              bgcolor: "primary.main",
-              "&:hover": {
-                bgcolor: "primary.dark",
-              },
-            }}
-          >
-            Search
-          </Button>
-        </>
+      <TextField
+        label="I am looking for a..."
+        variant="filled"
+        value={description}
+        onChange={handleInputChange}
+        onFocus={() => setShowRecentSearches(true)}
+        onBlur={() => setTimeout(() => setShowRecentSearches(false), 200)}
+        sx={{
+          width: "90%",
+          maxWidth: "500px",
+          backgroundColor: "white",
+          border: "10px",
+          borderBottom: "2px solid #ccc",
+          borderRadius: "10px",
+        }}
+      />
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubmit}
+        sx={{
+          bgcolor: "primary.main",
+          "&:hover": {
+            bgcolor: "primary.dark",
+          },
+        }}
+      >
+        Search
+      </Button>
+      {showRecentSearches && recentSearches.length > 0 && (
+        <List
+          sx={{
+            position: "absolute",
+            width: "90%",
+            maxWidth: "500px",
+            bgcolor: "background.paper",
+            boxShadow: 3,
+            zIndex: 1,
+          }}
+        >
+          {recentSearches.map((search, index) => (
+            <ListItem
+              key={index}
+              button
+              onClick={() => handleRecentSearchClick(search)}
+            >
+              <ListItemText primary={search} />
+            </ListItem>
+          ))}
+        </List>
       )}
     </Box>
   );
