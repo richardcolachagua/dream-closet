@@ -7,6 +7,7 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
+import SaveSearchButton from "./SaveSearchButton";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -70,6 +71,7 @@ function UserDescriptionInput({
   return (
     <Box
       sx={{
+        position: "relative",
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
@@ -113,10 +115,15 @@ function UserDescriptionInput({
       >
         Save Search
       </Button>
+      <SaveSearchButton
+        onSave={handleSaveSearch}
+        disabled={!description.trim()}
+      />
       {showRecentSearches && recentSearches.length > 0 && (
         <List
           sx={{
             position: "absolute",
+            top: "100%",
             width: "90%",
             maxWidth: "500px",
             bgcolor: "background.paper",

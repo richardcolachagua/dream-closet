@@ -1,6 +1,7 @@
 import React from "react";
 import IconButton from "@mui/material/IconButton";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import Tooltip from "@mui/material/Tooltip";
 
 function SaveForLaterButton({ itemId, onSave }) {
   const handleSaveForLater = async () => {
@@ -21,9 +22,11 @@ function SaveForLaterButton({ itemId, onSave }) {
   };
 
   return (
-    <IconButton onClick={handleSaveForLater} sx={{ color: "primary.main" }}>
-      <BookmarkBorderIcon />
-    </IconButton>
+    <Tooltip title="Save for later">
+      <IconButton onClick={handleSaveForLater} sx={{ color: "primary.main" }}>
+        <BookmarkBorderIcon />
+      </IconButton>
+    </Tooltip>
   );
 }
 

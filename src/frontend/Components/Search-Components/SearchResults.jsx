@@ -1,7 +1,15 @@
 import React from "react";
-import { Box, Typography, Card, CardContent, CardMedia } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+} from "@mui/material";
+import SaveForLaterButton from "./SaveForLaterButton";
 
-const SearchResults = ({ results }) => {
+const SearchResults = ({ results, onSaveItem }) => {
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
       {results.map((product, index) => (
@@ -20,6 +28,12 @@ const SearchResults = ({ results }) => {
               {product.description}
             </Typography>
           </CardContent>
+          <CardActions>
+            <SaveForLaterButton
+              itemId={product.id}
+              onSave={() => onSaveItem(product)}
+            />
+          </CardActions>
         </Card>
       ))}
     </Box>
