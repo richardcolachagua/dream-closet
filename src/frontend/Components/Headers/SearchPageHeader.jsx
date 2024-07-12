@@ -4,9 +4,9 @@ import { Link as RouterLink } from "react-router-dom";
 
 const pages = ["Dream Closet"];
 
-function ProfileHeader() {
+function SearchPageHeader() {
   return (
-    <AppBar position="static" sx={{ backgroundColor: "red" }}>
+    <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Toolbar
         sx={{
           width: "100%",
@@ -35,7 +35,7 @@ function ProfileHeader() {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button
             component={RouterLink}
-            to="/searchpage"
+            to="/profilepage"
             variant="contained"
             sx={{
               marginRight: "10px",
@@ -45,12 +45,12 @@ function ProfileHeader() {
               fontWeight: "bold",
             }}
           >
-            Search
+            Profile
           </Button>
           <Button
             component={RouterLink}
             variant="outlined"
-            to="/signuppage"
+            to="/loginpage"
             sx={{
               marginRight: "10px",
               color: "white",
@@ -70,4 +70,4 @@ function ProfileHeader() {
   );
 }
 
-export default ProfileHeader;
+export default SearchPageHeader;

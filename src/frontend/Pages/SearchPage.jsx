@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import UserDescriptionInput from "../Components/Search-Components/UserInputDescription";
 import SearchResults from "../Components/Search-Components/SearchResults";
+import Footer from "../Components/Footer";
+import SearchPageHeader from "../Components/Headers/SearchPageHeader";
 import {
   Box,
   Typography,
@@ -11,7 +13,6 @@ import {
   Alert,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Footer from "../Components/Footer";
 
 const SearchPage = () => {
   const defaultTheme = createTheme();
@@ -36,6 +37,7 @@ const SearchPage = () => {
 
   return (
     <ThemeProvider theme={defaultTheme}>
+      <SearchPageHeader />
       <CssBaseline />
       <Container maxWidth="lg">
         <Box
@@ -44,6 +46,7 @@ const SearchPage = () => {
             flexDirection: "column",
             transition: "background-color 0.3s ease",
             minHeight: "100vh",
+            backgroundColor: "black",
           }}
         >
           <Box
@@ -80,7 +83,7 @@ const SearchPage = () => {
                 justifyContent: "center",
               }}
             >
-              Search for any clothing
+              What are we looking for today?
             </Typography>
             <UserDescriptionInput
               onSearchStart={handleSearchStart}
@@ -90,7 +93,13 @@ const SearchPage = () => {
           </Box>
 
           {isLoading && (
-            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                my: 4,
+              }}
+            >
               <CircularProgress />
             </Box>
           )}
@@ -98,7 +107,6 @@ const SearchPage = () => {
           {!isLoading && searchResults.length > 0 && (
             <SearchResults results={searchResults} />
           )}
-          <Footer />
         </Box>
       </Container>
       <Snackbar
@@ -114,6 +122,7 @@ const SearchPage = () => {
           {error}
         </Alert>
       </Snackbar>
+      <Footer />
     </ThemeProvider>
   );
 };

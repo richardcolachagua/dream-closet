@@ -35,7 +35,7 @@ function UserDescriptionInput() {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row",
         alignItems: "center",
         "& > :not(style)": { m: 1 },
       }}
