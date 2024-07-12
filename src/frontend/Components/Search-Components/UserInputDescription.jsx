@@ -12,6 +12,7 @@ function UserDescriptionInput({
   onSearchStart,
   onSearchResults,
   onSearchError,
+  onSaveSearch,
 }) {
   const [description, setDescription] = useState("");
   const [recentSearches, setRecentSearches] = useState([]);
@@ -20,9 +21,9 @@ function UserDescriptionInput({
 
   useEffect(() => {
     //Load recent searches from localstorage or api
-    const loadSearches =
+    const loadedSearches =
       JSON.parse(localStorage.getItem("recentSearches")) || [];
-    setRecentSearches(loadSearches);
+    setRecentSearches(loadedSearches);
   }, []);
 
   const handleInputChange = (event) => {
@@ -55,6 +56,10 @@ function UserDescriptionInput({
       console.error("Error submitting description:", error);
       onSearchError("Error submitting description");
     }
+  };
+
+  const handleSaveSearch = () => {
+    onSaveSearch(description);
   };
 
   const handleRecentSearchClick = (search) => {
@@ -99,6 +104,14 @@ function UserDescriptionInput({
         }}
       >
         Search
+      </Button>
+      <Button
+        variant="outlined"
+        color="secondary"
+        onClick={handleSaveSearch}
+        sx={{ ml: 2 }}
+      >
+        Save Search
       </Button>
       {showRecentSearches && recentSearches.length > 0 && (
         <List

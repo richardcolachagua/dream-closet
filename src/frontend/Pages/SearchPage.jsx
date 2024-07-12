@@ -3,6 +3,7 @@ import UserDescriptionInput from "../Components/Search-Components/UserInputDescr
 import SearchResults from "../Components/Search-Components/SearchResults";
 import Footer from "../Components/Footer";
 import SearchPageHeader from "../Components/Headers/SearchPageHeader";
+import Searches from "../Components/Search-Components/SavedSearches";
 import {
   Box,
   Typography,
@@ -19,6 +20,7 @@ const SearchPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [savedSearches, setSavedSearches] = useState([]);
 
   const handleSearchResults = (results) => {
     setSearchResults(results);
@@ -33,6 +35,15 @@ const SearchPage = () => {
   const handleSearchError = (ErrorMessage) => {
     setError(ErrorMessage);
     setIsLoading(false);
+  };
+
+  const handleSaveSearch = (search) => {
+    setSavedSearches([...savedSearches, search]);
+  };
+
+  const handleDeleteSearch = (index) => {
+    const updatedSearches = savedSearches.filter((_, i) => i !== index);
+    setSavedSearches(updatedSearches);
   };
 
   return (
@@ -86,6 +97,7 @@ const SearchPage = () => {
               onSearchStart={handleSearchStart}
               onSearchResults={handleSearchResults}
               onSearchError={handleSearchError}
+              onSaveSearch={handleSaveSearch}
             />
           </Box>
 
@@ -104,6 +116,10 @@ const SearchPage = () => {
           {!isLoading && searchResults.length > 0 && (
             <SearchResults results={searchResults} />
           )}
+          <Searches
+            savedSearches={savedSearches}
+            onDeleteSearch={handleDeleteSearch}
+          />
         </Box>
       </Container>
       <Snackbar

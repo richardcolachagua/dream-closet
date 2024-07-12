@@ -15,31 +15,31 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-const Searches = () => {
+const Searches = ({ savedSearches, onDeleteSearch }) => {
   const defaultTheme = createTheme();
 
-  const [savedSearches, setSavedSearches] = useState([]);
+  //const [savedSearches, setSavedSearches] = useState([]);
   const [savedItems, setSavedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     //Fetch saved searches and items from your backend
-    fetchSavedSearches();
+    // fetchSavedSearches();
     fetchSavedItems();
   }, []);
 
-  const fetchSavedSearches = async () => {
-    // Implement API call to fetch saved searches
-    try {
-      setIsLoading(true);
-      const response = await axios.get("/api/saved-searches");
-      setSavedSearches(response.data);
-    } catch (error) {
-      console.error("Error fetching saved searches", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const fetchSavedSearches = async () => {
+  //   // Implement API call to fetch saved searches
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await axios.get("/api/saved-searches");
+  //     setSavedSearches(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching saved searches", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const fetchSavedItems = async () => {
     // Implement API call to fetch saved items
@@ -54,18 +54,18 @@ const Searches = () => {
       setIsLoading(false);
     }
   };
+  // const handleDeleteSearch = async (searchId) => {
+  //   // Implement delete functionality
+  //   try {
+  //     await axios.delete(`/api/saved-searches/${searchId}`);
+  //     setSavedSearches(
+  //       savedSearches.filter((search) => search.id !== searchId)
+  //     );
+  //   } catch (error) {
+  //     console.error("Error deleting search", error);
+  //   }
+  // };
 
-  const handleDeleteSearch = async (searchId) => {
-    // Implement delete functionality
-    try {
-      await axios.delete(`/api/saved-searches/${searchId}`);
-      setSavedSearches(
-        savedSearches.filter((search) => search.id !== searchId)
-      );
-    } catch (error) {
-      console.error("Error deleting search", error);
-    }
-  };
   const handleDeleteItem = async (itemId) => {
     // Implement delete functionality
     try {
@@ -161,9 +161,7 @@ const Searches = () => {
                           <Typography variant="body2">
                             Date: {new Date(search.date).toLocaleDateString()}{" "}
                           </Typography>
-                          <IconButton
-                            onClick={() => handleDeleteSearch(search.id)}
-                          >
+                          <IconButton onClick={() => onDeleteSearch(search.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </CardContent>
