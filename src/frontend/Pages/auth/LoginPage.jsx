@@ -13,7 +13,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import axios from "axios";
-import Header from "../Components/Header";
+import Header from "../../Components/Header";
 import { Link } from "react-router-dom";
 
 const validationSchema = Yup.object().shape({
