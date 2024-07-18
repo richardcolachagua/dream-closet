@@ -1,5 +1,8 @@
 const AWS = require("aws-sdk");
+const bcrypt = require("bcrypt");
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+
+const SALT_ROUNDS = 10;
 
 const authController = {
   login: async (req, res) => {
@@ -12,9 +15,10 @@ const authController = {
       });
     }
   },
+
   signup: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { firstName, lastName, email, password } = req.body;
 
       // Check if the email already exists in the database
       const existingUser = await dynamoDB
@@ -28,8 +32,23 @@ const authController = {
         return res.status(400).json({ error: "Email address already exists" });
       }
 
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
       // If email doesn't exist, proceed with user registration
-      // (hash password, store user data in the database, etc.)
+
+      const newUser = {
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+      };
+
+      await dynamoDB
+        .put({
+          TableName: "users",
+          Item: newUser,
+        })
+        .promise();
 
       res.status(201).json({ message: "User registerd successfully" });
     } catch (error) {

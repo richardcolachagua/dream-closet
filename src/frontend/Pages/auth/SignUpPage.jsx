@@ -49,10 +49,10 @@ const SignUpPage = () => {
       try {
         const response = await axios.post("/api/signup", values);
         console.log("User registered successfully:", response.data);
-        navigate("");
+        navigate("/searchpage");
       } catch (error) {
         if (
-          error.repsonse &&
+          error.response &&
           error.response.data &&
           error.response.data.error === "Email address already exists"
         ) {
@@ -93,8 +93,8 @@ const SignUpPage = () => {
             <CssBaseline />
             <Box
               sx={{
-                marginTop: 6,
-                marginBottom: 5,
+                marginTop: 4,
+                marginBottom: 4,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -111,7 +111,11 @@ const SignUpPage = () => {
                 Sign Up
               </Typography>
               {/* Signup form */}
-              <form onSubmit={formik.handleSubmit}>
+              <Box
+                component="form"
+                onSubmit={formik.handleSubmit}
+                sx={{ mt: 3 }}
+              >
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <TextField
@@ -192,10 +196,9 @@ const SignUpPage = () => {
                       required
                       fullWidth
                       id="confirmPassword"
-                      name="Confirm Password"
+                      name="confirmPassword"
                       label="Confirm Password"
                       type="password"
-                      autoComplete="new-password"
                       value={formik.values.confirmPassword}
                       onChange={formik.handleChange}
                       error={
@@ -215,17 +218,16 @@ const SignUpPage = () => {
                   fullWidth
                   variant="contained"
                   sx={{ mt: 3, mb: 2 }}
-                  onClick={formik.handleSubmit}
                 >
                   Sign Up
                 </Button>
                 {/* Error message display */}
                 {error && (
-                  <Typography variant="body2" color="error">
+                  <Typography color="error" align="center">
                     {error}
                   </Typography>
                 )}
-              </form>
+              </Box>
               {/* Link to login page */}
               <Grid container justifyContent="flex-end">
                 <Grid item>
