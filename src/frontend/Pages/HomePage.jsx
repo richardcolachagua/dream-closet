@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Typography, Stack, Box, CssBaseline } from "@mui/material";
-import Header from "../Components/Header";
+import Header from "../Components/Headers/Header.jsx";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
 import LayoutContainer from "../Components/Shared-Layout-Animation/LayoutContainer.jsx";

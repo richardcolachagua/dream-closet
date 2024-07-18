@@ -1,6 +1,6 @@
 import React from "react";
 import { Typography, Box } from "@mui/material";
-import Header from "../Components/Header";
+import Header from "../Components/Headers/Header";
 import Footer from "../Components/Footer";
 
 const PrivacyPolicyPage = () => {

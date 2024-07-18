@@ -10,6 +10,9 @@ import {
 import SaveForLaterButton from "./SaveForLaterButton";
 
 const SearchResults = ({ results, onSaveItem }) => {
+  if (!results || results.length === 0) {
+    return <Typography>No results found</Typography>;
+  }
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
       {results.map((product, index) => (
