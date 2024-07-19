@@ -47,7 +47,10 @@ const SignUpPage = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("/api/signup", values);
+        const response = await axios.post(
+          "https://dwyiq3xx4h.execute-api.us-east-1.amazonaws.com/signup",
+          values
+        );
         console.log("User registered successfully:", response.data);
         navigate("/searchpage");
       } catch (error) {
