@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { intitalTabs as tabs } from "./features.ts";
 import { motion, AnimatePresence } from "framer-motion";
 import "./styles.css";
-import styles from './Layout.module.css';
-
+import styles from "./Layout.module.css";
 
 export default function Layout() {
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
@@ -12,16 +11,16 @@ export default function Layout() {
     <div className="window">
       <nav>
         <ul>
-      {/* Map over the tabs and render a list item for each */}
+          {/* Map over the tabs and render a list item for each */}
           {tabs.map((item) => (
             <li
               key={item.label}
               className={item === selectedTab ? "selected" : ""}
               onClick={() => setSelectedTab(item)}
             >
-          {/* Display the icon and label for each tab */}
+              {/* Display the icon and label for each tab */}
               {`${item.icon} ${item.label}`}
-          {/* If the tab is selected, render an underline */}
+              {/* If the tab is selected, render an underline */}
               {item === selectedTab ? (
                 <motion.div className="underline" layoutId="underline" />
               ) : null}
@@ -31,7 +30,7 @@ export default function Layout() {
       </nav>
       <main>
         <AnimatePresence mode="wait">
-       {/* Render the selected tab's content */}
+          {/* Render the selected tab's content */}
           <motion.div
             key={selectedTab ? selectedTab.label : "empty"}
             initial={{ y: 10, opacity: 0 }}
@@ -39,17 +38,22 @@ export default function Layout() {
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {selectedTab ? ( <>
-
-            {selectedTab.description && ( 
-            <p className="text text-large text-margin text-center text-bold">
-              {selectedTab.description}
-            </p>
-            )}              
-            {/* <img src={selectedTab.imagePath} alt={selectedTab.label} className={styles.image} /> */}
-            </> 
+            {selectedTab ? (
+              <>
+                {selectedTab.description && (
+                  <p className="text text-large text-margin text-center text-bold">
+                    {selectedTab.description}
+                  </p>
+                )}
+                <img
+                  src={selectedTab.imagePath}
+                  alt={selectedTab.label}
+                  className={styles.image}
+                />
+              </>
             ) : (
-            "😋")}
+              "😋"
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
