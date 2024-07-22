@@ -14,7 +14,9 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import axios from "axios";
 import Header from "../../Components/Headers/Header";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+const defaultTheme = createTheme();
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -24,9 +26,38 @@ const validationSchema = Yup.object().shape({
 });
 
 const LoginPage = ({ history }) => {
-  const defaultTheme = createTheme();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/auth/login`,
+        values
+      );
+      if (response.data.sucess) {
+        localStorage.setItem("authToken", response.data.token);
+
+        localStorage.setItem("token", response.data.token);
+
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        navigate("/searchpage");
+      } else {
+        setError(response.data.error || "Authentication failed");
+      }
+    } catch (error) {
+      console.error("Login failed", error);
+      setError(
+        error.response?.data?.message ||
+          "An error occurred. Please try again later"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -34,29 +65,7 @@ const LoginPage = ({ history }) => {
       password: "",
     },
     validationSchema,
-    onSubmit: async (values) => {
-      try {
-        setLoading(true);
-        const response = await axios.post("/api/login", values);
-
-        // Handle response from backend
-        if (response.data.success) {
-          // Authentication successful
-          setError("");
-          console.log("Login Successful");
-          // Redirect use to home page
-          history.push("/homepage");
-        } else {
-          //authentication failed
-          setLoading(false);
-          setError(response.data.error);
-        }
-      } catch (error) {
-        setLoading(false);
-        console.error("Login failed", error);
-        setError("An error occurred. Please try again later.");
-      }
-    },
+    onSubmit: handleSubmit,
   });
 
   return (
