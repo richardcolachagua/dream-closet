@@ -25,47 +25,48 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required("Password is required"),
 });
 
-const LoginPage = ({ history }) => {
+const LoginPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("");
   const navigate = useNavigate();
-
-  const handleSubmit = async (values) => {
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        `${process.env.REACT_APP_URL}/auth/login`,
-        values
-      );
-      if (response.data.sucess) {
-        localStorage.setItem("authToken", response.data.token);
-
-        localStorage.setItem("token", response.data.token);
-
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-
-        navigate("/searchpage");
-      } else {
-        setError(response.data.error || "Authentication failed");
-      }
-    } catch (error) {
-      console.error("Login failed", error);
-      setError(
-        error.response?.data?.message ||
-          "An error occurred. Please try again later"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
+
     validationSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (values) => {
+      try {
+        setLoading(true);
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_URL}/auth/login`,
+          values
+        );
+
+        if (response.data.success) {
+          // Store the token in localStorage or a more secure storage method
+          localStorage.setItem("token", response.data.token);
+
+          //Store user info if needed
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+
+          //Redirect user to search page
+          navigate("/searchpage");
+        } else {
+          setError("Login failed. Please check your credentials.");
+        }
+      } catch (error) {
+        console.error("Login Failed", error);
+        setError(
+          error.response?.data?.error ||
+            "An error occurred. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
   });
 
   return (
