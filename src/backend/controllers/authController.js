@@ -1,7 +1,6 @@
 const AWS = require("aws-sdk");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -53,6 +52,25 @@ const authController = {
       res.status(500).json({
         success: false,
         error: "An error occured. Please try again later",
+      });
+    }
+  },
+
+  protectedRoute: async (req, res) => {
+    try {
+      const token = req.headers.authorization.split("")[1]; //Extract token from header
+
+      const decoded = jwt.verify(token, JWT_SECRET); // verify token
+
+      res.json({
+        success: true,
+        message: "You have access to this protected route!",
+      });
+    } catch (error) {
+      console.error("Access denied", error);
+      res.status(401).json({
+        success: false,
+        error: "Unathorized access",
       });
     }
   },

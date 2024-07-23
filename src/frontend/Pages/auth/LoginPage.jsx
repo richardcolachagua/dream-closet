@@ -35,15 +35,15 @@ const LoginPage = () => {
       email: "",
       password: "",
     },
-
     validationSchema,
+
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/auth/login`,
-          values
-        );
+        const API_URL =
+          "https://kqmyydwgwa.execute-api.us-east-1.amazonaws.com/login";
+
+        const response = await axios.post(`${API_URL}/auth/login`, values);
 
         if (response.data.success) {
           // Store the token in localStorage or a more secure storage method
