@@ -119,10 +119,9 @@ function UserDescriptionInput({
           Search
         </Button>
         <Button
-          variant="outlined"
+          variant="contained"
           color="secondary"
           onClick={handleSaveSearch}
-          sx={{ ml: 2 }}
         >
           Save Search
         </Button>

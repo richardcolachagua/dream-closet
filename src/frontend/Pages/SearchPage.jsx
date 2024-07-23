@@ -47,19 +47,21 @@ const SearchPage = () => {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <SearchPageHeader />
-      <CssBaseline />
-      <Container maxWidth="lg">
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            transition: "background-color 0.3s ease",
-            minHeight: "100vh",
-            backgroundColor: "black",
-          }}
-        >
+    <>
+      <Box
+        sx={{
+          transition: "background-color 0.3s ease",
+          minHeight: "100vh",
+          backgroundColor: "black",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {" "}
+        <ThemeProvider theme={defaultTheme}>
+          <SearchPageHeader />
+          <CssBaseline />
           <Box
             sx={{
               padding: "50px",
@@ -100,7 +102,6 @@ const SearchPage = () => {
               onSaveSearch={handleSaveSearch}
             />
           </Box>
-
           {isLoading && (
             <Box
               sx={{
@@ -112,31 +113,30 @@ const SearchPage = () => {
               <CircularProgress />
             </Box>
           )}
-
           {!isLoading && searchResults.length > 0 && (
             <SearchResults results={searchResults} />
           )}
           <Searches
             savedSearches={savedSearches}
             onDeleteSearch={handleDeleteSearch}
-          />
-        </Box>
-      </Container>
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-      >
-        <Alert
+          />{" "}
+        </ThemeProvider>
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
           onClose={() => setError(null)}
-          severity="error"
-          sx={{ width: "100%" }}
         >
-          {error}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={() => setError(null)}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {error}
+          </Alert>
+        </Snackbar>{" "}
+      </Box>
       <Footer />
-    </ThemeProvider>
+    </>
   );
 };
 

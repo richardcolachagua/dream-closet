@@ -106,7 +106,13 @@ const Searches = ({ savedSearches, onDeleteSearch }) => {
           <CssBaseline />
           <Typography
             variant="h4"
-            sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+            sx={{
+              mb: 3,
+              fontWeight: "bold",
+              color: "white",
+              justifyContent: "center",
+              display: "flex",
+            }}
           >
             Your Saved Searches
           </Typography>
@@ -114,7 +120,13 @@ const Searches = ({ savedSearches, onDeleteSearch }) => {
             <Box mb={4}>
               <Typography
                 variant="h5"
-                sx={{ mb: 3, fontWeight: "bold", color: "white" }}
+                sx={{
+                  mb: 3,
+                  fontWeight: "bold",
+                  color: "white",
+                  justifyContent: "center",
+                  display: "flex",
+                }}
               >
                 Saved Items
               </Typography>
@@ -137,7 +149,16 @@ const Searches = ({ savedSearches, onDeleteSearch }) => {
                   ))
                 ) : (
                   <Grid item xs={12}>
-                    <Typography variant="body1" color="white">
+                    <Typography
+                      variant="body1"
+                      color="white"
+                      sx={{
+                        mb: 3,
+                        color: "white",
+                        justifyContent: "center",
+                        display: "flex",
+                      }}
+                    >
                       No saved items found.
                     </Typography>
                   </Grid>
