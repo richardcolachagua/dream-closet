@@ -6,7 +6,7 @@ const pages = ["Dream Closet"];
 
 function ProfileHeader() {
   return (
-    <AppBar position="static" sx={{ backgroundColor: "red" }}>
+    <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Toolbar
         sx={{
           width: "100%",

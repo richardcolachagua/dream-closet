@@ -69,7 +69,7 @@ const HomePage = () => {
                 color: "turquoise",
                 fontFamily: "Times New Roman",
                 padding: { xs: "10px", md: "30px" },
-                fontSize: { xs: "20px", sm: "30px", md: "40px", lg: "50px" },
+                fontSize: { xs: "15px", sm: "25px", md: "35px", lg: "45px" },
               }}
             >
               Dream Closet is a clothing search engine that allows you to search
@@ -98,9 +98,9 @@ const HomePage = () => {
               color: "white",
               fontWeight: "bold",
               fontSize: {
-                xs: "2rem",
-                sm: "3rem",
-                md: "4rem",
+                xs: "1rem",
+                sm: "2rem",
+                md: "3rem",
               },
               padding: {
                 xs: "30px 15px",
@@ -113,25 +113,24 @@ const HomePage = () => {
             Example: "A red-orange colored strapless dress for a wedding with a
             slit on the left side"
           </Typography>
-          <Container sx={{ padding: "20px" }}>
+          <Container sx={{ padding: "5px" }}>
             <AnimatedSearchBar />
           </Container>
-          <Container sx={{ padding: "50px" }}>
+          <Container>
             <LayoutContainer />
           </Container>
         </Container>
         <Typography
           variant="h3"
           align="center"
-          paddingBottom="100px"
           sx={{
             fontFamily: "Times New Roman",
             color: "white",
             fontWeight: "bold",
             fontSize: {
-              xs: "2rem",
-              sm: "3rem",
-              md: "4rem",
+              xs: "1rem",
+              sm: "2rem",
+              md: "3rem",
             },
             padding: {
               xs: "30px 15px",

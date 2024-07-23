@@ -14,7 +14,7 @@ const Footer = () => {
           padding: "20px",
         }}
       >
-        <Link to="/TOS">
+        <Link to="/TOSPage">
           <Typography
             variant="h6"
             color="white"
@@ -40,7 +40,7 @@ const Footer = () => {
             Contact Us
           </Typography>
         </Link>
-        <Link to="/Privacy Policy">
+        <Link to="/privacypolicypage">
           <Typography
             variant="h6"
             color="white"

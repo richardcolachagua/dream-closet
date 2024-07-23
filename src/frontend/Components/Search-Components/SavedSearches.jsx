@@ -116,8 +116,8 @@ const Searches = ({ savedSearches, onDeleteSearch }) => {
           >
             Your Saved Searches
           </Typography>
-          <Stack fullWidth direction="row" spacing={50}>
-            <Box mb={4}>
+          <Stack fullWidth direction="row" spacing={70} p={4}>
+            <Box>
               <Typography
                 variant="h5"
                 sx={{
