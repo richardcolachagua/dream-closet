@@ -53,7 +53,7 @@ const HomePage = () => {
               fontSize: { xs: "10px", sm: "20px", md: "30px", lg: "40px" },
             }}
           >
-            The Ultimate Fashion Search Engine, The New Way To Shop
+            The New Way To Search For Your Next Outfit
           </Typography>
           <Stack
             direction={{ xs: "column", md: "row" }}
