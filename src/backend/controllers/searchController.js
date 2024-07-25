@@ -47,3 +47,63 @@ exports.search = async (req, res) => {
     res.status(500).json({ error: "An error occurred during search" });
   }
 };
+
+exports.saveItem = async (req, res) => {
+  try {
+    const { item } = req.body;
+    await dynamoDB
+      .put({
+        TableName: "SavedItems",
+        Item: { ...item, id: Date.now().toString() },
+      })
+      .promise();
+    res.status(201).json({ message: "Item saved succssfully" });
+  } catch (error) {
+    console.error("Save item error", error);
+    res.status(500).json({ error: "An error occurred while saving the item" });
+  }
+};
+
+exports.deleteItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await dynamoDB
+      .delete({
+        TableName: "SavedItems",
+        Key: { id },
+      })
+      .promise();
+    res.json({ message: "Item deleted successfully" });
+  } catch (error) {
+    console.error("Delete item error:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting the item" });
+  }
+};
+
+exports.getSavedSearches = async (req, res) => {
+  try {
+    const result = await dynamoDB
+      .scan({ TableName: "SavedSearches" })
+      .promise();
+    res.json(result.Items);
+  } catch (error) {
+    console.error("Get saved searches error", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching saved searches" });
+  }
+};
+
+exports.getSavedItems = async (req, res) => {
+  try {
+    const result = await dynamoDB.scan({ TableName: "SavedItems" }).promise();
+    res.json(result.Items);
+  } catch (error) {
+    console.error("Get saved items error:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching saved items" });
+  }
+};
