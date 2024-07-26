@@ -9,6 +9,7 @@ import {
   ClickAwayListener,
 } from "@mui/material";
 import SaveSearchButton from "./SaveSearchButton";
+import axios from "axios";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -39,16 +40,10 @@ function UserDescriptionInput({
     }
     onSearchStart();
     try {
-      // Replace '/api/submit-description' with your actual API endpoint
-      const response = await fetch("/api/submit-description", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ description }),
-      });
-      const data = await response.json();
-      onSearchResults(data);
+      const response = await axios.get(
+        `/api/search?query=${encodeURIComponent(description)}`
+      );
+      onSearchResults(response.data);
 
       //Add to recent searches
       const updatedSearches = [description, ...recentSearches.slice(0, 4)];
@@ -118,13 +113,7 @@ function UserDescriptionInput({
         >
           Search
         </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleSaveSearch}
-        >
-          Save Search
-        </Button>
+
         <SaveSearchButton
           onSave={handleSaveSearch}
           disabled={!description.trim()}

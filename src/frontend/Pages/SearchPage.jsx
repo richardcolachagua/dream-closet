@@ -13,6 +13,7 @@ import {
   Alert,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import axios from "axios";
 
 const SearchPage = () => {
   const defaultTheme = createTheme();
@@ -36,13 +37,27 @@ const SearchPage = () => {
     setIsLoading(false);
   };
 
-  const handleSaveSearch = (search) => {
-    setSavedSearches([...savedSearches, search]);
+  const handleSaveSearch = async (search) => {
+    try {
+      await axios.post("/api/save-search", { query: search });
+      setSavedSearches([
+        ...savedSearches,
+        { id: Date.now().toString(), query: search },
+      ]);
+    } catch (error) {
+      console.error("Error saving search:", error);
+      setError("Error saving search");
+    }
   };
 
-  const handleDeleteSearch = (index) => {
-    const updatedSearches = savedSearches.filter((_, i) => i !== index);
-    setSavedSearches(updatedSearches);
+  const handleDeleteSearch = async (id) => {
+    try {
+      await axios.delete(`/api/delete-search/${id}`);
+      setSavedSearches(savedSearches.filter((search) => search.id === id));
+    } catch (error) {
+      console.error("Error deleting search:", error);
+      setError("Error deleting search");
+    }
   };
 
   return (
@@ -57,27 +72,9 @@ const SearchPage = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        {" "}
         <ThemeProvider theme={defaultTheme}>
           <SearchPageHeader />
           <CssBaseline />
-          <Box
-            sx={{
-              padding: "50px",
-            }}
-          >
-            <Typography
-              variant="h5"
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              Personalized Recommendations
-            </Typography>
-          </Box>
           <Box
             sx={{
               padding: "50px",
@@ -132,7 +129,7 @@ const SearchPage = () => {
           >
             {error}
           </Alert>
-        </Snackbar>{" "}
+        </Snackbar>
       </Box>
       <Footer />
     </>
