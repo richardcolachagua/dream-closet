@@ -10,12 +10,8 @@ function SaveSearchButton({ onSave, disabled }) {
   return (
     <Tooltip title="save this search">
       <span>
-        <IconButton
-          onClick={handleSaveSearch}
-          sx={{ color: "secondary.main" }}
-          disabled={disabled}
-        >
-          <BookmarkAddIcon />
+        <IconButton onClick={handleSaveSearch} disabled={disabled}>
+          <BookmarkAddIcon sx={{ color: "red" }} />
         </IconButton>
       </span>
     </Tooltip>

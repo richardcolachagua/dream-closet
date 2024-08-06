@@ -15,8 +15,8 @@ const SearchResults = ({ results, onSaveItem }) => {
   }
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-      {results.map((product, index) => (
-        <Card key={index} sx={{ maxWidth: 345, m: 2 }}>
+      {results.map((product) => (
+        <Card key={product.id} sx={{ maxWidth: 345, m: 2 }}>
           <CardMedia
             component="img"
             height="140"

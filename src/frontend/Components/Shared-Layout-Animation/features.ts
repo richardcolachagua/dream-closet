@@ -6,14 +6,14 @@ import { Feature } from "./types"
       label: "AI-driven clothing search",
       description:
         "Our AI-powered search engine revolutionizes the way you shop online by accurately interpreting your descriptions & fetching matching items from an extensive selection of retailers.",
-        imagePath: "/assets/black_technology_gradient.jpg"
+        imagePath: "/assets/1-AI-Driven-Clothing-Search_v.jpg"
     },
     {
       icon: "🛍️",
       label: "Multi-store integration",
       description:
         "With seamless integration across multiple online stores, our platform ensures you have access to a diverse range of fashion items, empowering you to find the perfect pieces to suit your style preferences.",
-        imagePath: "/assets/cybersecurity_gradient.jpg"
+        imagePath: "/assets/2-Multi-Store-Integration_v.jpg"
 
     },
     {
@@ -21,8 +21,7 @@ import { Feature } from "./types"
       label: "Personalized recommendations",
       description:
         "Receive personalized clothing recommendations tailored to your unique taste and browsing habits, ensuring you discover new styles that resonate with your individual fashion sense.",
-        imagePath: "/assets/black_technology_gradient2.jpg"
-
+        imagePath: "/assets/3-Personalized-Recommendations.jpg"
     },
   ];
   

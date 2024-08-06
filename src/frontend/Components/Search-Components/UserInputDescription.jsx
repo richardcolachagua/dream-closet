@@ -98,6 +98,9 @@ function UserDescriptionInput({
             border: "10px",
             borderBottom: "2px solid #ccc",
             borderRadius: "10px",
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
           }}
         />
         <Button
