@@ -15,7 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-const Searches = ({ savedSearches, onDeleteSearch }) => {
+const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
   const defaultTheme = createTheme();
 
   //const [savedSearches, setSavedSearches] = useState([]);
@@ -116,7 +116,7 @@ const Searches = ({ savedSearches, onDeleteSearch }) => {
           >
             Your Saved Searches
           </Typography>
-          <Stack fullWidth direction="row" spacing={70} p={4}>
+          <Stack fullWidth direction="row">
             <Box>
               <Typography
                 variant="h5"
@@ -205,4 +205,4 @@ const Searches = ({ savedSearches, onDeleteSearch }) => {
   );
 };
 
-export default Searches;
+export default SavedSearches;

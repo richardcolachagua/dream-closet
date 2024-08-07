@@ -3,7 +3,7 @@ import UserDescriptionInput from "../Components/Search-Components/UserInputDescr
 import SearchResults from "../Components/Search-Components/SearchResults";
 import Footer from "../Components/Footer";
 import SearchPageHeader from "../Components/Headers/SearchPageHeader";
-import Searches from "../Components/Search-Components/SavedSearches";
+import SavedSearches from "../Components/Search-Components/SavedSearches";
 import {
   Box,
   Typography,
@@ -11,6 +11,7 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Container,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
@@ -61,78 +62,81 @@ const SearchPage = () => {
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          transition: "background-color 0.3s ease",
-          minHeight: "100vh",
-          backgroundColor: "black",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <ThemeProvider theme={defaultTheme}>
-          <SearchPageHeader />
-          <CssBaseline />
-          <Box
+    <Box
+      sx={{
+        transition: "background-color 0.3s ease",
+        minHeight: "100vh",
+        backgroundColor: "black",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <ThemeProvider theme={defaultTheme}>
+        <SearchPageHeader />
+        <CssBaseline />
+        <Container
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            padding: "30px",
+          }}
+        >
+          <Typography
+            variant="h5"
             sx={{
-              padding: "50px",
+              color: "white",
+              fontWeight: "bold",
+              display: "flex",
+              justifyContent: "center",
             }}
           >
-            <Typography
-              variant="h5"
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              What are we looking for today?
-            </Typography>
+            What are we looking for today?
+          </Typography>
+          <Box sx={{ marginTop: 2, padding: "10px" }}>
             <UserDescriptionInput
               onSearchStart={handleSearchStart}
               onSearchResults={handleSearchResults}
               onSearchError={handleSearchError}
               onSaveSearch={handleSaveSearch}
             />
-          </Box>
-          {isLoading && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                my: 4,
-              }}
+            {isLoading && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  my: 4,
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            )}
+            {!isLoading && searchResults.length > 0 && (
+              <SearchResults results={searchResults} />
+            )}
+            <SavedSearches
+              savedSearches={savedSearches}
+              onDeleteSearch={handleDeleteSearch}
+            />
+            <Snackbar
+              open={!!error}
+              autoHideDuration={6000}
+              onClose={() => setError(null)}
             >
-              <CircularProgress />
-            </Box>
-          )}
-          {!isLoading && searchResults.length > 0 && (
-            <SearchResults results={searchResults} />
-          )}
-          <Searches
-            savedSearches={savedSearches}
-            onDeleteSearch={handleDeleteSearch}
-          />{" "}
-        </ThemeProvider>
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={() => setError(null)}
-        >
-          <Alert
-            onClose={() => setError(null)}
-            severity="error"
-            sx={{ width: "100%" }}
-          >
-            {error}
-          </Alert>
-        </Snackbar>
-      </Box>
-      <Footer />
-    </>
+              <Alert
+                onClose={() => setError(null)}
+                severity="error"
+                sx={{ width: "100%" }}
+              >
+                {error}
+              </Alert>
+            </Snackbar>
+          </Box>
+        </Container>
+        <Footer />
+      </ThemeProvider>
+    </Box>
   );
 };
 
