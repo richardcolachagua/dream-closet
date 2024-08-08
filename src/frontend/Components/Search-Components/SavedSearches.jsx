@@ -18,32 +18,14 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
   const defaultTheme = createTheme();
 
-  //const [savedSearches, setSavedSearches] = useState([]);
   const [savedItems, setSavedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    //Fetch saved searches and items from your backend
-    // fetchSavedSearches();
     fetchSavedItems();
   }, []);
 
-  // const fetchSavedSearches = async () => {
-  //   // Implement API call to fetch saved searches
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await axios.get("/api/saved-searches");
-  //     setSavedSearches(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching saved searches", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const fetchSavedItems = async () => {
-    // Implement API call to fetch saved items
-
     try {
       setIsLoading(true);
       const response = await axios.get("/api/saved-items");
@@ -54,17 +36,6 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
       setIsLoading(false);
     }
   };
-  // const handleDeleteSearch = async (searchId) => {
-  //   // Implement delete functionality
-  //   try {
-  //     await axios.delete(`/api/saved-searches/${searchId}`);
-  //     setSavedSearches(
-  //       savedSearches.filter((search) => search.id !== searchId)
-  //     );
-  //   } catch (error) {
-  //     console.error("Error deleting search", error);
-  //   }
-  // };
 
   const handleDeleteItem = async (itemId) => {
     // Implement delete functionality
@@ -100,6 +71,7 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           minHeight: "100vh",
+          paddingTop: "30px",
         }}
       >
         <ThemeProvider theme={defaultTheme}>
@@ -116,8 +88,12 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
           >
             Your Saved Searches
           </Typography>
-          <Stack fullWidth direction="row">
-            <Box>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            sx={{ width: "100%" }}
+          >
+            <Box sx={{ width: "40%" }}>
               <Typography
                 variant="h5"
                 sx={{
@@ -165,7 +141,7 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
                 )}
               </Grid>
             </Box>
-            <Box>
+            <Box sx={{ width: "40%" }}>
               <Typography
                 variant="h5"
                 sx={{ mb: 3, fontWeight: "bold", color: "white" }}

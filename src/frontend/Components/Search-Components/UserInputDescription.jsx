@@ -80,6 +80,7 @@ function UserDescriptionInput({
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
+          justifyContent: "center",
           "& > :not(style)": { m: 1 },
         }}
       >
