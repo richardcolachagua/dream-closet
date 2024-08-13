@@ -17,10 +17,9 @@ import Header from "../../Components/Headers/Header";
 import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
-  const [error, setError] = useState(""); // State for managing error messages
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Form validation schema using Yup
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
@@ -35,7 +34,6 @@ const SignUpPage = () => {
       .required("Confirm Password is required"),
   });
 
-  // Formik for managing form state and submission
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -59,10 +57,8 @@ const SignUpPage = () => {
           error.response.data &&
           error.response.data.error === "Email address already exists"
         ) {
-          // Handle duplicate email error
           setError("Email address already exists");
         } else {
-          // Handle other errors
           setError("An error occurred. Please try again.");
         }
       }

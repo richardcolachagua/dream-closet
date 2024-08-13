@@ -1,123 +1,160 @@
+const { FirstPage } = require("@mui/icons-material");
+const { create } = require("@mui/material/styles/createTransitions");
 const AWS = require("aws-sdk");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-
+const JWT_SECRET = process.env.JWT_SECRET || "your=secret-key";
 const SALT_ROUNDS = 10;
 
-const authController = {
-  login: async (req, res) => {
-    try {
-      const { email, password } = req.body;
+// Helper function to create a response
 
-      const result = await dynamoDB
-        .get({
-          TableName: "users",
-          Key: { email },
-        })
-        .promise();
-
-      const user = result.Item;
-
-      if (!user) {
-        return res
-          .status(401)
-          .json({ success: false, error: "Invalid email or password" });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res
-          .status(401)
-          .json({ success: false, error: "Invalid email or password" });
-      }
-
-      const token = jwt.sign({ email: user.email }, JWT_SECRET, {
-        expiresIn: "1h",
-      });
-
-      res.json({
-        success: true,
-        token,
-        user: {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-        },
-      });
-    } catch (error) {
-      console.error("Login failed", error);
-      res.status(500).json({
-        success: false,
-        error: "An error occured. Please try again later",
-      });
-    }
-  },
-
-  protectedRoute: async (req, res) => {
-    try {
-      const token = req.headers.authorization.split("")[1]; //Extract token from header
-
-      const decoded = jwt.verify(token, JWT_SECRET); // verify token
-
-      res.json({
-        success: true,
-        message: "You have access to this protected route!",
-      });
-    } catch (error) {
-      console.error("Access denied", error);
-      res.status(401).json({
-        success: false,
-        error: "Unathorized access",
-      });
-    }
-  },
-
-  signup: async (req, res) => {
-    try {
-      const { firstName, lastName, email, password } = req.body;
-
-      // Check if the email already exists in the database
-      const existingUser = await dynamoDB
-        .get({
-          TableName: "users",
-          Key: { email },
-        })
-        .promise();
-
-      if (existingUser.Item) {
-        return res.status(400).json({ error: "Email address already exists" });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
-      // If email doesn't exist, proceed with user registration
-
-      const newUser = {
-        email,
-        firstName,
-        lastName,
-        password: hashedPassword,
-      };
-
-      await dynamoDB
-        .put({
-          TableName: "users",
-          Item: newUser,
-        })
-        .promise();
-
-      res.status(201).json({ message: "User registerd successfully" });
-    } catch (error) {
-      console.error("Signup failed", error);
-      res.status(500).json({
-        success: false,
-        error: "An error occured. Please try again later",
-      });
-    }
-  },
+const createResponse = (statusCode, body) => {
+  return {
+    statusCode: statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*", // Enable CORS for all origins
+      "Access-Control-Allow-Credentials": true,
+    },
+    body: JSON.stringify(body),
+  };
 };
 
-module.exports = authController;
+const login = async (event) => {
+  try {
+    const { email, password } = JSON.parse(event.body);
+
+    const result = await dynamoDB
+      .get({
+        TableName: "users",
+        key: { email },
+      })
+      .promise();
+
+    const user = result.Item;
+
+    if (!user) {
+      return createResponse(401, {
+        success: false,
+        error: "Invalid email or password",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return createResponse(401, {
+        success: false,
+        error: "Invalid email or password",
+      });
+    }
+
+    const token = jwt.sign({ email: user.email }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    return createResponse(200, {
+      success: true,
+      token,
+      user: {
+        email: user.email,
+        FirstName: user.FirstName,
+        lastName: user.lastName,
+      },
+    });
+  } catch (error) {
+    console.error("Login Failed", error);
+    return createResponse(500, {
+      success: false,
+      error: "An error occurred. Please try again later",
+    });
+  }
+};
+
+const protectedRoute = async (event) => {
+  try {
+    const token = event.headers.Authorization.split(" ")[1]; // Extract token from header
+
+    const decoded = jwt.verify(token, JWT_SECRET); // verify token
+
+    return createResponse(200, {
+      success: true,
+      message: "You have access to this protected route!",
+    });
+  } catch (error) {
+    console.error("Access denied", error);
+    return createResponse(401, {
+      success: false,
+      error: "Unauthorized access",
+    });
+  }
+};
+
+const signup = async (event) => {
+  try {
+    const { FirstName, lastName, email, password } = JSON.parse(event.body);
+
+    // Check if the email already exists in the database
+
+    const existingUser = await dynamoDB
+      .get({
+        TableName: "users",
+        key: { email },
+      })
+      .promise();
+
+    if (existingUser.Item) {
+      return createResponse(400, { error: "Email address already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    // if email does not exist, create user registration
+    const newUser = {
+      email,
+      FirstName,
+      lastName,
+      password: hashedPassword,
+    };
+    await dynamoDB
+      .put({
+        TableName: "users",
+        Item: newUser,
+      })
+      .promise();
+
+    return createResponse(201, { message: "User registered successfully" });
+  } catch (error) {
+    console.error("Signup failed", error);
+    return createResponse(500, {
+      success: false,
+      error: "An error occurred. Please try again later",
+    });
+  }
+};
+
+// Main handler function
+exports.handler = async (event) => {
+  console.log("Received event:", JSON.stringify(event, null, 2));
+
+  switch (event.path) {
+    case "/login":
+      if (event.httpMethod === "POST") {
+        return await login(event);
+      }
+      break;
+    case "/signup":
+      if (event.httpMethod === "POST") {
+        return await jwt.signup(event);
+      }
+      break;
+    case "/protected":
+      if (event.httpMethod === "GET") {
+        return await protectedRoute(event);
+      }
+      break;
+    default:
+      return createResponse(404, { error: "Not Found" });
+  }
+  return createResponse(405, { error: "Method Now Allowed" });
+};
