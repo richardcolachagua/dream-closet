@@ -1,5 +1,3 @@
-const { FirstPage } = require("@mui/icons-material");
-const { create } = require("@mui/material/styles/createTransitions");
 const AWS = require("aws-sdk");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -81,6 +79,7 @@ const protectedRoute = async (event) => {
     return createResponse(200, {
       success: true,
       message: "You have access to this protected route!",
+      user: decoded.email, // include the users email from the token
     });
   } catch (error) {
     console.error("Access denied", error);
@@ -145,7 +144,7 @@ exports.handler = async (event) => {
       break;
     case "/signup":
       if (event.httpMethod === "POST") {
-        return await jwt.signup(event);
+        return await signup(event);
       }
       break;
     case "/protected":
