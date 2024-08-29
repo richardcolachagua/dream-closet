@@ -47,7 +47,8 @@ const SignUpPage = () => {
       try {
         const response = await axios.post(
           "https://dwyiq3xx4h.execute-api.us-east-1.amazonaws.com/signup",
-          values
+          values,
+          { withCredentials: true }
         );
         console.log("User registered successfully:", response.data);
         navigate("/searchpage");
