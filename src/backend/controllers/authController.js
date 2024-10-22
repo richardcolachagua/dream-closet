@@ -13,7 +13,10 @@ const createResponse = (statusCode, body) => {
     statusCode: statusCode,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*", // Enable CORS for all origins
+      "Access-Control-Allow-Origin": "http://localhost:3000",
+      "Access-Control-Allow-Headers":
+        "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+      "Access-Control-Allow-Methods": "OPTIONS,POST",
       "Access-Control-Allow-Credentials": true,
     },
     body: JSON.stringify(body),
