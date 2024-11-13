@@ -113,36 +113,36 @@ const HomePage = () => {
             Example: "A red-orange colored strapless dress for a wedding with a
             slit on the left side"
           </Typography>
-          <Container sx={{ padding: "5px" }}>
+          <Container>
             <AnimatedSearchBar />
           </Container>
           <Container>
             <LayoutContainer />
           </Container>
+          <Typography
+            variant="h3"
+            align="center"
+            sx={{
+              fontFamily: "Times New Roman",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: {
+                xs: "1rem",
+                sm: "2rem",
+                md: "3rem",
+              },
+              padding: {
+                xs: "30px 15px",
+                sm: "40px 20px",
+                md: "50px 30px",
+                lg: "60px 40px",
+              },
+            }}
+          >
+            The more you use Dream Closet, the more it recognizes your taste in
+            clothing.
+          </Typography>
         </Container>
-        <Typography
-          variant="h3"
-          align="center"
-          sx={{
-            fontFamily: "Times New Roman",
-            color: "white",
-            fontWeight: "bold",
-            fontSize: {
-              xs: "1rem",
-              sm: "2rem",
-              md: "3rem",
-            },
-            padding: {
-              xs: "30px 15px",
-              sm: "40px 20px",
-              md: "50px 30px",
-              lg: "60px 40px",
-            },
-          }}
-        >
-          The more you use Dream Closet, the more it recognizes your taste in
-          clothing.
-        </Typography>
 
         <ProfileFeatures />
         <Footer />

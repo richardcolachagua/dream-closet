@@ -15,6 +15,7 @@ import { useFormik } from "formik";
 import axios from "axios";
 import Header from "../../Components/Headers/Header";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../Components/Footer";
 
 const SignUpPage = () => {
   const [error, setError] = useState("");
@@ -245,6 +246,7 @@ const SignUpPage = () => {
           </Container>
         </Grid>
       </ThemeProvider>
+      <Footer />
     </Box>
   );
 };

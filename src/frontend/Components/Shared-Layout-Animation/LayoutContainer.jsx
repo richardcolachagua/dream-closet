@@ -9,7 +9,7 @@ const LayoutContainer = () => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    height: "100vh",
+    height: "50vh",
   };
 
   return (

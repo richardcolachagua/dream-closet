@@ -15,6 +15,7 @@ import { useFormik } from "formik";
 import axios from "axios";
 import Header from "../../Components/Headers/Header";
 import { Link, useNavigate } from "react-router-dom";
+import Footer from "../../Components/Footer";
 
 const defaultTheme = createTheme();
 
@@ -181,6 +182,7 @@ const LoginPage = () => {
             </Box>
           </Container>
         </Grid>
+        <Footer />
       </ThemeProvider>
     </Box>
   );
