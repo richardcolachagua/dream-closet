@@ -14,7 +14,7 @@ const Footer = () => {
           padding: "20px",
         }}
       >
-        <Link to="/TOSPage">
+        <Link to="/TOSPage" style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             color="white"
@@ -27,7 +27,7 @@ const Footer = () => {
             Terms of Use
           </Typography>
         </Link>
-        <Link to="/ContactPage">
+        <Link to="/ContactPage" style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             color="white"
@@ -40,7 +40,7 @@ const Footer = () => {
             Contact Us
           </Typography>
         </Link>
-        <Link to="/privacypolicypage">
+        <Link to="/privacypolicypage" style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             color="white"
@@ -53,7 +53,7 @@ const Footer = () => {
             Privacy Policy
           </Typography>
         </Link>
-      </Stack>{" "}
+      </Stack>
       <Box
         sx={{
           display: "flex",

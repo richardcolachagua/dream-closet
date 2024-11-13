@@ -1,11 +1,19 @@
 import React from "react";
-import { Container, Typography, Stack, Box, CssBaseline } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Stack,
+  Box,
+  CssBaseline,
+  Button,
+} from "@mui/material";
 import Header from "../Components/Headers/Header.jsx";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AnimatedSearchBar from "../Components/AnimatedSearchBar";
 import LayoutContainer from "../Components/Shared-Layout-Animation/LayoutContainer.jsx";
 import Footer from "../Components/Footer.jsx";
 import ProfileFeatures from "../Components/Profile-Features/Profile-Features.jsx";
+import { Link as RouterLink } from "react-router-dom";
 
 const HomePage = () => {
   const defaultTheme = createTheme();
@@ -31,14 +39,13 @@ const HomePage = () => {
           }}
         >
           <CssBaseline />
-
           <Typography
             align="center"
             sx={{
               fontWeight: "bold",
               color: "white",
               fontFamily: "sans-serif",
-              fontSize: { xs: "40px", sm: "60px", md: "80px", lg: "100px" },
+              fontSize: { xs: "80px", sm: "100px", md: "120px", lg: "140px" },
             }}
           >
             Dream Closet
@@ -50,7 +57,7 @@ const HomePage = () => {
               fontWeight: "bold",
               color: "white",
               fontFamily: "helvetica normal",
-              fontSize: { xs: "10px", sm: "20px", md: "30px", lg: "40px" },
+              fontSize: { xs: "15px", sm: "25px", md: "30px", lg: "35px" },
             }}
           >
             The New Way To Search For Your Next Outfit
@@ -142,6 +149,29 @@ const HomePage = () => {
             The more you use Dream Closet, the more it recognizes your taste in
             clothing.
           </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              component={RouterLink}
+              to="/"
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                fontSize: "25px",
+                fontWeight: "bold",
+                backgroundColor: "turquoise",
+                color: "black",
+              }}
+            >
+              Try a Search Here
+            </Button>
+          </Box>
         </Container>
 
         <ProfileFeatures />

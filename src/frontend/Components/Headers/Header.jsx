@@ -43,6 +43,7 @@ function Header() {
               textTransform: "none",
               fontSize: "15px",
               fontWeight: "bold",
+              color: "black",
             }}
           >
             Login

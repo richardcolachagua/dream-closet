@@ -29,7 +29,7 @@ const AnimatedSearchBar = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "15vh",
+        height: "30vh",
       }}
     >
       <input
