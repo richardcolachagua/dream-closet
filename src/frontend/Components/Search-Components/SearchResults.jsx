@@ -11,7 +11,16 @@ import SaveForLaterButton from "./SaveForLaterButton";
 
 const SearchResults = ({ results, onSaveItem }) => {
   if (!results || results.length === 0) {
-    return <Typography>No results found</Typography>;
+    return (
+      <Typography
+        sx={{
+          color: "white",
+          fontWeight: "bold",
+        }}
+      >
+        No results found
+      </Typography>
+    );
   }
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>

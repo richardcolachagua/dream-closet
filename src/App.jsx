@@ -9,6 +9,7 @@ import PrivacyPolicyPage from "./frontend/Pages/PrivacyPolicyPage";
 import ProfileHeader from "./frontend/Components/ProfileHeader";
 import SearchPage from "./frontend/Pages/SearchPage";
 import TOSPage from "./frontend/Pages/TOS-Page";
+import FreeSearchPage from "./frontend/Pages/FreeSearchPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <Route path="/userheader" element={<ProfileHeader />} />
       <Route path="/Searchpage" element={<SearchPage />} />
       <Route path="/TOSPage" element={<TOSPage />} />
+      <Route path="/FreeSearchPage" element={<FreeSearchPage />} />
     </Routes>
   );
 }
