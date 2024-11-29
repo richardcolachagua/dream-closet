@@ -64,6 +64,8 @@ const SearchPage = () => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "column",
         transition: "background-color 0.3s ease",
         minHeight: "100vh",
         backgroundColor: "black",

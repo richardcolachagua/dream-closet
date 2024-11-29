@@ -70,6 +70,8 @@ const SignUpPage = () => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "column",
         backgroundImage: `url(/assets/backgroundImage.png)`,
         backgroundSize: "cover",
         backgroundPosition: "center",

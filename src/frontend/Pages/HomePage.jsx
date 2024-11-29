@@ -21,6 +21,8 @@ const HomePage = () => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "column",
         backgroundImage: `url(/assets/black_technology_gradient.png)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -159,7 +161,7 @@ const HomePage = () => {
               variant="contained"
               size="large"
               component={RouterLink}
-              to="/"
+              to="/freesearchpage"
               sx={{
                 borderRadius: "20px",
                 textTransform: "none",

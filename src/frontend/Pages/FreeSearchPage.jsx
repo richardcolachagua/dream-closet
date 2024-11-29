@@ -14,11 +14,10 @@ import {
   Button,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import axios from "axios";
 import Footer from "../Components/Footer";
 import SearchResults from "../Components/Search-Components/SearchResults";
 import SearchHeader from "../Components/Headers/SearchPageHeader";
-import UserDesceiptionInput from "../Components/Search-Components/SearchResults";
+import UserDescriptionInput from "../Components/Search-Components/UserInputDescription";
 
 const FreeSearchPage = () => {
   const defaultTheme = createTheme();
@@ -49,6 +48,8 @@ const FreeSearchPage = () => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "column",
         transition: "background-color 0.3s ease",
         minHeight: "100vh",
         backgroundColor: "black",
@@ -77,10 +78,22 @@ const FreeSearchPage = () => {
               justifyContent: "center",
             }}
           >
-            Try Dream Closet - {3 - searchCount} searches remaining
+            Try Dream Closet
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              color: "white",
+              fontWeight: "bold",
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "10px",
+            }}
+          >
+            {3 - searchCount} searches remaining
           </Typography>
           <Box sx={{ marginTop: 2, padding: "10px" }}>
-            <UserDesceiptionInput
+            <UserDescriptionInput
               onSearchStart={hanldeSearchStart}
               onSearchResults={handleSearchResults}
               onSearchError={handleSearchError}

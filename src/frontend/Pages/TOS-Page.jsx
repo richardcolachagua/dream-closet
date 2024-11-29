@@ -10,6 +10,8 @@ const TOSPage = () => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flexDirection: "column",
         backgroundColor: "black",
         backgroundSize: "cover",
         backgroundPosition: "center",
