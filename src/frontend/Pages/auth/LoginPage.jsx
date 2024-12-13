@@ -12,10 +12,11 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import axios from "axios";
 import Header from "../../Components/Headers/Header";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "./firebase";
 
 const defaultTheme = createTheme();
 
@@ -37,33 +38,14 @@ const LoginPage = () => {
       password: "",
     },
     validationSchema,
-
     onSubmit: async (values) => {
       try {
         setLoading(true);
-        const API_URL =
-          "https://kqmyydwgwa.execute-api.us-east-1.amazonaws.com/login";
-
-        const response = await axios.post(`${API_URL}/auth/login`, values);
-
-        if (response.data.success) {
-          // Store the token in localStorage or a more secure storage method
-          localStorage.setItem("token", response.data.token);
-
-          //Store user info if needed
-          localStorage.setItem("user", JSON.stringify(response.data.user));
-
-          //Redirect user to search page
-          navigate("/searchpage");
-        } else {
-          setError("Login failed. Please check your credentials.");
-        }
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        navigate("/searchpage");
       } catch (error) {
-        console.error("Login Failed", error);
-        setError(
-          error.response?.data?.error ||
-            "An error occurred. Please try again later."
-        );
+        console.error("login failed", error);
+        setError("Login failed. Please check your credentials.");
       } finally {
         setLoading(false);
       }

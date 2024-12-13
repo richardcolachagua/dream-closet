@@ -27,7 +27,7 @@ const HomePage = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        minHeight: "100vh",
+        minHeight: "calc(100vh - env(safe-area-inset-bottom))",
       }}
     >
       <ThemeProvider theme={defaultTheme}>

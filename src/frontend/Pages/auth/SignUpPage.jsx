@@ -12,7 +12,9 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import axios from "axios";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
 import Header from "../../Components/Headers/Header";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
@@ -46,19 +48,23 @@ const SignUpPage = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await axios.post(
-          "https://dwyiq3xx4h.execute-api.us-east-1.amazonaws.com/signup",
-          values,
-          { withCredentials: true }
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          values.email,
+          values.password
         );
-        console.log("User registered successfully:", response.data);
+        createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+        await setDoc(doc(db, "users", user.uid), {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+        });
+
+        console.log("user registered sucessfully:", user);
         navigate("/searchpage");
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.error === "Email address already exists"
-        ) {
+        if (error.code === "auth/email-already-in-use") {
           setError("Email address already exists");
         } else {
           setError("An error occurred. Please try again.");
