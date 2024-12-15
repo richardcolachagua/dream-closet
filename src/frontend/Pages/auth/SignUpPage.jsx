@@ -9,6 +9,7 @@ import {
   Container,
   CssBaseline,
 } from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -229,6 +230,15 @@ const SignUpPage = () => {
                   sx={{ mt: 3, mb: 2 }}
                 >
                   Sign Up
+                </Button>
+                <Button
+                  variant="contained"
+                  aria-label="Sign Up With Google"
+                  startIcon={<GoogleIcon />}
+                  sx={{ mt: 2 }}
+                  onClick={() => handleLogin("google")}
+                >
+                  SIGN UP WITH GOOGLE
                 </Button>
                 {/* Error message display */}
                 {error && (

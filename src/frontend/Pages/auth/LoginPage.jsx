@@ -9,6 +9,7 @@ import {
   CssBaseline,
   CircularProgress,
 } from "@mui/material";
+import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -16,7 +17,6 @@ import Header from "../../Components/Headers/Header";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebase";
 
 const defaultTheme = createTheme();
 
@@ -31,6 +31,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("");
   const navigate = useNavigate();
+  const { handleLoginWithEmailAndPass, handleGoogleLogin } = useAuth();
 
   const formik = useFormik({
     initialValues: {
@@ -39,18 +40,39 @@ const LoginPage = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
+      setLoading(true);
       try {
-        setLoading(true);
-        await signInWithEmailAndPassword(auth, values.email, values.password);
+        await signInWithEmailAndPassword(values.email, values.password);
         navigate("/searchpage");
       } catch (error) {
         console.error("login failed", error);
-        setError("Login failed. Please check your credentials.");
+        if (error.code === "auth/user-not-found") {
+          setError("Login failed. Please check your credentials.");
+        } else if (error.code === "auth/wrong-password") {
+          setError("Incorrect password. Please try again.");
+        } else if (error.code === "auth/invalid-email") {
+          setError("Invalid email address. Please check your email.");
+        } else {
+          setError("Login failed, Please try again.");
+        }
       } finally {
         setLoading(false);
       }
     },
   });
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await handleGoogleLogin();
+      navigate("/searchpage");
+    } catch (error) {
+      console.error("Google sign-in failed", error);
+      setError("Google sign-in failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -140,14 +162,43 @@ const LoginPage = () => {
                   )}
                 </Button>
               </form>
-              <Grid container justifyContent="flex-end">
+
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<GoogleIcon />}
+                sx={{
+                  mt: 1,
+                  color: "white",
+                  py: 1,
+                }}
+                onClick={handleGoogleSignIn}
+                disable={loading}
+              >
+                Sign in with Google
+              </Button>
+
+              <Grid
+                container
+                justifyContent="flex-end"
+                sx={{
+                  mt: 2,
+                }}
+              >
                 <Grid item>
-                  <Link href="#" variant="body2">
+                  <Link to="/forgot-password" variant="body2">
                     Forgot Password
                   </Link>
                 </Grid>
               </Grid>
-              <Grid container justifyContent="flex-end">
+
+              <Grid
+                container
+                justifyContent="flex-end"
+                sx={{
+                  mt: 2,
+                }}
+              >
                 <Grid item>
                   <Link to="/SignUpPage" variant="body2">
                     <Typography
