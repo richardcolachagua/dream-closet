@@ -14,6 +14,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
 import Header from "../../Components/Headers/Header";
@@ -23,6 +24,28 @@ import Footer from "../../Components/Footer";
 const SignUpPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleGoogleSignUp = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const uid = user.uid;
+
+      await setDoc(doc(db, "users", user, uid), {
+        firstName: user.displayName.split(" ")[0],
+        lastName: user.displayName.split(" ")[1] || "",
+        email: user.email,
+      });
+
+      console.log("User signed up successfully with Google:", user);
+      navigate("/searchpage");
+    } catch (error) {
+      console.error("Google sign-up failed:", error);
+      setError("Google sign-up failed. Please try again.");
+    }
+  };
 
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name is required"),
@@ -54,7 +77,6 @@ const SignUpPage = () => {
           values.email,
           values.password
         );
-        createUserWithEmailAndPassword(auth, values.email, values.password);
         const user = userCredential.user;
         await setDoc(doc(db, "users", user.uid), {
           firstName: values.firstName,
@@ -65,6 +87,7 @@ const SignUpPage = () => {
         console.log("user registered sucessfully:", user);
         navigate("/searchpage");
       } catch (error) {
+        console.error("Signup error:", error);
         if (error.code === "auth/email-already-in-use") {
           setError("Email address already exists");
         } else {
@@ -228,6 +251,7 @@ const SignUpPage = () => {
                   fullWidth
                   variant="contained"
                   sx={{ mt: 3, mb: 2 }}
+                  disabled={formik.isSubmitting}
                 >
                   Sign Up
                 </Button>
@@ -236,7 +260,7 @@ const SignUpPage = () => {
                   aria-label="Sign Up With Google"
                   startIcon={<GoogleIcon />}
                   sx={{ mt: 2 }}
-                  onClick={() => handleLogin("google")}
+                  onClick={() => handleGoogleSignUp("google")}
                 >
                   SIGN UP WITH GOOGLE
                 </Button>

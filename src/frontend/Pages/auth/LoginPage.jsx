@@ -16,7 +16,11 @@ import { useFormik } from "formik";
 import Header from "../../Components/Headers/Header";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 
 const defaultTheme = createTheme();
 
@@ -62,15 +66,14 @@ const LoginPage = () => {
   });
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    const provider = new GoogleAuthProvider();
     try {
-      await handleGoogleLogin();
+      const result = await signInWithPopup(auth, provider);
+      console.log("Google sign-in successful:", result.user);
       navigate("/searchpage");
     } catch (error) {
-      console.error("Google sign-in failed", error);
+      console.error("Google sign-in failed:", error);
       setError("Google sign-in failed. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -173,9 +176,13 @@ const LoginPage = () => {
                   py: 1,
                 }}
                 onClick={handleGoogleSignIn}
-                disable={loading}
+                disabled={loading}
               >
-                Sign in with Google
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Sign in with Google"
+                )}{" "}
               </Button>
 
               <Grid
