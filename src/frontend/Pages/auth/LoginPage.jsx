@@ -186,7 +186,7 @@ const LoginPage = () => {
                 }}
               >
                 <Grid item>
-                  <Link to="/forgot-password" variant="body2">
+                  <Link to="/forgotpassword" variant="body2">
                     Forgot Password
                   </Link>
                 </Grid>
