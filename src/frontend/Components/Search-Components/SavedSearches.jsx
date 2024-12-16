@@ -12,8 +12,9 @@ import {
   Stack,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import axios from "axios";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../../../backend/firebase";
 
 const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
   const defaultTheme = createTheme();
@@ -28,8 +29,12 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
   const fetchSavedItems = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("/api/saved-items");
-      setSavedItems(response.data);
+      const querySnapshot = await getDocs(collection(db, "saved-items"));
+      const items = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setSavedItems(items);
     } catch (error) {
       console.error("Error fetching saved items", error);
     } finally {
@@ -40,7 +45,7 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
   const handleDeleteItem = async (itemId) => {
     // Implement delete functionality
     try {
-      await axios.delete(`/api/saved/item/${itemId}`);
+      await deleteDoc(doc(db, "saved-items", itemId));
       setSavedItems(savedItems.filter((item) => item.id !== itemId));
     } catch (error) {
       console.error("Error deleting saved item", error);

@@ -9,7 +9,8 @@ import {
   ClickAwayListener,
 } from "@mui/material";
 import SaveSearchButton from "./SaveSearchButton";
-import axios from "axios";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../../backend/firebase";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -40,13 +41,20 @@ function UserDescriptionInput({
     }
     onSearchStart();
     try {
-      const response = await axios.get(
-        `/api/search?query=${encodeURIComponent(description)}`
+      const q = query(
+        collection(db, "products"),
+        where("description", ">=", description.toLowerCase()),
+        where("description", ">=", description.toLowerCase() + "\uf8ff")
       );
-      onSearchResults(response.data);
+      const querySnapshot = await getDocs(q);
+      const results = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      onSearchResults(results);
 
-      //Add to recent searches
       const updatedSearches = [description, ...recentSearches.slice(0, 4)];
+
       setRecentSearches(updatedSearches);
       localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
     } catch (error) {
@@ -54,7 +62,6 @@ function UserDescriptionInput({
       onSearchError("Error submitting description");
     }
   };
-
   const handleSaveSearch = () => {
     onSaveSearch(description);
   };

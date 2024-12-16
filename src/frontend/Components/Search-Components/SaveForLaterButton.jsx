@@ -2,18 +2,16 @@ import React from "react";
 import IconButton from "@mui/material/IconButton";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import Tooltip from "@mui/material/Tooltip";
+import { db } from "../../../backend/firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 function SaveForLaterButton({ itemId, onSave }) {
   const handleSaveForLater = async () => {
     try {
-      const response = await fetch("/api/save-forlater", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ itemId }),
+      const docRef = await addDoc(collection(db, "saved-items"), {
+        itemId,
       });
-      if (response.ok) {
+      if (docRef.id) {
         onSave(itemId);
       }
     } catch (error) {
