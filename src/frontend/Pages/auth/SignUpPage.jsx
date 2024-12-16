@@ -8,6 +8,7 @@ import {
   Grid,
   Container,
   CssBaseline,
+  Stack,
 } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -15,7 +16,7 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { auth, db } from "../../../backend/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import Header from "../../Components/Headers/Header";
 import { useNavigate } from "react-router-dom";
@@ -245,33 +246,42 @@ const SignUpPage = () => {
                     />
                   </Grid>
                 </Grid>
-                {/* Button for form submission */}
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
+                  sx={{
+                    mt: 3,
+                    mb: 2,
+                    backgroundColor: "black",
+                    color: "white",
+                  }}
                   disabled={formik.isSubmitting}
                 >
                   Sign Up
                 </Button>
-                <Button
-                  variant="contained"
-                  aria-label="Sign Up With Google"
-                  startIcon={<GoogleIcon />}
-                  sx={{ mt: 2 }}
-                  onClick={() => handleGoogleSignUp("google")}
-                >
-                  SIGN UP WITH GOOGLE
-                </Button>
-                {/* Error message display */}
-                {error && (
-                  <Typography color="error" align="center">
-                    {error}
-                  </Typography>
-                )}
+                <Stack>
+                  <Button
+                    variant="contained"
+                    aria-label="Sign Up With Google"
+                    startIcon={<GoogleIcon />}
+                    sx={{
+                      mb: 2,
+                      backgroundColor: "turquoise",
+                      color: "black",
+                    }}
+                    onClick={() => handleGoogleSignUp("google")}
+                  >
+                    SIGN UP WITH GOOGLE
+                  </Button>
+                  {/* Error message display */}
+                  {error && (
+                    <Typography color="error" align="center">
+                      {error}
+                    </Typography>
+                  )}
+                </Stack>
               </Box>
-              {/* Link to login page */}
               <Grid container justifyContent="flex-end">
                 <Grid item>
                   <Link

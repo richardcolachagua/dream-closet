@@ -21,6 +21,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+import { auth } from "../../../backend/firebase";
 
 const defaultTheme = createTheme();
 
@@ -35,7 +36,6 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("");
   const navigate = useNavigate();
-  const { handleLoginWithEmailAndPass, handleGoogleLogin } = useAuth();
 
   const formik = useFormik({
     initialValues: {
@@ -46,7 +46,7 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       setLoading(true);
       try {
-        await signInWithEmailAndPassword(values.email, values.password);
+        await signInWithEmailAndPassword(auth, values.email, values.password);
         navigate("/searchpage");
       } catch (error) {
         console.error("login failed", error);
@@ -155,7 +155,12 @@ const LoginPage = () => {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
+                  sx={{
+                    mt: 3,
+                    mb: 2,
+                    backgroundColor: "black",
+                    color: "white",
+                  }}
                   disabled={loading}
                 >
                   {loading ? (
@@ -172,8 +177,9 @@ const LoginPage = () => {
                 startIcon={<GoogleIcon />}
                 sx={{
                   mt: 1,
-                  color: "white",
                   py: 1,
+                  backgroundColor: "turquoise",
+                  color: "black",
                 }}
                 onClick={handleGoogleSignIn}
                 disabled={loading}
