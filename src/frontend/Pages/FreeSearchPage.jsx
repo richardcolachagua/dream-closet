@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -16,22 +16,43 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Footer from "../Components/Footer";
 import SearchResults from "../Components/Search-Components/SearchResults";
-import SearchHeader from "../Components/Headers/SearchPageHeader";
-import UserDescriptionInput from "../Components/Search-Components/UserInputDescription";
+import Header from "../Components/Headers/Header";
+import FreeUserDescriptionInput from "../Components/Search-Components/FreeUserInputDescription";
 
 const FreeSearchPage = () => {
   const defaultTheme = createTheme();
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(0);
-  const [searchCount, setSearchCount] = useState(0);
   const [showSignUpDialog, setShowSignUpDialog] = useState(false);
+  const [searchCount, setSearchCount] = useState(() => {
+    const savedCount = localStorage.getItem("searchCount");
+    const savedTime = localStorage.getItem("lastSearchTime");
+    if (savedCount && savedTime) {
+      const lastSearchTime = new Date(savedTime);
+      if (new Date() - lastSearchTime < 24 * 60 * 60 * 1000) {
+        return parseInt(savedCount, 10);
+      }
+    }
+    return 3;
+  });
+  const [lastSearchTime, setLastSearchTime] = useState(() => {
+    return localStorage.getItem("lastSearchTime") || null;
+  });
 
   const handleSearchResults = (results) => {
     setSearchResults(results);
     setIsLoading(false);
-    setSearchCount((prevCount) => prevCount + 1);
-    if (searchCount >= 2) {
+
+    const newCount = searchCount - 1;
+    setSearchCount(newCount);
+    localStorage.setItem("searchCount", newCount.toString());
+
+    const currentTime = new Date().toISOString();
+    setLastSearchTime(currentTime);
+    localStorage.setItem("lastSearchTime", currentTime);
+
+    if (newCount <= 0) {
       setShowSignUpDialog(true);
     }
   };
@@ -40,9 +61,64 @@ const FreeSearchPage = () => {
     setIsLoading(true);
     setError(null);
   };
+
   const handleSearchError = (errorMessage) => {
     setError(errorMessage);
     setIsLoading(false);
+  };
+
+  useEffect(() => {
+    const checkAndResetSearchCount = () => {
+      const savedTime = localStorage.getItem("lastSearchTime");
+      if (savedTime) {
+        const lastSearchTime = new Date(savedTime);
+        if (new Date() - lastSearchTime >= 24 * 60 * 60 * 1000) {
+          setSearchCount(3);
+          localStorage.setItem("searchCount", "3");
+          localStorage.removeItem("lastSearchItem");
+        }
+      }
+    };
+
+    const interval = setInterval(checkAndResetSearchCount, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const Timer = () => {
+    const [timeRemaining, setTimeRemaining] = useState("");
+
+    useEffect(() => {
+      const updateTimer = () => {
+        const savedTime = localStorage.getItem("lastSearchTime");
+        if (savedTime) {
+          const lastSearchTime = new Date(savedTime);
+          const timeDiff = 24 * 60 * 60 * 1000 - (new Date() - lastSearchTime);
+          if (timeDiff > 0) {
+            const hours = Math.floor((timeDiff / 60) * 60 * 1000);
+            const minutes = Math.floor(
+              (timeDiff % (60 * 60 * 1000)) / (60 * 1000)
+            );
+            setTimeRemaining(`${hours}h ${minutes}m`);
+          } else {
+            setTimeRemaining("");
+          }
+        } else {
+          setTimeRemaining("");
+        }
+      };
+
+      updateTimer();
+      const interval = setInterval(updateTimer, 600000);
+
+      return () => clearInterval(interval);
+    }, []);
+
+    return timeRemaining ? (
+      <Typography variant="body2" sx={{ color: "white", textAlign: "center" }}>
+        Resets in: {timeRemaining}
+      </Typography>
+    ) : null;
   };
 
   return (
@@ -59,7 +135,7 @@ const FreeSearchPage = () => {
       }}
     >
       <ThemeProvider theme={defaultTheme}>
-        <SearchHeader />
+        <Header />
         <CssBaseline />
         <Container
           sx={{
@@ -90,10 +166,10 @@ const FreeSearchPage = () => {
               marginTop: "10px",
             }}
           >
-            {3 - searchCount} searches remaining
+            {searchCount} searches remaining
           </Typography>
           <Box sx={{ marginTop: 2, padding: "10px" }}>
-            <UserDescriptionInput
+            <FreeUserDescriptionInput
               onSearchStart={hanldeSearchStart}
               onSearchResults={handleSearchResults}
               onSearchError={handleSearchError}
@@ -144,7 +220,7 @@ const FreeSearchPage = () => {
           <Button onClick={() => setShowSignUpDialog(false)}>Close</Button>
           <Button
             onClick={() => {
-              "/";
+              window.location.href = "/signuppage";
             }}
           >
             Sign Up
