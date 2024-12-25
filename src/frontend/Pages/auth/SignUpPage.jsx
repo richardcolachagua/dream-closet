@@ -138,13 +138,11 @@ const SignUpPage = () => {
                 component="h1"
                 variant="h5"
                 sx={{
-                  marginBottom: 2,
                   fontWeight: "bold",
                 }}
               >
                 Sign Up
               </Typography>
-              {/* Signup form */}
               <Box
                 component="form"
                 onSubmit={formik.handleSubmit}
@@ -289,6 +287,7 @@ const SignUpPage = () => {
                     variant="body2"
                     to="/LoginPage"
                     sx={{ Link: "/loginpage" }}
+                    style={{ textDecoration: "none" }}
                   >
                     Already have an account? Sign in
                   </Link>

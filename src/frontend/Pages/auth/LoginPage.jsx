@@ -113,7 +113,13 @@ const LoginPage = () => {
                 paddingTop: "20px",
               }}
             >
-              <Typography component="h1" variant="h5">
+              <Typography
+                component="h1"
+                variant="h5"
+                sx={{
+                  fontWeight: "bold",
+                }}
+              >
                 Sign In
               </Typography>
               <form onSubmit={formik.handleSubmit}>
@@ -199,21 +205,23 @@ const LoginPage = () => {
                 }}
               >
                 <Grid item>
-                  <Link to="/forgotpassword" variant="body2">
+                  <Link
+                    to="/forgotpassword"
+                    variant="body2"
+                    style={{ textDecoration: "none" }}
+                  >
                     Forgot Password
                   </Link>
                 </Grid>
               </Grid>
 
-              <Grid
-                container
-                justifyContent="flex-end"
-                sx={{
-                  mt: 2,
-                }}
-              >
+              <Grid container justifyContent="flex-end">
                 <Grid item>
-                  <Link to="/SignUpPage" variant="body2">
+                  <Link
+                    to="/SignUpPage"
+                    variant="body2"
+                    style={{ textDecoration: "none" }}
+                  >
                     <Typography
                       color="black"
                       align="center"
