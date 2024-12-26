@@ -34,7 +34,7 @@ const SignUpPage = () => {
 
       const uid = user.uid;
 
-      await setDoc(doc(db, "users", user, uid), {
+      await setDoc(doc(db, "users", uid), {
         firstName: user.displayName.split(" ")[0],
         lastName: user.displayName.split(" ")[1] || "",
         email: user.email,
