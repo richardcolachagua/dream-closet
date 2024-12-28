@@ -68,7 +68,7 @@ const SearchPage = () => {
         flexDirection: "column",
         transition: "background-color 0.3s ease",
         minHeight: "100vh",
-        backgroundColor: "black",
+        backgroundColor: "red",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   TextField,
   Button,
@@ -11,6 +11,7 @@ import {
 import SaveSearchButton from "./SaveSearchButton";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
+import { debounce } from "lodash";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -30,8 +31,17 @@ function UserDescriptionInput({
     setRecentSearches(loadedSearches);
   }, []);
 
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      handleSubmit(value);
+    },
+   300), []
+  );
+
+
   const handleInputChange = (event) => {
     setDescription(event.target.value);
+    debouncedSearch(event.target.value);
   };
 
   const handleSubmit = async () => {
@@ -78,6 +88,7 @@ function UserDescriptionInput({
       if (firstItem) firstItem.focus();
     }
   };
+
 
   return (
     <ClickAwayListener onClickAway={() => setShowRecentSearches(false)}>
