@@ -113,7 +113,6 @@ function UserDescriptionInput({
         />
         <Button
           variant="contained"
-          color="primary"
           onClick={handleSubmit}
           sx={{
             bgcolor: "primary.main",
@@ -144,7 +143,6 @@ function UserDescriptionInput({
             {recentSearches.map((search, index) => (
               <ListItem
                 key={index}
-                button
                 onClick={() => handleRecentSearchClick(search)}
                 className="recent-search-item"
                 tabIndex={0}

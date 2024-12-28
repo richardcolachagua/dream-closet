@@ -41,9 +41,9 @@ const ProfilePage = () => {
 
   const formik = useFormik({
     initialValues: {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
+      firstName: "",
+      lastName: "",
+      email: "",
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
@@ -91,6 +91,8 @@ const ProfilePage = () => {
     <>
       <Box
         sx={{
+          display: "flex",
+          flexDirection: "column",
           backgroundColor: "black",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -112,17 +114,6 @@ const ProfilePage = () => {
             >
               Welcome {formik.values.firsName}
             </Typography>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 3,
-                fontWeight: "bold",
-                color: "white",
-                marginLeft: "20px",
-              }}
-            >
-              Update Your Profile
-            </Typography>
             <Grid
               container
               direction="column"
@@ -133,18 +124,28 @@ const ProfilePage = () => {
               <Container
                 component="main"
                 maxWidth="xs"
-                sx={{ backgroundColor: "white", borderRadius: 1 }}
+                sx={{ backgroundColor: "white", borderRadius: 2 }}
               >
                 <CssBaseline />
                 <Box
                   sx={{
                     marginTop: 6,
-                    marginBottom: 5,
+                    marginBottom: 6,
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                   }}
                 >
+                    <Typography
+                    component="h1"
+              variant="h5"
+              sx={{
+                mb: 3,
+                fontWeight: "bold",
+                color: "black"}}
+            >
+              Update Your Profile
+            </Typography>
                   <form onSubmit={formik.handleSubmit}>
                     <TextField
                       fullWidth
@@ -199,7 +200,7 @@ const ProfilePage = () => {
                       fullWidth
                       id="newPassword"
                       name="newPassword"
-                      label="New Password (optional)"
+                      label="New Password"
                       type="password"
                       value={formik.values.newPassword}
                       onChange={formik.handleChange}
