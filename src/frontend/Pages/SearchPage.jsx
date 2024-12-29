@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import UserDescriptionInput from "../Components/Search-Components/UserInputDescription";
 import SearchResults from "../Components/Search-Components/SearchResults";
 import Footer from "../Components/Footer";
@@ -60,6 +61,13 @@ const SearchPage = () => {
       setError("Error deleting search");
     }
   };
+
+  const useSearchResults = (query, page) => {
+    return useQuery(['searchResults', query, page], async () => {
+      const response = await axios.get(`/api/search?q=${query}&page=${page}`)
+      return response.data
+    })
+  }
 
   return (
     <Box
