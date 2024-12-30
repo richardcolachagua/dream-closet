@@ -9,9 +9,25 @@ import {
   ClickAwayListener,
 } from "@mui/material";
 import SaveSearchButton from "./SaveSearchButton";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
-import { debounce } from "lodash";
+import { debounce, } from "lodash";
+
+const useRecentSearches = (maxSearches = 5) => {
+  const [recentSearches, setRecentSearches] = useState([]);
+
+  useEffect(() => {
+    const loadedSearches = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    setRecentSearches(loadedSearches);
+  }, []);
+
+  const addRecentSearch = useCallback((search) => {
+    const updatedSearches = [search, ...recentSearches.filter(s => s !== search)].slice(0, maxSearches);
+    setRecentSearches(updatedSearches);
+    localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
+  }, [recentSearches, maxSearches]);
+  return [recentSearches, addRecentSearch];
+}
 
 function UserDescriptionInput({
   onSearchStart,
@@ -20,32 +36,12 @@ function UserDescriptionInput({
   onSaveSearch,
 }) {
   const [description, setDescription] = useState("");
-  const [recentSearches, setRecentSearches] = useState([]);
   const [showRecentSearches, setShowRecentSearches] = useState(false);
   const inputRef = useRef(null);
+  const [recentSearches, addRecentSearch] = useRecentSearches();
 
-  useEffect(() => {
-    //Load recent searches from localstorage or api
-    const loadedSearches =
-      JSON.parse(localStorage.getItem("recentSearches")) || [];
-    setRecentSearches(loadedSearches);
-  }, []);
-
-  const debouncedSearch = useCallback(
-    debounce((value) => {
-      handleSubmit(value);
-    },
-   300), []
-  );
-
-
-  const handleInputChange = (event) => {
-    setDescription(event.target.value);
-    debouncedSearch(event.target.value);
-  };
-
-  const handleSubmit = async () => {
-    if (description.trim() === "") {
+  const handleSubmit = async (searchTerm) => {
+    if (searchTerm.trim() === "") {
       alert("Please enter a description.");
       return;
     }
@@ -53,8 +49,8 @@ function UserDescriptionInput({
     try {
       const q = query(
         collection(db, "products"),
-        where("description", ">=", description.toLowerCase()),
-        where("description", ">=", description.toLowerCase() + "\uf8ff")
+        where("description", ">=", searchTerm.toLowerCase()),
+        where("description", "<", searchTerm.toLowerCase() + "\uf8ff"), limit(20)
       );
       const querySnapshot = await getDocs(q);
       const results = querySnapshot.docs.map((doc) => ({
@@ -62,23 +58,32 @@ function UserDescriptionInput({
         ...doc.data(),
       }));
       onSearchResults(results);
-
-      const updatedSearches = [description, ...recentSearches.slice(0, 4)];
-
-      setRecentSearches(updatedSearches);
-      localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
+      addRecentSearch(searchTerm);
     } catch (error) {
       console.error("Error submitting description:", error);
       onSearchError("Error submitting description");
     }
   };
+
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      handleSubmit(value);
+    }, 300),
+    []
+  );
+
+  const handleInputChange = (event) => {
+    setDescription(event.target.value);
+    debouncedSearch(event.target.value);
+  };
+
   const handleSaveSearch = () => {
     onSaveSearch(description);
   };
 
   const handleRecentSearchClick = (search) => {
     setDescription(search);
-    handleSubmit();
+    handleSubmit(search);
   };
 
   const handleKeyDown = (event) => {
@@ -124,7 +129,7 @@ function UserDescriptionInput({
         />
         <Button
           variant="contained"
-          onClick={handleSubmit}
+          onClick={() => handleSubmit(description)}
           sx={{
             bgcolor: "primary.main",
             "&:hover": {

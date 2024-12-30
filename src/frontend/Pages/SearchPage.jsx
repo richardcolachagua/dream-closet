@@ -17,57 +17,64 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 
+const defaultTheme = createTheme();
+
+const useSearchResults = (query, page = 1) => {
+  return useQuery(
+    ['searchResults', query, page],
+    async () => {
+      const response = await axios.get(`/api/search?q=${query}&page=${page}`);
+      return response.data;
+    },
+    {
+      enabled: !!query,
+    }
+  )
+}
+
+const useSaveSearch = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (search) => axios.post("/api/save-search", { query: search}), {
+      onSuccess: () => {
+        queryClient.invalidateQueries('savedSearches')
+      }
+    }
+  )
+}
+
 const SearchPage = () => {
-  const defaultTheme = createTheme();
-  const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const {data: searchResults, isLoading, error} = useSearchResults(searchQuery, page);
+  const saveSearchMutation = useSaveSearch();
   const [savedSearches, setSavedSearches] = useState([]);
 
-  const handleSearchResults = (results) => {
-    setSearchResults(results);
-    setIsLoading(false);
-  };
-
-  const handleSearchStart = () => {
-    setIsLoading(true);
-    setError(null);
-  };
-
-  const handleSearchError = (ErrorMessage) => {
-    setError(ErrorMessage);
-    setIsLoading(false);
-  };
+  const handleSearchStart = (query) => {
+    setSearchQuery(query);
+    setPage(1);
+  }
 
   const handleSaveSearch = async (search) => {
     try {
-      await axios.post("/api/save-search", { query: search });
-      setSavedSearches([
-        ...savedSearches,
-        { id: Date.now().toString(), query: search },
-      ]);
+   await saveSearchMutation.mutateAsync(search);
+   setSavedSearches([
+    ...setSavedSearches,
+    { id: Date.now().toString(), query: search }
+   ]);
     } catch (error) {
-      console.error("Error saving search:", error);
-      setError("Error saving search");
+      console.error("Error saving search", error)
     }
   };
 
   const handleDeleteSearch = async (id) => {
     try {
       await axios.delete(`/api/delete-search/${id}`);
-      setSavedSearches(savedSearches.filter((search) => search.id === id));
+      setSavedSearches(savedSearches.filter((search) => search.id !== id));
     } catch (error) {
-      console.error("Error deleting search:", error);
-      setError("Error deleting search");
+      console.error("Error deleting search:", error)
     }
-  };
-
-  const useSearchResults = (query, page) => {
-    return useQuery(['searchResults', query, page], async () => {
-      const response = await axios.get(`/api/search?q=${query}&page=${page}`)
-      return response.data
-    })
-  }
+  }; 
 
   return (
     <Box
@@ -107,8 +114,6 @@ const SearchPage = () => {
           <Box sx={{ marginTop: 2, padding: "10px" }}>
             <UserDescriptionInput
               onSearchStart={handleSearchStart}
-              onSearchResults={handleSearchResults}
-              onSearchError={handleSearchError}
               onSaveSearch={handleSaveSearch}
             />
             {isLoading && (
@@ -122,7 +127,7 @@ const SearchPage = () => {
                 <CircularProgress />
               </Box>
             )}
-            {!isLoading && searchResults.length > 0 && (
+            {!isLoading && searchResults && searchResults.length > 0 && (
               <SearchResults results={searchResults} />
             )}
             <SavedSearches
@@ -132,14 +137,14 @@ const SearchPage = () => {
             <Snackbar
               open={!!error}
               autoHideDuration={6000}
-              onClose={() => setError(null)}
+              onClose={() => {}}
             >
               <Alert
-                onClose={() => setError(null)}
+                onClose={() => {}}
                 severity="error"
                 sx={{ width: "100%" }}
               >
-                {error}
+                {error && error.message}
               </Alert>
             </Snackbar>
           </Box>

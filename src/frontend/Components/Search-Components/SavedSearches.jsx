@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -16,17 +16,11 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 
-const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
-  const defaultTheme = createTheme();
-
+const useSavedItems = () => {
   const [savedItems, setSavedItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSavedItems();
-  }, []);
-
-  const fetchSavedItems = async () => {
+  const fetchSavedItems = useCallback(async () => {
     try {
       setIsLoading(true);
       const querySnapshot = await getDocs(collection(db, "saved-items"));
@@ -40,19 +34,30 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleDeleteItem = async (itemId) => {
-    // Implement delete functionality
-    try {
-      await deleteDoc(doc(db, "saved-items", itemId));
-      setSavedItems(savedItems.filter((item) => item.id !== itemId));
-    } catch (error) {
-      console.error("Error deleting saved item", error);
-    }
-  };
+  useEffect(() => {
+    fetchSavedItems();
+  }, [fetchSavedItems]);
 
-  if (isLoading) {
+  return { savedItems, isLoading, fetchSavedItems, setSavedItems };
+};
+
+const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
+  const defaultTheme = createTheme();
+  const { savedItems, isLoading, setSavedItems } = useSavedItems();
+  
+
+const handleDeleteItem = async (itemId) => {
+  try {
+    await deleteDoc(doc(db, "saved-items", itemId));
+    setSavedItems(savedItems.filter((item) => item.id !== itemId));
+  } catch (error) {
+    console.error("Error deleting saved item", error);
+  }
+};
+
+if (isLoading) {
     return (
       <Container>
         <Box
@@ -68,7 +73,6 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
   }
 
   return (
-    <>
       <Box
         sx={{
           backgroundColor: "black",
@@ -182,7 +186,6 @@ const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
           </Stack>
         </ThemeProvider>
       </Box>
-    </>
   );
 };
 
