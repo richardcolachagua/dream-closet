@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import UserDescriptionInput from "../Components/Search-Components/UserInputDescription";
-import SearchResults from "../Components/Search-Components/SearchResults";
-import Footer from "../Components/Footer";
-import SearchPageHeader from "../Components/Headers/SearchPageHeader";
-import SavedSearches from "../Components/Search-Components/SavedSearches";
+import UserDescriptionInput from "../../Components/Search-Components/UserInputDescription";
+import SearchResults from "../../Components/Search-Components/SearchResults";
+import Footer from "../../Components/Footer";
+import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
+import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import {
   Box,
   Typography,

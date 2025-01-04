@@ -10,9 +10,13 @@ import ProfileHeader from "./frontend/Components/ProfileHeader";
 import SearchPage from "./frontend/Pages/SearchPage";
 import TOSPage from "./frontend/Pages/TOS-Page";
 import FreeSearchPage from "./frontend/Pages/FreeSearchPage";
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <Routes>
       <Route path="/HomePage" element={<HomePage />} />
       <Route path="/ContactPage" element={<ContactPage />} />
@@ -23,10 +27,14 @@ function App() {
       <Route path="/profilepage" element={<ProfilePage />} />
       <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
       <Route path="/userheader" element={<ProfileHeader />} />
+      
       <Route path="/Searchpage" element={<SearchPage />} />
+
       <Route path="/TOSPage" element={<TOSPage />} />
       <Route path="/FreeSearchPage" element={<FreeSearchPage />} />
     </Routes>
+    </QueryClientProvider>
+
   );
 }
 

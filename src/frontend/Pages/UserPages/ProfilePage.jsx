@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Footer from "../Components/Footer.jsx";
+import Footer from "../../Components/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -15,7 +15,7 @@ import {
   Grid,
 } from "@mui/material";
 import axios from "axios";
-import UserHeader from "../Components/ProfileHeader.jsx";
+import UserHeader from "../../Components/Headers/ProfileHeader.jsx";
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
