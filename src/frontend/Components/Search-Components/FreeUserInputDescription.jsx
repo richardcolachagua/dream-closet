@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   TextField,
   Button,
@@ -8,8 +8,38 @@ import {
   ListItemText,
   ClickAwayListener,
 } from "@mui/material";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../../../backend/firebase";
+import axios from "axios";
+
+const fetchAsosProducts = async (query) => {
+  const options = {
+    method: 'GET',
+    url: 'https://asos2.p.rapidapi.com/products/v2/list',
+    params: {
+      store: 'US',
+      offset: '0',
+      categoryId: '4209',
+      country: 'US',
+      sort: 'freshness',
+      currency: 'USD',
+      sizeSchema: 'US',
+      limit: '48',
+      lang: 'en-US',
+      q: query
+    },
+    headers: {
+      'x-rapidapi-key': '233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14',
+      'x-rapidapi-host': 'asos2.p.rapidapi.com'
+    }
+  };
+
+  try {
+    const response = await axios.request(options);
+    return response.data.products;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 
 function FreeUserDescriptionInput({
   onSearchStart,
@@ -17,16 +47,11 @@ function FreeUserDescriptionInput({
   onSearchError,
 }) {
   const [description, setDescription] = useState("");
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentSearches, setRecentSearches] = useState(() => {
+   return JSON.parse(localStorage.getItem("recentSearches")) || [];
+  });
   const [showRecentSearches, setShowRecentSearches] = useState(false);
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    //Load recent searches from localstorage or api
-    const loadedSearches =
-      JSON.parse(localStorage.getItem("recentSearches")) || [];
-    setRecentSearches(loadedSearches);
-  }, []);
 
   const handleInputChange = (event) => {
     setDescription(event.target.value);
@@ -39,20 +64,10 @@ function FreeUserDescriptionInput({
     }
     onSearchStart();
     try {
-      const q = query(
-        collection(db, "products"),
-        where("description", ">=", description.toLowerCase()),
-        where("description", ">=", description.toLowerCase() + "\uf8ff")
-      );
-      const querySnapshot = await getDocs(q);
-      const results = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const results = await fetchAsosProducts(description);      
       onSearchResults(results);
 
-      const updatedSearches = [description, ...recentSearches.slice(0, 4)];
-
+      const updatedSearches = [description, ...recentSearches.filter(s => s !== description)].slice(0, 5);
       setRecentSearches(updatedSearches);
       localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
     } catch (error) {

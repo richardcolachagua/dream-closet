@@ -1,11 +1,12 @@
 import React from "react";
 import {
-  Box,
   Typography,
   Card,
   CardContent,
   CardMedia,
   CardActions,
+  Grid,
+  Button,
 } from "@mui/material";
 import SaveForLaterButton from "./SaveForLaterButton";
 
@@ -23,32 +24,37 @@ const SearchResults = ({ results, onSaveItem }) => {
     );
   }
   return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-      {results.map((product) => (
-        <Card key={product.id} sx={{ maxWidth: 345, m: 2 }}>
-          <CardMedia
-            component="img"
-            height="140"
-            image={product.image}
-            alt={product.name}
-          />
-          <CardContent>
-            <Typography gutterBottom variant="h5" component="div">
-              {product.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {product.description}
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <SaveForLaterButton
-              itemId={product.id}
-              onSave={() => onSaveItem(product)}
-            />
-          </CardActions>
+   <Grid container spacing={2} justifyContent="center">
+    {results.map((product) => (
+      <Grid item xs={12} sm={6} md={4} key={product.id}>
+        <Card sx={{ maxWidth: 345, height: "100%", display: "flex", flexDirection: "column"}}>
+      <CardMedia 
+      component="img"
+      height="140"
+      image={`https://${product.imageUrl}`}
+      alt={product.name}
+      />
+      <CardContent sx={{ flexGrow: 1}}>
+      <Typography gutterBottom variant="h6" component="div">
+        {product.name}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {product.price.current.text}
+      </Typography>
+      </CardContent>
+      <CardActions>
+        <SaveForLaterButton 
+        itemId={product.id}
+        onSave={() => onSaveItem(product)}
+        />
+        <Button size="small" href={`https://www.asos.com/${product.url}`} target="_blank">
+      View on ASOS
+        </Button>
+      </CardActions>
         </Card>
-      ))}
-    </Box>
+        </Grid>
+    ))}
+   </Grid>
   );
 };
 

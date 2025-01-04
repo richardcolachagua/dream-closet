@@ -23,7 +23,7 @@ const FreeSearchPage = () => {
   const defaultTheme = createTheme();
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(0);
+  const [error, setError] = useState(null);
   const [showSignUpDialog, setShowSignUpDialog] = useState(false);
   const [searchCount, setSearchCount] = useState(() => {
     const savedCount = localStorage.getItem("searchCount");
@@ -36,9 +36,6 @@ const FreeSearchPage = () => {
     }
     return 3;
   });
-  const [lastSearchTime, setLastSearchTime] = useState(() => {
-    return localStorage.getItem("lastSearchTime") || null;
-  });
 
   const handleSearchResults = (results) => {
     setSearchResults(results);
@@ -47,10 +44,7 @@ const FreeSearchPage = () => {
     const newCount = searchCount - 1;
     setSearchCount(newCount);
     localStorage.setItem("searchCount", newCount.toString());
-
-    const currentTime = new Date().toISOString();
-    setLastSearchTime(currentTime);
-    localStorage.setItem("lastSearchTime", currentTime);
+    localStorage.setItem("lastSearchTime", new Date().toISOString())
 
     if (newCount <= 0) {
       setShowSignUpDialog(true);
@@ -81,7 +75,6 @@ const FreeSearchPage = () => {
     };
 
     const interval = setInterval(checkAndResetSearchCount, 60000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -110,7 +103,6 @@ const FreeSearchPage = () => {
 
       updateTimer();
       const interval = setInterval(updateTimer, 600000);
-
       return () => clearInterval(interval);
     }, []);
 
