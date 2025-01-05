@@ -27,27 +27,40 @@ const SearchResults = ({ results, onSaveItem }) => {
    <Grid container spacing={2} justifyContent="center">
     {results.map((product) => (
       <Grid item xs={12} sm={6} md={4} key={product.id}>
-        <Card sx={{ maxWidth: 345, height: "100%", display: "flex", flexDirection: "column"}}>
+        <Card sx={{ display: "flex", flexDirection: "column"}}>
       <CardMedia 
       component="img"
-      height="140"
       image={`https://${product.imageUrl}`}
       alt={product.name}
+      sx={{
+        objectFit: "cover",
+        width: "100%", 
+        height: "100%",
+        flexGrow: 1
+      }}
       />
       <CardContent sx={{ flexGrow: 1}}>
-      <Typography gutterBottom variant="h6" component="div">
+      <Typography gutterBottom variant="h6" component="div" sx={{
+        fontWeight:"bold"
+      }}>
         {product.name}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" color="text.secondary" sx={{
+        fontWeight: "bold"
+      }}>
         {product.price.current.text}
       </Typography>
       </CardContent>
-      <CardActions>
+      <CardActions sx={{
+        justifyContent: "center"
+      }}>
         <SaveForLaterButton 
         itemId={product.id}
         onSave={() => onSaveItem(product)}
         />
-        <Button size="small" href={`https://www.asos.com/${product.url}`} target="_blank">
+        <Button size="small" variant="contained" sx={{ fontWeight: "bold",
+          backgroundColor: "turquoise", color: "black"
+        }} href={`https://www.asos.com/${product.url}`} target="_blank">
       View on ASOS
         </Button>
       </CardActions>

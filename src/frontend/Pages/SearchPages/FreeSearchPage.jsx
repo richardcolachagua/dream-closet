@@ -51,7 +51,7 @@ const FreeSearchPage = () => {
     }
   };
 
-  const hanldeSearchStart = () => {
+  const handleSearchStart = () => {
     setIsLoading(true);
     setError(null);
   };
@@ -160,9 +160,10 @@ const FreeSearchPage = () => {
           >
             {searchCount} searches remaining
           </Typography>
+          <Timer />
           <Box sx={{ marginTop: 2, padding: "10px" }}>
             <FreeUserDescriptionInput
-              onSearchStart={hanldeSearchStart}
+              onSearchStart={handleSearchStart}
               onSearchResults={handleSearchResults}
               onSearchError={handleSearchError}
             />
@@ -177,7 +178,7 @@ const FreeSearchPage = () => {
                 <CircularProgress />
               </Box>
             )}
-            {!isLoading && SearchResults.length > 0 && (
+            {!isLoading && searchResults.length > 0 && (
               <SearchResults results={searchResults} />
             )}
             <Snackbar

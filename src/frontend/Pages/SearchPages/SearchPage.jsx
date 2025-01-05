@@ -6,7 +6,7 @@ import SearchResults from "../../Components/Search-Components/SearchResults";
 import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import Footer from "../../Components/Footer";
 import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
-import { addDoc, collection, deleteDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 
 const defaultTheme = createTheme();
@@ -70,7 +70,7 @@ const SearchPage = () => {
         flexDirection: "column",
         transition: "background-color 0.3s ease",
         minHeight: "100vh",
-        backgroundColor: "red",
+        backgroundColor: "black",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -100,6 +100,8 @@ const SearchPage = () => {
             <UserDescriptionInput
               onSearchStart={handleSearchStart}
               onSaveSearch={handleSaveSearch}
+              onSearchError={handleSearchError}
+              onSearchResults={handleSearchResults}
             />
             {isLoading && (
               <Box
@@ -115,7 +117,7 @@ const SearchPage = () => {
             {!isLoading && searchResults && searchResults.length > 0 && (
               <SearchResults results={searchResults} onSaveItem={handleSaveItem} />
             )}
-            <SavedSearches
+               <SavedSearches
               savedSearches={savedSearches}
               onDeleteSearch={handleDeleteSearch}
             />

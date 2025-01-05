@@ -4,29 +4,34 @@ import axios from "axios";
 import { debounce } from "lodash";
 import SaveSearchButton from "../Buttons/SaveSearchButton";
 
-function UserDescriptionInput({ onSearchStart, onSearchResults, onSearchError, onSaveSearch }) {
+function UserDescriptionInput({
+  onSearchStart,
+  onSearchResults,
+  onSearchError,
+  onSaveSearch,
+}) {
   const [description, setDescription] = useState("");
 
   const searchAsos = async (query) => {
     const options = {
-      method: 'GET',
-      url: 'https://asos2.p.rapidapi.com/products/v2/list',
+      method: "GET",
+      url: "https://asos2.p.rapidapi.com/products/v2/list",
       params: {
-        store: 'US',
-        offset: '0',
-        categoryId: '4209',
-        limit: '48',
-        country: 'US',
-        sort: 'freshness',
+        store: "US",
+        offset: "0",
+        categoryId: "4209",
+        limit: "48",
+        country: "US",
+        sort: "freshness",
         q: query,
-        currency: 'USD',
-        sizeSchema: 'US',
-        lang: 'en-US'
+        currency: "USD",
+        sizeSchema: "US",
+        lang: "en-US",
       },
       headers: {
-        'x-rapidapi-key': '233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14',
-        'x-rapidapi-host': 'asos2.p.rapidapi.com'
-      }
+        "x-rapidapi-key": "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
+        "x-rapidapi-host": "asos2.p.rapidapi.com",
+      },
     };
 
     try {
@@ -57,7 +62,7 @@ function UserDescriptionInput({ onSearchStart, onSearchResults, onSearchError, o
     debounce((value) => {
       handleSubmit(value);
     }, 300),
-    []
+    [handleSubmit]
   );
 
   const handleInputChange = (event) => {
@@ -70,22 +75,52 @@ function UserDescriptionInput({ onSearchStart, onSearchResults, onSearchError, o
   };
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: "20px",
+      }}
+    >
       <TextField
         label="I am looking for a..."
         variant="filled"
         value={description}
         onChange={handleInputChange}
-        sx={{ width: "90%", maxWidth: "500px", mr: 1 }}
+        sx={{
+          width: "90%",
+          maxWidth: "500px",
+          mr: 2,
+          backgroundColor: "white",
+          borderRadius: "10px",
+        }}
       />
-      <Button
-        variant="contained"
-        onClick={() => handleSubmit(description)}
-        sx={{ bgcolor: "primary.main", "&:hover": { bgcolor: "primary.dark" }, mr: 1 }}
-      >
-        Search
-      </Button>
-      <SaveSearchButton onSave={handleSaveSearch} />
+      <Box sx={{ display: "flex", gap: 1, flex: 1 }}>
+        <Button
+          variant="contained"
+          onClick={() => handleSubmit(description)}
+          sx={{
+            bgcolor: "primary.main",
+            "&:hover": { bgcolor: "primary.dark" },
+            mr: 2,
+            width: "100px",
+            backgroundColor: "turquoise",
+            color: "black",
+            fontWeight: "bold",
+            fontSize: "15px",
+          }}
+        >
+          Search
+        </Button>
+        <SaveSearchButton
+          sx={{
+            flex: 1,
+
+          }}
+          onSave={handleSaveSearch}
+        />
+      </Box>
     </Box>
   );
 }

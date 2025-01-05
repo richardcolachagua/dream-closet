@@ -119,7 +119,7 @@ const HomePage = () => {
               },
             }}
           >
-            Example: "A red-orange colored strapless dress for a wedding with a
+            Example: "A pink strapless dress with a
             slit on the left side"
           </Typography>
           <Container>
