@@ -1,80 +1,67 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import UserDescriptionInput from "../../Components/Search-Components/UserInputDescription";
+import { Box, Typography, CssBaseline, CircularProgress, Snackbar, Alert, Container } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import UserDescriptionInput from "../../Components/Search-Components/Searchbars/UserInputDescription";
 import SearchResults from "../../Components/Search-Components/SearchResults";
+import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import Footer from "../../Components/Footer";
 import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
-import SavedSearches from "../../Components/Search-Components/SavedSearches";
-import {
-  Box,
-  Typography,
-  CssBaseline,
-  CircularProgress,
-  Snackbar,
-  Alert,
-  Container,
-} from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import axios from "axios";
+import { addDoc, collection, deleteDoc } from "firebase/firestore";
+import { db } from "../../../backend/firebase";
 
 const defaultTheme = createTheme();
 
-const useSearchResults = (query, page = 1) => {
-  return useQuery(
-    ['searchResults', query, page],
-    async () => {
-      const response = await axios.get(`/api/search?q=${query}&page=${page}`);
-      return response.data;
-    },
-    {
-      enabled: !!query,
-    }
-  )
-}
-
-const useSaveSearch = () => {
-  const queryClient = useQueryClient();
-  return useMutation(
-    (search) => axios.post("/api/save-search", { query: search}), {
-      onSuccess: () => {
-        queryClient.invalidateQueries('savedSearches')
-      }
-    }
-  )
-}
-
 const SearchPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const {data: searchResults, isLoading, error} = useSearchResults(searchQuery, page);
-  const saveSearchMutation = useSaveSearch();
+  const [searchResults, setSearchResults] = useState("");
+  const [isLoading, setIsloading] = useState(false);
+  const [error, setError] = useState(null);
   const [savedSearches, setSavedSearches] = useState([]);
 
-  const handleSearchStart = (query) => {
-    setSearchQuery(query);
-    setPage(1);
+  const handleSearchStart = () => {
+    setIsloading(true);
+    setError(null);
   }
 
-  const handleSaveSearch = async (search) => {
+  const handleSearchResults = async (results) => {
+    setSearchResults(results);
+    setIsloading(false);
+  };
+
+  const handleSearchError = (ErrorMessage) => {
+    setError(ErrorMessage);
+    setIsloading(false);
+  }
+
+  const handleSaveSearch = async (searchQuery) => {
     try {
-   await saveSearchMutation.mutateAsync(search);
-   setSavedSearches([
-    ...setSavedSearches,
-    { id: Date.now().toString(), query: search }
-   ]);
+      const docRef = await addDoc(collection(db, "saved-searches"), {
+        query: searchQuery,
+        date: new Date().toISOString(),
+      });
+      setSavedSearches([...savedSearches, { id: docRef.id, query: searchQuery, date: new Date().toISOString() }]);
     } catch (error) {
-      console.error("Error saving search", error)
+      console.error("Error saving search", error);
     }
   };
 
+  const handleSaveItem = async (item) => {
+    try {
+      await addDoc(collection(db, "saved-items"), item)
+    } catch (error) {
+      console.error("Error saving item", error);
+    }
+  };
+
+
   const handleDeleteSearch = async (id) => {
     try {
-      await axios.delete(`/api/delete-search/${id}`);
+      await deleteDoc(doc(db, "saved-searches", id));
       setSavedSearches(savedSearches.filter((search) => search.id !== id));
     } catch (error) {
-      console.error("Error deleting search:", error)
+      console.error("Error deleting search:", error);
     }
-  }; 
+  };
+
 
   return (
     <Box
@@ -105,13 +92,11 @@ const SearchPage = () => {
             sx={{
               color: "white",
               fontWeight: "bold",
-              display: "flex",
-              justifyContent: "center",
+              textAlign: "center", mb: 2
             }}
           >
             What are we looking for today?
           </Typography>
-          <Box sx={{ marginTop: 2, padding: "10px" }}>
             <UserDescriptionInput
               onSearchStart={handleSearchStart}
               onSaveSearch={handleSaveSearch}
@@ -128,7 +113,7 @@ const SearchPage = () => {
               </Box>
             )}
             {!isLoading && searchResults && searchResults.length > 0 && (
-              <SearchResults results={searchResults} />
+              <SearchResults results={searchResults} onSaveItem={handleSaveItem} />
             )}
             <SavedSearches
               savedSearches={savedSearches}
@@ -137,17 +122,16 @@ const SearchPage = () => {
             <Snackbar
               open={!!error}
               autoHideDuration={6000}
-              onClose={() => {}}
+              onClose={() => setError(null)}
             >
               <Alert
-                onClose={() => {}}
+                onClose={() => setError(null)}
                 severity="error"
                 sx={{ width: "100%" }}
               >
-                {error && error.message}
+                {error}
               </Alert>
             </Snackbar>
-          </Box>
         </Container>
         <Footer />
       </ThemeProvider>

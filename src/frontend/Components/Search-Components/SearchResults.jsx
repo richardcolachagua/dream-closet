@@ -8,7 +8,7 @@ import {
   Grid,
   Button,
 } from "@mui/material";
-import SaveForLaterButton from "./SaveForLaterButton";
+import SaveForLaterButton from "./Buttons/SaveForLaterButton";
 
 const SearchResults = ({ results, onSaveItem }) => {
   if (!results || results.length === 0) {

@@ -17,7 +17,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Footer from "../../Components/Footer";
 import SearchResults from "../../Components/Search-Components/SearchResults";
 import Header from "../../Components/Headers/Header";
-import FreeUserDescriptionInput from "../../Components/Search-Components/FreeUserInputDescription";
+import FreeUserDescriptionInput from "../../Components/Search-Components/Searchbars/FreeUserInputDescription";
 
 const FreeSearchPage = () => {
   const defaultTheme = createTheme();
