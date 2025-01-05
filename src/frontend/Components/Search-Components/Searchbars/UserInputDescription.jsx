@@ -116,7 +116,6 @@ function UserDescriptionInput({
         <SaveSearchButton
           sx={{
             flex: 1,
-
           }}
           onSave={handleSaveSearch}
         />

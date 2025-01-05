@@ -95,7 +95,7 @@ const SearchPage = () => {
               textAlign: "center", mb: 2
             }}
           >
-            What are we looking for today?
+            What clothes are we looking for today?
           </Typography>
             <UserDescriptionInput
               onSearchStart={handleSearchStart}
