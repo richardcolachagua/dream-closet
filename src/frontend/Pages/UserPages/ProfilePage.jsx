@@ -3,6 +3,13 @@ import Footer from "../../Components/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import {
+  getAuth,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from "firebase/auth";
 import {
   Box,
   TextField,
@@ -14,8 +21,10 @@ import {
   CssBaseline,
   Grid,
 } from "@mui/material";
-import axios from "axios";
 import UserHeader from "../../Components/Headers/ProfileHeader.jsx";
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
@@ -25,14 +34,20 @@ const validationSchema = Yup.object().shape({
     .required("Email is required"),
   currentPassword: Yup.string().required("Current password is required"),
   newPassword: Yup.string().min(8, "Password must be at least 8 characters"),
-  confirmNewPassword: Yup.string().when("newPassword", (newPassword, schema) => newPassword ? schema.oneOf([Yup.ref("newPassword")], "Passwords must match").required("Confirm Password is required") : schema
+  confirmNewPassword: Yup.string().when("newPassword", (newPassword, schema) =>
+    newPassword
+      ? schema
+          .oneOf([Yup.ref("newPassword")], "Passwords must match")
+          .required("Confirm Password is required")
+      : schema
   ),
 });
 
 const ProfilePage = () => {
   const defaultTheme = createTheme();
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState();
+  const [successMessage, setSuccessMessage] = useState("");
+  const auth = getAuth();
 
   const formik = useFormik({
     initialValues: {
@@ -46,38 +61,44 @@ const ProfilePage = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
+        // Handle password update separately
+        if (values.newPassword) {
+          const user = auth.currentUser;
+          const credential = EmailAuthProvider.credential(
+            user.email,
+            values.currentPassword
+          );
+          await reauthenticateWithCredential(user, credential);
+          await updatePassword(user, values.newPassword);
+          toast.success("Password updated successfully");
+        }
+
+        //Handle other profile updates
         const changedValues = Object.keys(values).reduce((acc, key) => {
           if (
             values[key] !== formik.initialValues[key] &&
-            key !== "currentPassword"
+            !["currentPassword", "newPassword", "confirmNewPassword"].includes(
+              key
+            )
           ) {
             acc[key] = values[key];
           }
           return acc;
         }, {});
 
-        if (Object.keys(changedValues).length === 0) {
-          setError(
-            "No changes detected. Please modify at least one field to update."
-          );
-          return;
-        }
+        if (Object.keys(changedValues).length > 0) {
+          const functions = getFunctions();
+          const updateProfile = httpsCallable(functions, "updateUserProfile");
+          const result = await updateProfile(changedValues);
+          console.log("Profile updated successfully:", result.data);
+          toast.success("Profile updated successfully");
 
-        const response = await axios.post("/api/update-profile", values);
-        console.log("Profile updated successfully:", response.data);
-        setSuccessMessage("Profile successfully updated");
+        }
         setError("");
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.error
-        ) {
-          setError(error.response.data.error);
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-        setSuccessMessage("");
+        console.error("Error updating profile:", error);
+        toast.error(error.message || "An error occurred. Please try again.");
+
       }
     },
   });
@@ -107,7 +128,7 @@ const ProfilePage = () => {
                 marginLeft: "20px",
               }}
             >
-              Welcome {formik.values.firsName}
+              Welcome {formik.values.firstName}
             </Typography>
             <Grid
               container
@@ -131,23 +152,24 @@ const ProfilePage = () => {
                     alignItems: "center",
                   }}
                 >
-                    <Typography
+                  <Typography
                     component="h1"
-              variant="h5"
-              sx={{
-                mb: 3,
-                fontWeight: "bold",
-                color: "black"}}
-            >
-              Update Your Profile
-            </Typography>
+                    variant="h5"
+                    sx={{
+                      mb: 3,
+                      fontWeight: "bold",
+                      color: "black",
+                    }}
+                  >
+                    Update Your Profile
+                  </Typography>
                   <form onSubmit={formik.handleSubmit}>
                     <TextField
                       fullWidth
                       id="firstName"
                       name="firstName"
                       label="First Name"
-                      variant="filled"
+                      variant="outlined"
                       value={formik.values.firstName}
                       onChange={formik.handleChange}
                       error={
@@ -165,7 +187,7 @@ const ProfilePage = () => {
                       id="lastName"
                       name="lastName"
                       label="Last Name"
-                      variant="filled"
+                      variant="outlined"
                       value={formik.values.lastName}
                       onChange={formik.handleChange}
                       error={
@@ -193,6 +215,24 @@ const ProfilePage = () => {
                     />
                     <TextField
                       fullWidth
+                      id="currentPassword"
+                      name="currentPassword"
+                      label="Current Password"
+                      type="password"
+                      value={formik.values.currentPassword}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.currentPassword &&
+                        Boolean(formik.errors.currentPassword)
+                      }
+                      helperText={
+                        formik.touched.currentPassword &&
+                        formik.errors.currentPassword
+                      }
+                      sx={{ mb: 2 }}
+                    />
+                    <TextField
+                      fullWidth
                       id="newPassword"
                       name="newPassword"
                       label="New Password"
@@ -209,24 +249,24 @@ const ProfilePage = () => {
                       sx={{ mb: 2 }}
                     />
 
-                        <TextField
-                          fullWidth
-                          id="confirmNewPassword"
-                          name="confirmNewPassword"
-                          label="Confirm New Password"
-                          type="password"
-                          value={formik.values.confirmNewPassword}
-                          onChange={formik.handleChange}
-                          error={
-                            formik.touched.confirmNewPassword &&
-                            Boolean(formik.errors.confirmNewPassword)
-                          }
-                          helperText={
-                            formik.touched.confirmNewPassword &&
-                            formik.errors.confirmNewPassword
-                          }
-                          sx={{ mb: 2 }}
-                        />
+                    <TextField
+                      fullWidth
+                      id="confirmNewPassword"
+                      name="confirmNewPassword"
+                      label="Confirm New Password"
+                      type="password"
+                      value={formik.values.confirmNewPassword}
+                      onChange={formik.handleChange}
+                      error={
+                        formik.touched.confirmNewPassword &&
+                        Boolean(formik.errors.confirmNewPassword)
+                      }
+                      helperText={
+                        formik.touched.confirmNewPassword &&
+                        formik.errors.confirmNewPassword
+                      }
+                      sx={{ mb: 2 }}
+                    />
                     {error && (
                       <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
@@ -263,8 +303,8 @@ const ProfilePage = () => {
           </Box>
         </ThemeProvider>
       </Box>
-
       <Footer />
+      <ToastContainer position="bottom-right" />
     </>
   );
 };
