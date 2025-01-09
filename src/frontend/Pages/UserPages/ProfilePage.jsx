@@ -25,13 +25,8 @@ const validationSchema = Yup.object().shape({
     .required("Email is required"),
   currentPassword: Yup.string().required("Current password is required"),
   newPassword: Yup.string().min(8, "Password must be at least 8 characters"),
-  confirmNewPassword: Yup.string().when("newPassword", {
-    is: (val) => val && val.length > 0,
-    then: Yup.string()
-      .oneOf([Yup.ref("newPassword")], "Passwords must match")
-      .required("Confirm Password is required when setting a new password"),
-    otherwise: Yup.string(),
-  }),
+  confirmNewPassword: Yup.string().when("newPassword", (newPassword, schema) => newPassword ? schema.oneOf([Yup.ref("newPassword")], "Passwords must match").required("Confirm Password is required") : schema
+  ),
 });
 
 const ProfilePage = () => {
@@ -213,8 +208,7 @@ const ProfilePage = () => {
                       }
                       sx={{ mb: 2 }}
                     />
-                    {formik.values.newPassword &&
-                      formik.values.newPassword.length > 0 && (
+
                         <TextField
                           fullWidth
                           id="confirmNewPassword"
@@ -233,7 +227,6 @@ const ProfilePage = () => {
                           }
                           sx={{ mb: 2 }}
                         />
-                      )}
                     {error && (
                       <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
