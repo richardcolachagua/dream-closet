@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "../../Components/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -16,38 +16,48 @@ import {
   Typography,
   Button,
   CircularProgress,
-  Alert,
   Container,
   CssBaseline,
   Grid,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import UserHeader from "../../Components/Headers/ProfileHeader.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../backend/firebase.js";
 
-const validationSchema = Yup.object().shape({
-  firstName: Yup.string().required("First Name is required"),
-  lastName: Yup.string().required("Last Name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  currentPassword: Yup.string().required("Current password is required"),
+const validationSchema = Yup.object({
+  firstName: Yup.string(),
+  lastName: Yup.string(),
+  email: Yup.string().email("Invalid email address"),
+
+  currentPassword: Yup.string().when("newPassword", {
+    is: (value) => Boolean(value),
+    then: (schema) =>
+      schema.required("Current password is required to change the password"),
+  }),
+
   newPassword: Yup.string().min(8, "Password must be at least 8 characters"),
-  confirmNewPassword: Yup.string().when("newPassword", (newPassword, schema) =>
-    newPassword
-      ? schema
-          .oneOf([Yup.ref("newPassword")], "Passwords must match")
-          .required("Confirm Password is required")
-      : schema
+
+  confirmNewPassword: Yup.string().oneOf(
+    [Yup.ref("newPassword")],
+    "Passwords must match"
   ),
 });
 
 const ProfilePage = () => {
   const defaultTheme = createTheme();
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const auth = getAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentUserInfo, setCurrentUserInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -61,47 +71,86 @@ const ProfilePage = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        // Handle password update separately
+        const user = auth.currentUser;
+        const updatedValues = {};
+        let passwordUpdated = false;
+
+        if (
+          values.firstName &&
+          values.firstName !== currentUserInfo.firstName
+        ) {
+          updatedValues.firstName = values.firstName;
+        }
+        if (values.lastName && values.lastName !== currentUserInfo.lastName) {
+          updatedValues.lastName = values.lastName;
+        }
+        if (values.email && values.email !== currentUserInfo.email) {
+          updatedValues.email = values.email;
+        }
+
         if (values.newPassword) {
-          const user = auth.currentUser;
+          if (!values.currentPassword) {
+            toast.error("Current password is required to change password");
+            return;
+          }
           const credential = EmailAuthProvider.credential(
             user.email,
             values.currentPassword
           );
           await reauthenticateWithCredential(user, credential);
           await updatePassword(user, values.newPassword);
-          toast.success("Password updated successfully");
+          passwordUpdated = true;
         }
-
-        //Handle other profile updates
-        const changedValues = Object.keys(values).reduce((acc, key) => {
-          if (
-            values[key] !== formik.initialValues[key] &&
-            !["currentPassword", "newPassword", "confirmNewPassword"].includes(
-              key
-            )
-          ) {
-            acc[key] = values[key];
-          }
-          return acc;
-        }, {});
-
-        if (Object.keys(changedValues).length > 0) {
+        if (Object.keys(updatedValues).length > 0) {
           const functions = getFunctions();
           const updateProfile = httpsCallable(functions, "updateUserProfile");
-          const result = await updateProfile(changedValues);
-          console.log("Profile updated successfully:", result.data);
-          toast.success("Profile updated successfully");
-
+          await updateProfile(updatedValues);
+          setCurrentUserInfo((prev) => ({ ...prev, ...updatedValues }));
         }
-        setError("");
+        if (passwordUpdated || Object.keys(updatedValues).length > 0) {
+          toast.success("Profile updated successfully");
+          formik.resetForm();
+        } else {
+          toast.info("No changes detected");
+        }
       } catch (error) {
         console.error("Error updating profile:", error);
-        toast.error(error.message || "An error occurred. Please try again.");
-
+        toast.error(error.message || "An error occurred.Please try again.");
       }
     },
   });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            setCurrentUserInfo({
+              firstName: userData.firstName || "",
+              lastName: userData.lastName || "",
+              email: user.email || "",
+            });
+            formik.setValues({
+              ...formik.values,
+              firstName: userData.firstName || "",
+              lastName: userData.lastName || "",
+              email: user.email || "",            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
+    fetchUserData();
+  }, [auth, formik]);
+ 
+  const handleTogglePasswordVisiblity = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <>
@@ -128,7 +177,7 @@ const ProfilePage = () => {
                 marginLeft: "20px",
               }}
             >
-              Welcome {formik.values.firstName}
+              Welcome {currentUserInfo.firstName}
             </Typography>
             <Grid
               container
@@ -180,6 +229,7 @@ const ProfilePage = () => {
                         formik.touched.firstName && formik.errors.firstName
                       }
                       sx={{ mb: 2 }}
+                      placeholder={currentUserInfo.firstName}
                     />
 
                     <TextField
@@ -198,6 +248,7 @@ const ProfilePage = () => {
                         formik.touched.lastName && formik.errors.lastName
                       }
                       sx={{ mb: 2 }}
+                      placeholder={currentUserInfo.lastName}
                     />
                     <TextField
                       fullWidth
@@ -212,13 +263,14 @@ const ProfilePage = () => {
                       }
                       helperText={formik.touched.email && formik.errors.email}
                       sx={{ mb: 2 }}
+                      placeholder={currentUserInfo.email}
                     />
                     <TextField
                       fullWidth
                       id="currentPassword"
                       name="currentPassword"
                       label="Current Password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={formik.values.currentPassword}
                       onChange={formik.handleChange}
                       error={
@@ -230,13 +282,29 @@ const ProfilePage = () => {
                         formik.errors.currentPassword
                       }
                       sx={{ mb: 2 }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={handleTogglePasswordVisiblity}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                     <TextField
                       fullWidth
                       id="newPassword"
                       name="newPassword"
                       label="New Password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={formik.values.newPassword}
                       onChange={formik.handleChange}
                       error={
@@ -247,14 +315,29 @@ const ProfilePage = () => {
                         formik.touched.newPassword && formik.errors.newPassword
                       }
                       sx={{ mb: 2 }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={handleTogglePasswordVisiblity}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
-
                     <TextField
                       fullWidth
                       id="confirmNewPassword"
                       name="confirmNewPassword"
                       label="Confirm New Password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={formik.values.confirmNewPassword}
                       onChange={formik.handleChange}
                       error={
@@ -266,17 +349,23 @@ const ProfilePage = () => {
                         formik.errors.confirmNewPassword
                       }
                       sx={{ mb: 2 }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={handleTogglePasswordVisiblity}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
-                    {error && (
-                      <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                      </Alert>
-                    )}
-                    {successMessage && (
-                      <Alert severity="success" sx={{ mb: 2 }}>
-                        {successMessage}
-                      </Alert>
-                    )}
                     <Button
                       type="submit"
                       variant="contained"

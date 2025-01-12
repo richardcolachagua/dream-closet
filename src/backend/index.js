@@ -2,6 +2,10 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const axios = require("axios");
 
+admin.initializeApp();
+
+//const db = admin.firestore();
+
 exports.updateUserProfile = functions.https.onCall(async (data, context) => {
   // Ensure the user is authenticated
   if (!context.auth) {
@@ -38,13 +42,13 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
 
     await Promise.all(updatePromises);
 
-    //Update user data in Firestore
+    // Update user data in Firestore
     const userRef = admin.firestore().collection("users").doc(uid);
-    await userRef.update({
+    await userRef.set({
       firstName,
       lastName,
       email,
-    });
+    }, { merge: true });
 
     return { message: "Profile updated successfully" };
   } catch (error) {
@@ -54,11 +58,7 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
       "An error occurred while updating the profile"
     );
   }
-})[1][2][4];
-
-admin.initializeApp();
-
-const db = admin.firestore();
+});
 
 exports.search = functions.https.onCall(async (data, context) => {
   const { query } = data;
@@ -99,11 +99,13 @@ exports.search = functions.https.onCall(async (data, context) => {
     return transformedResults;
   } catch (error) {
     console.error("Search error", error);
-    throw new functions.HttpsError(
+    throw new functions.https.HttpsError(
       "internal",
       "An error occurred during search"
     );
   }
 });
 
-exports.saveItem = functions.https;
+exports.saveItem = functions.https.onCall(async (data, context) => {
+  // Implement your saveItem logic here
+});
