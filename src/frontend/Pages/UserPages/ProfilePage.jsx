@@ -135,10 +135,11 @@ const ProfilePage = () => {
               email: user.email || "",
             });
             formik.setValues({
-              ...formik.values,
               firstName: userData.firstName || "",
               lastName: userData.lastName || "",
-              email: user.email || "",            });
+              email: user.email || "",
+              
+            });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -147,7 +148,7 @@ const ProfilePage = () => {
     };
     fetchUserData();
   }, [auth, formik]);
- 
+
   const handleTogglePasswordVisiblity = () => {
     setShowPassword(!showPassword);
   };
@@ -229,7 +230,7 @@ const ProfilePage = () => {
                         formik.touched.firstName && formik.errors.firstName
                       }
                       sx={{ mb: 2 }}
-                      placeholder={currentUserInfo.firstName}
+                   
                     />
 
                     <TextField
@@ -248,7 +249,7 @@ const ProfilePage = () => {
                         formik.touched.lastName && formik.errors.lastName
                       }
                       sx={{ mb: 2 }}
-                      placeholder={currentUserInfo.lastName}
+                 
                     />
                     <TextField
                       fullWidth
@@ -263,7 +264,6 @@ const ProfilePage = () => {
                       }
                       helperText={formik.touched.email && formik.errors.email}
                       sx={{ mb: 2 }}
-                      placeholder={currentUserInfo.email}
                     />
                     <TextField
                       fullWidth

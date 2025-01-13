@@ -4,7 +4,7 @@ const axios = require("axios");
 
 admin.initializeApp();
 
-//const db = admin.firestore();
+const db = admin.firestore();
 
 exports.updateUserProfile = functions.https.onCall(async (data, context) => {
   // Ensure the user is authenticated
