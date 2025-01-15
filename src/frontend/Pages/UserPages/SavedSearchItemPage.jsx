@@ -1,12 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
-  Typography,
-  CssBaseline,
-  CircularProgress,
-  Snackbar,
-  Alert,
-  Container,
+  CssBaseline
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SavedSearches from "../../Components/Search-Components/SavedSearches";

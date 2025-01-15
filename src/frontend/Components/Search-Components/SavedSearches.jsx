@@ -2,18 +2,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
-  Container,
   Grid,
   Card,
   CardContent,
   IconButton,
-  CircularProgress,
   CssBaseline,
   Stack,
+  Skeleton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 
 const useSavedItems = () => {
@@ -43,10 +42,35 @@ const useSavedItems = () => {
   return { savedItems, isLoading, fetchSavedItems, setSavedItems };
 };
 
-const SavedSearches = ({ savedSearches, onDeleteSearch }) => {
+const useSavedSearches = () => {
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [isLoadingSearches, setIsLoadingSearches] = useState(true);
+
+  const fetchSavedSearches = useCallback(async () => {
+    try {
+      setIsLoadingSearches(true);
+      const querySnapshot = await getDocs(collection(db, "saved-searches"));
+      const searches = querySnapshot.docs.map((doc) => ({
+        id: doc.id, ...doc.data(),
+      }));
+      setSavedSearches(searches);
+    } catch (error) {
+      console.error("Error fetching saved searches", error);
+    } finally {
+      setIsLoadingSearches(false);
+    }
+  }, []);
+  useEffect(() => {
+    fetchSavedSearches();
+  }, [fetchSavedSearches]);
+  return {savedSearches, isLoadingSearches, fetchSavedSearches, setSavedSearches };
+};
+
+const SavedSearches = () => {
   const defaultTheme = createTheme();
-  const { savedItems, isLoading, setSavedItems } = useSavedItems();
+  const { savedItems, isLoading: isLoadingItems, setSavedItems } = useSavedItems();
   
+  const { savedSearches, isLoadingSearches, setSavedSearches } = useSavedSearches();
 
 const handleDeleteItem = async (itemId) => {
   try {
@@ -57,20 +81,14 @@ const handleDeleteItem = async (itemId) => {
   }
 };
 
-if (isLoading) {
-    return (
-      <Container>
-        <Box
-          display="flex"
-          justifyContent="content"
-          alignItems="center"
-          height="200px"
-        >
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
+const handleDeleteSearch = async (searchId) => {
+  try {
+    await deleteDoc(doc(db, "saved-searches", searchId));
+    setSavedSearches(savedSearches.filter((search) => search.id !== searchId));
+  } catch (error) {
+    console.error("Error deleting saved search", error);
   }
+}
 
   return (
       <Box
@@ -116,8 +134,14 @@ if (isLoading) {
                 Saved Items
               </Typography>
               <Grid container spacing={2}>
-                {savedItems.length > 0 ? (
-                  savedItems.map((item) => (
+              {isLoadingItems ? (
+                [1, 2, 3].map((item) => (
+                  <Grid item xs={12} sm={6} md={4} key={item}>
+                    <Skeleton variant="rectangular" height={200} />
+                  </Grid>
+                ))
+              ) : savedItems.length > 0 ? (
+                savedItems.map((item) => (
                     <Grid item xs={12} sm={6} md={4} key={item.id}>
                       <Card>
                         <CardContent>
@@ -157,9 +181,16 @@ if (isLoading) {
               >
                 Saved Searches
               </Typography>
-              <Grid container spacing={2}>
-                {savedSearches.length > 0 ? (
-                  savedSearches.map((search) => (
+
+                <Grid container spacing={2}>
+              {isLoadingSearches ? (
+                [1, 2, 3].map((item) => (
+                  <Grid item xs={12} sm={6} md={4} key={item}>
+                    <Skeleton variant="rectangular" height={200} />
+                  </Grid>
+                ))
+              ) : savedSearches.length > 0 ? (
+                savedSearches.map((search) => (
                     <Grid item xs={12} sm={6} md={4} key={search.id}>
                       <Card>
                         <CardContent>
@@ -167,7 +198,7 @@ if (isLoading) {
                           <Typography variant="body2">
                             Date: {new Date(search.date).toLocaleDateString()}{" "}
                           </Typography>
-                          <IconButton onClick={() => onDeleteSearch(search.id)}>
+                          <IconButton onClick={() => handleDeleteSearch(search.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </CardContent>
@@ -187,6 +218,6 @@ if (isLoading) {
         </ThemeProvider>
       </Box>
   );
-};
+}
 
 export default SavedSearches;

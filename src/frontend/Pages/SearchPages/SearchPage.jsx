@@ -3,7 +3,6 @@ import { Box, Typography, CssBaseline, CircularProgress, Snackbar, Alert, Contai
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import UserDescriptionInput from "../../Components/Search-Components/Searchbars/UserInputDescription";
 import SearchResults from "../../Components/Search-Components/SearchResults";
-import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import Footer from "../../Components/Footer";
 import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
 import { addDoc, collection, deleteDoc, doc } from "firebase/firestore";
@@ -117,10 +116,7 @@ const SearchPage = () => {
             {!isLoading && searchResults && searchResults.length > 0 && (
               <SearchResults results={searchResults} onSaveItem={handleSaveItem} />
             )}
-               <SavedSearches
-              savedSearches={savedSearches}
-              onDeleteSearch={handleDeleteSearch}
-            />
+           
             <Snackbar
               open={!!error}
               autoHideDuration={6000}
