@@ -23,7 +23,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import UserHeader from "../../Components/Headers/ProfileHeader.jsx";
+import ProfilePageHeader from "../../Components/Headers/ProfilePageHeader.jsx"
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -167,7 +167,7 @@ const ProfilePage = () => {
         }}
       >
         <ThemeProvider theme={defaultTheme}>
-          <UserHeader />
+          <ProfilePageHeader />
           <Box my={4}>
             <Typography
               variant="h3"

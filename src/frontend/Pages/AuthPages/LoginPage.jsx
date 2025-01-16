@@ -8,6 +8,8 @@ import {
   Container,
   CssBaseline,
   CircularProgress,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -22,6 +24,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../../../backend/firebase";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const defaultTheme = createTheme();
 
@@ -35,6 +38,7 @@ const validationSchema = Yup.object().shape({
 const LoginPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -75,6 +79,9 @@ const LoginPage = () => {
       console.error("Google sign-in failed:", error);
       setError("Google sign-in failed. Please try again.");
     }
+  };
+  const handleTogglePasswordVisiblity = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -151,6 +158,19 @@ const LoginPage = () => {
                     formik.touched.password && Boolean(formik.errors.password)
                   }
                   helperText={formik.touched.password && formik.errors.password}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisiblity}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 {error && (
                   <Typography variant="body2" color="error">
