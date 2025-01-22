@@ -19,7 +19,7 @@ function ProfileHeader() {
             <Button
               key={index}
               component={RouterLink}
-              to={`/${page.toLowerCase()}`}
+              to="/homepage"
               sx={{
                 marginRight: "10px",
                 color: "white",

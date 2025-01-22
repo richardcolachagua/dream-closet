@@ -122,9 +122,7 @@ const HomePage = () => {
             Example: "A pink strapless dress with a
             slit on the left side"
           </Typography>
-          <Container sx={{
-            marginBottom: "20px"
-          }}>
+          <Container>
             <AnimatedSearchBar />
           </Container>
           <Container>
