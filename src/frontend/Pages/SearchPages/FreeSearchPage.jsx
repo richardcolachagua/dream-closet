@@ -18,6 +18,8 @@ import Footer from "../../Components/Footer";
 import SearchResults from "../../Components/Search-Components/SearchResults";
 import Header from "../../Components/Headers/Header";
 import FreeUserDescriptionInput from "../../Components/Search-Components/Searchbars/FreeUserInputDescription";
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 const FreeSearchPage = () => {
   const defaultTheme = createTheme();
@@ -25,30 +27,36 @@ const FreeSearchPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSignUpDialog, setShowSignUpDialog] = useState(false);
-  const [searchCount, setSearchCount] = useState(() => {
-    const savedCount = localStorage.getItem("searchCount");
-    const savedTime = localStorage.getItem("lastSearchTime");
-    if (savedCount && savedTime) {
-      const lastSearchTime = new Date(savedTime);
-      if (new Date() - lastSearchTime < 24 * 60 * 60 * 1000) {
-        return parseInt(savedCount, 10);
-      }
+  const [remainingSearches, setRemainingSearches] = useState(3);
+  const [resetTime, setResetTime] = useState(null);
+  const analytics = getAnalytics();
+
+  const checkSearchLimit = async () => {
+    setIsLoading(true);
+    try {
+      const functions = getFunctions();
+      const result = await httpsCallable(functions, "checkSearchLimit")();
+      setRemainingSearches(result.data.remainingSearches);
+      setResetTime(result.data.resetTime);
+    } catch (error) {
+      console.error("Error checking search limit", error);
+      setError("Error checking search limit. Please try again.");
+    } finally {
+      setIsLoading(true);
     }
-    return 3;
-  });
+  };
+
+  useEffect(() => {
+    checkSearchLimit();
+  }, []);
 
   const handleSearchResults = (results) => {
     setSearchResults(results);
     setIsLoading(false);
-
-    const newCount = searchCount - 1;
-    setSearchCount(newCount);
-    localStorage.setItem("searchCount", newCount.toString());
-    localStorage.setItem("lastSearchTime", new Date().toISOString())
-
-    if (newCount <= 0) {
-      setShowSignUpDialog(true);
-    }
+    checkSearchLimit();
+    logEvent(analytics, "free_search", {
+      search_term: results.length > 0 ? results[0].query : "unknown",
+    });
   };
 
   const handleSearchStart = () => {
@@ -59,52 +67,34 @@ const FreeSearchPage = () => {
   const handleSearchError = (errorMessage) => {
     setError(errorMessage);
     setIsLoading(false);
+    logEvent(analytics, "search_error", { error_message: errorMessage });
   };
-
-  useEffect(() => {
-    const checkAndResetSearchCount = () => {
-      const savedTime = localStorage.getItem("lastSearchTime");
-      if (savedTime) {
-        const lastSearchTime = new Date(savedTime);
-        if (new Date() - lastSearchTime >= 24 * 60 * 60 * 1000) {
-          setSearchCount(3);
-          localStorage.setItem("searchCount", "3");
-          localStorage.removeItem("lastSearchItem");
-        }
-      }
-    };
-
-    const interval = setInterval(checkAndResetSearchCount, 60000);
-    return () => clearInterval(interval);
-  }, []);
 
   const Timer = () => {
     const [timeRemaining, setTimeRemaining] = useState("");
 
     useEffect(() => {
       const updateTimer = () => {
-        const savedTime = localStorage.getItem("lastSearchTime");
-        if (savedTime) {
-          const lastSearchTime = new Date(savedTime);
-          const timeDiff = 24 * 60 * 60 * 1000 - (new Date() - lastSearchTime);
+        if (resetTime) {
+          const now = new Date();
+          const timeDiff = new Date(resetTime) - now;
           if (timeDiff > 0) {
-            const hours = Math.floor((timeDiff / 60) * 60 * 1000);
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
             const minutes = Math.floor(
-              (timeDiff % (60 * 60 * 1000)) / (60 * 1000)
+              (timeDiff % (1000 * 60 * 60)) / (1000 * 60)
             );
             setTimeRemaining(`${hours}h ${minutes}m`);
           } else {
             setTimeRemaining("");
+            checkSearchLimit();
           }
-        } else {
-          setTimeRemaining("");
         }
       };
 
       updateTimer();
       const interval = setInterval(updateTimer, 600000);
       return () => clearInterval(interval);
-    }, []);
+    }, [resetTime]);
 
     return timeRemaining ? (
       <Typography variant="body2" sx={{ color: "white", textAlign: "center" }}>
@@ -142,8 +132,8 @@ const FreeSearchPage = () => {
             sx={{
               color: "white",
               fontWeight: "bold",
-              display: "flex",
-              justifyContent: "center",
+              textAlign: "center",
+              mb: 2,
             }}
           >
             Try Dream Closet
@@ -153,12 +143,11 @@ const FreeSearchPage = () => {
             sx={{
               color: "white",
               fontWeight: "bold",
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "10px",
+              textAlign: "center",
+              mb: 2,
             }}
           >
-            {searchCount} searches remaining
+            {remainingSearches} searches remaining
           </Typography>
           <Timer />
           <Box sx={{ marginTop: 2, padding: "10px" }}>
@@ -166,6 +155,7 @@ const FreeSearchPage = () => {
               onSearchStart={handleSearchStart}
               onSearchResults={handleSearchResults}
               onSearchError={handleSearchError}
+              remainingSearches={remainingSearches}
             />
             {isLoading && (
               <Box

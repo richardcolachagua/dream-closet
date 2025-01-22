@@ -23,7 +23,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import ProfilePageHeader from "../../Components/Headers/ProfilePageHeader.jsx"
+import ProfilePageHeader from "../../Components/Headers/ProfilePageHeader.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -138,7 +138,6 @@ const ProfilePage = () => {
               firstName: userData.firstName || "",
               lastName: userData.lastName || "",
               email: user.email || "",
-              
             });
           }
         } catch (error) {
@@ -230,7 +229,6 @@ const ProfilePage = () => {
                         formik.touched.firstName && formik.errors.firstName
                       }
                       sx={{ mb: 2 }}
-                   
                     />
 
                     <TextField
@@ -249,7 +247,6 @@ const ProfilePage = () => {
                         formik.touched.lastName && formik.errors.lastName
                       }
                       sx={{ mb: 2 }}
-                 
                     />
                     <TextField
                       fullWidth
