@@ -33,10 +33,12 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
           md={viewMode === "list" ? 12 : 3}
           key={product.id}
         >
-          <Card sx={{ display: "flex", flexDirection: "column" }}>
+          <Card
+            sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+          >
             <CardMedia
               component="img"
-              image={`https://${product.imageUrl}`}
+              image={product.imageUrl}
               alt={product.name}
               sx={{
                 objectFit: "cover",
@@ -63,7 +65,7 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
                   fontWeight: "bold",
                 }}
               >
-                {product.price.current.text}
+                {product.price}
               </Typography>
             </CardContent>
             <CardActions
@@ -83,10 +85,10 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
                   backgroundColor: "turquoise",
                   color: "black",
                 }}
-                href={`https://www.asos.com/${product.url}`}
+                href={product.url}
                 target="_blank"
               >
-                View on ASOS
+                View Product
               </Button>
             </CardActions>
           </Card>

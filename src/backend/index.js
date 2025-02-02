@@ -1,10 +1,15 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const axios = require("axios");
+const rateLimit = require("express-rate-limit");
 
 admin.initializeApp();
 
 const db = admin.firestore();
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per WindowMs
+});
 
 exports.updateUserProfile = functions.https.onCall(async (data, context) => {
   // Ensure the user is authenticated
@@ -44,11 +49,14 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
 
     // Update user data in Firestore
     const userRef = admin.firestore().collection("users").doc(uid);
-    await userRef.set({
-      firstName,
-      lastName,
-      email,
-    }, { merge: true });
+    await userRef.set(
+      {
+        firstName,
+        lastName,
+        email,
+      },
+      { merge: true }
+    );
 
     return { message: "Profile updated successfully" };
   } catch (error) {
@@ -58,54 +66,4 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
       "An error occurred while updating the profile"
     );
   }
-});
-
-exports.search = functions.https.onCall(async (data, context) => {
-  const { query } = data;
-  const API_KEY = "your-rapidapi-key";
-  const API_HOST = "asos2.p.rapidapi.com";
-
-  try {
-    const options = {
-      method: "GET",
-      url: "https://asos2.p.rapidapi.com/products/v2/list",
-      params: {
-        store: "US",
-        offset: "0",
-        categoryId: "4209",
-        country: "US",
-        sort: "freshness",
-        currency: "USD",
-        sizeSchema: "US",
-        limit: "48",
-        lang: "en-US",
-        q: query,
-      },
-      headers: {
-        "x-rapidapi-key": API_KEY,
-        "x-rapidapi-host": API_HOST,
-      },
-    };
-    const response = await axios.request(options);
-
-    const transformedResults = response.data.products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.price.current.text,
-      image: product.imageUrl,
-    }));
-
-    return transformedResults;
-  } catch (error) {
-    console.error("Search error", error);
-    throw new functions.https.HttpsError(
-      "internal",
-      "An error occurred during search"
-    );
-  }
-});
-
-exports.saveItem = functions.https.onCall(async (data, context) => {
-  // Implement your saveItem logic here
 });
