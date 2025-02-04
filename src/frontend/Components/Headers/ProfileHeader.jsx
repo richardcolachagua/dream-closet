@@ -49,6 +49,20 @@ function ProfileHeader() {
           </Button>
           <Button
             component={RouterLink}
+            to="/profilepage"
+            variant="contained"
+            sx={{
+              marginRight: "10px",
+              backgroundColor: "turquoise",
+              textTransform: "none",
+              fontSize: "15px",
+              fontWeight: "bold",
+            }}
+          >
+            Profile
+          </Button>
+          <Button
+            component={RouterLink}
             variant="outlined"
             to="/signuppage"
             sx={{

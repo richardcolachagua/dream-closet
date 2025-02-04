@@ -35,6 +35,20 @@ function SearchPageHeader() {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button
             component={RouterLink}
+            to="/SavedItemsAndSearches"
+            variant="contained"
+            sx={{
+              marginRight: "10px",
+              backgroundColor: "turquoise",
+              textTransform: "none",
+              fontSize: "15px",
+              fontWeight: "bold",
+            }}
+          >
+            Saved Searches
+          </Button>
+          <Button
+            component={RouterLink}
             to="/profilepage"
             variant="contained"
             sx={{
@@ -47,6 +61,7 @@ function SearchPageHeader() {
           >
             Profile
           </Button>
+
           <Button
             component={RouterLink}
             variant="outlined"

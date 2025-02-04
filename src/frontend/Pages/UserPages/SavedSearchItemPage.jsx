@@ -1,12 +1,9 @@
 import React from "react";
-import {
-  Box,
-  CssBaseline
-} from "@mui/material";
+import { Box, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import Footer from "../../Components/Footer";
-import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
+import ProfileHeader from "../../Components/Headers/ProfileHeader";
 
 const defaultTheme = createTheme();
 
@@ -25,7 +22,7 @@ const SavedItemsAndSearches = () => {
       }}
     >
       <ThemeProvider theme={defaultTheme}>
-        <SearchPageHeader />
+        <ProfileHeader />
         <CssBaseline />
         <SavedSearches />
         <Footer />

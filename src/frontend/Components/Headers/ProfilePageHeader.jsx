@@ -45,6 +45,20 @@ function SearchPageHeader() {
               fontWeight: "bold",
             }}
           >
+            Saved Searches
+          </Button>
+          <Button
+            component={RouterLink}
+            to="/Searchpage"
+            variant="contained"
+            sx={{
+              marginRight: "10px",
+              backgroundColor: "turquoise",
+              textTransform: "none",
+              fontSize: "15px",
+              fontWeight: "bold",
+            }}
+          >
             Searches
           </Button>
           <Button

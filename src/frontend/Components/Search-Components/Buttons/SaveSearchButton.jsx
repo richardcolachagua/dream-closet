@@ -1,12 +1,14 @@
 import React from "react";
 import { Button } from "@mui/material";
 
-function SaveSearchButton({ onSave }) {
+function SaveSearchButton({ onSave, disabled }) {
   const handleSaveSearch = () => {
     onSave();
   };
   return (
-       <Button variant="contained"  sx={{
+    <Button
+      variant="contained"
+      sx={{
         bgcolor: "primary.main",
         "&:hover": { bgcolor: "primary.dark" },
         mr: 2,
@@ -15,10 +17,12 @@ function SaveSearchButton({ onSave }) {
         color: "black",
         fontWeight: "bold",
         fontSize: "15px",
-          
-          }} onClick={handleSaveSearch}>
-          Save Search
-        </Button>
+      }}
+      onClick={handleSaveSearch}
+      disabled={Boolean(disabled)}
+    >
+      Save Search
+    </Button>
   );
 }
 
