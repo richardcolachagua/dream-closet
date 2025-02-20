@@ -3,7 +3,7 @@ import { Box, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import Footer from "../../Components/Footer";
-import ProfileHeader from "../../Components/Headers/ProfileHeader";
+import ProfileHeader from "../../Components/Headers/SavedSearchHeader";
 
 const defaultTheme = createTheme();
 
