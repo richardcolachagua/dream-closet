@@ -15,29 +15,27 @@ function UserDescriptionInput({
   const [isLoading, setIsLoading] = useState(false);
 
   const searchAsos = async (query) => {
+    const options = {
+      method: "GET",
+      url: "https://asos2.p.rapidapi.com/products/v2/list",
+      params: {
+        store: "US",
+        offset: "0",
+        categoryId: "4209",
+        limit: "48",
+        country: "US",
+        sort: "freshness",
+        q: query,
+        currency: "USD",
+        sizeSchema: "US",
+        lang: "en-US",
+      },
+      headers: {
+        "x-rapidapi-key": "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
+        "x-rapidapi-host": "asos2.p.rapidapi.com",
+      },
+    };
     try {
-      const options = {
-        method: "GET",
-        url: "https://asos2.p.rapidapi.com/products/v2/list",
-        params: {
-          store: "US",
-          offset: "0",
-          categoryId: "4209",
-          limit: "48",
-          country: "US",
-          sort: "freshness",
-          q: query,
-          currency: "USD",
-          sizeSchema: "US",
-          lang: "en-US",
-        },
-        headers: {
-          "x-rapidapi-key":
-            "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
-          "x-rapidapi-host": "asos2.p.rapidapi.com",
-        },
-      };
-
       const response = await axios.request(options);
       return response.data.products;
     } catch (error) {
@@ -46,58 +44,32 @@ function UserDescriptionInput({
     }
   };
 
-  const searchAdditionalAPIs = async (query) => {
+  const searchRealTimeProducts = async (query) => {
+    const options = {
+      method: "GET",
+      url: "https://real-time-product-search.p.rapidapi.com/search-v2",
+      params: {
+        q: query,
+        country: "us",
+        language: "en",
+        page: "1",
+        limit: "48",
+        sort_by: "BEST_MATCH",
+        product_condition: "ANY",
+        return_filters: "true",
+      },
+      headers: {
+        "x-rapidapi-key": "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
+        "x-rapidapi-host": "real-time-product-search.p.rapidapi.com",
+      },
+    };
+
     try {
-      if (!query || query.length < 3) {
-        return { amazonResults: [], depopResults: [] };
-      }
-
-      const realTimeOptions = {
-        method: "GET",
-        url: "https://real-time-product-search.p.rapidapi.com/store-reviews",
-        params: {
-          store_domain: "amazon.com",
-          limit: "10",
-          q: query,
-          country: "us",
-        },
-        headers: {
-          "x-rapidapi-key":
-            "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
-          "x-rapidapi-host": "real-time-product-search.p.rapidapi.com",
-        },
-      };
-
-      const [realTimeResponse, depopResponse] = await Promise.allSettled([
-        axios.request(realTimeOptions),
-        axios.get("https://depop3.p.rapidapi.com/search", {
-          params: {
-            query: encodeURIComponent(query),
-            country: "US",
-            limit: "10",
-          },
-          headers: {
-            "x-rapidapi-key":
-              "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
-            "x-rapidapi-host": "depop3.p.rapidapi.com",
-          },
-          timeout: 5000,
-        }),
-      ]);
-
-      return {
-        amazonResults:
-          realTimeResponse.status === "fulfilled"
-            ? realTimeResponse.value.data?.reviews || []
-            : [],
-        depopResults:
-          depopResponse.status === "fulfilled"
-            ? depopResponse.value.data?.products || []
-            : [],
-      };
+      const response = await axios.request(options);
+      return response.data.products;
     } catch (error) {
-      console.error("Additional API Error:", error);
-      return { amazonResults: [], depopResults: [] };
+      console.error("Real-Time Product Search API Error:", error);
+      throw error;
     }
   };
 
@@ -110,35 +82,29 @@ function UserDescriptionInput({
     setIsLoading(true);
 
     try {
-      const [asosResults, additionalResults] = await Promise.all([
+      const [asosResults, realTimeResults] = await Promise.all([
         searchAsos(description),
-        searchAdditionalAPIs(description),
+        searchRealTimeProducts(description),
       ]);
+      console.log("ASOS results:", asosResults);
+      console.log("Real-Time Product Search results:", realTimeResults);
 
       const combinedResults = [
-        ...(asosResults || []).map((product) => ({
+        ...asosResults.map((product) => ({
           id: product.id,
           name: product.name,
-          price: product.price?.current?.text || "Price unavailable",
-          imageUrl: product.imageUrl ? `https://${product.imageUrl}` : "",
-          productUrl: product.url ? `https://www.asos.com/${product.url}` : "",
+          price: product.price.current.text,
+          imageUrl: `https://${product.imageUrl}`,
+          productUrl: `https://www.asos.com/${product.url}`,
           source: "ASOS",
         })),
-        ...(additionalResults.amazonResults || []).map((review) => ({
-          id: review.id,
-          name: review.title,
-          price: "N/A",
-          imageUrl: review.image_url || "",
-          productUrl: review.product_url || "",
-          source: "Amazon",
-        })),
-        ...(additionalResults.depopResults || []).map((product) => ({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          imageUrl: product.image_url,
-          productUrl: product.url,
-          source: "Depop",
+        ...realTimeResults.map((product) => ({
+          id: product.product_id,
+          name: product.product_title,
+          price: product.offer.price,
+          imageUrl: product.product_photos[0],
+          productUrl: product.product_page_url,
+          source: product.seller.name,
         })),
       ];
 

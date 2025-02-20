@@ -67,6 +67,9 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
               >
                 {product.price}
               </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Source: {product.source}
+              </Typography>
             </CardContent>
             <CardActions
               sx={{
@@ -85,7 +88,7 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
                   backgroundColor: "turquoise",
                   color: "black",
                 }}
-                href={product.url}
+                href={product.productUrl}
                 target="_blank"
               >
                 View Product
