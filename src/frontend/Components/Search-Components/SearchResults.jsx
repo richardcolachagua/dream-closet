@@ -38,8 +38,8 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
           >
             <CardMedia
               component="img"
-              image={product.imageUrl}
-              alt={product.name}
+              image={product.imageUrl || ""}
+              alt={product.name || ""}
               sx={{
                 objectFit: "cover",
                 width: "100%",
@@ -47,6 +47,7 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
                 flexGrow: 1,
               }}
             />
+
             <CardContent sx={{ flexGrow: 1 }}>
               <Typography
                 gutterBottom

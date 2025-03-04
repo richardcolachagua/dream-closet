@@ -66,7 +66,8 @@ function UserDescriptionInput({
 
     try {
       const response = await axios.request(options);
-      return response.data.products;
+      console.log("Real-Time Product Search Raw Response:", response.data);
+      return response.data?.data?.products || [];
     } catch (error) {
       console.error("Real-Time Product Search API Error:", error);
       throw error;
@@ -90,23 +91,27 @@ function UserDescriptionInput({
       console.log("Real-Time Product Search results:", realTimeResults);
 
       const combinedResults = [
-        ...asosResults.map((product) => ({
+        ...(Array.isArray(asosResults) ? asosResults : []).map((product) => ({
           id: product.id,
           name: product.name,
-          price: product.price.current.text,
-          imageUrl: `https://${product.imageUrl}`,
-          productUrl: `https://www.asos.com/${product.url}`,
+          price: product.price?.current?.text || "Price unavailable",
+          imageUrl: product.imageUrl ? `https://${product.imageUrl}` : "",
+          productUrl: product.url ? `https://www.asos.com/${product.url}` : "",
           source: "ASOS",
         })),
-        ...realTimeResults.map((product) => ({
-          id: product.product_id,
-          name: product.product_title,
-          price: product.offer.price,
-          imageUrl: product.product_photos[0],
-          productUrl: product.product_page_url,
-          source: product.seller.name,
-        })),
+        ...(Array.isArray(realTimeResults) ? realTimeResults : []).map(
+          (product) => ({
+            id: product.product_id,
+            name: product.product_title,
+            price: product.offer?.price || "Price unavailable",
+            imageUrl: product.product_photos?.[0] || "",
+            productUrl: product.offer?.offer_page_url || "",
+            source: product.offer?.store_name || "Unknown",
+          })
+        ),
       ];
+
+      console.log("Combined Results:", combinedResults);
 
       onSearchResults(combinedResults);
     } catch (error) {
@@ -169,7 +174,7 @@ function UserDescriptionInput({
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={isLoading}
+          disabled={isLoading || description.trim() === ""}
           sx={{
             bgcolor: "primary.main",
             "&:hover": { bgcolor: "primary.dark" },
@@ -188,6 +193,7 @@ function UserDescriptionInput({
             flex: 1,
           }}
           onSave={() => handleSaveSearch(description)}
+          disabled={isLoading || description.trim() === ""}
         />
       </Box>
     </Box>
