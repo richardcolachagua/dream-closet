@@ -47,16 +47,16 @@ function UserDescriptionInput({
   const searchRealTimeProducts = async (query) => {
     const options = {
       method: "GET",
-      url: "https://real-time-product-search.p.rapidapi.com/search-v2",
+      url: "https://real-time-product-search.p.rapidapi.com/search",
       params: {
         q: query,
-        country: "us",
+        country: "uk",
         language: "en",
         page: "1",
-        limit: "48",
+        limit: "10",
         sort_by: "BEST_MATCH",
         product_condition: "ANY",
-        return_filters: "true",
+        min_rating: "ANY",
       },
       headers: {
         "x-rapidapi-key": "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",

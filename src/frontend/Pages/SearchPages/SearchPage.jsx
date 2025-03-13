@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -16,7 +16,7 @@ import SearchResults from "../../Components/Search-Components/SearchResults";
 import Footer from "../../Components/Footer";
 import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
 import { addDoc, collection, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../../backend/firebase";
+import { db, auth } from "../../../backend/firebase";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
 
@@ -28,6 +28,15 @@ const SearchPage = () => {
   const [error, setError] = useState(null);
   const [savedSearches, setSavedSearches] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const ViewToggle = ({ viewMode, onViewChange }) => (
     <ToggleButtonGroup
@@ -65,7 +74,13 @@ const SearchPage = () => {
   };
 
   const handleSearchResults = async (results) => {
-    setSearchResults(results);
+    const resultsWithSource = results.map((result) => ({
+      ...result,
+      source:
+        result.source ||
+        (result.id.toString().startsWith("asos") ? "ASOS" : "RealTimeSearch"),
+    }));
+    setSearchResults(resultsWithSource);
     setIsloading(false);
   };
 
@@ -177,6 +192,7 @@ const SearchPage = () => {
                 results={searchResults}
                 onSaveItem={handleSaveItem}
                 viewMode={viewMode}
+                userId={currentUser?.uid}
               />
             </>
           )}

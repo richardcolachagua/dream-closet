@@ -13,22 +13,48 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-function SaveForLaterButton({ item, userId }) {
+function SaveForLaterButton({ item, userId, source }) {
   const [isSaved, setIsSaved] = useState(false);
 
-  useEffect(() => {
-    checkIfSaved();
-  }, []);
-
-  const checkIfSaved = async () => {
-    const q = query(
-      collection(db, "saved-items"),
-      where("itemId", "==", item.id),
-      where("user-id", "==", userId)
-    );
-    const querySnapshot = await getDocs(q);
-    setIsSaved(!querySnapshot.empty);
+  const createUnifiedItemStructure = (item, source) => {
+    if (source === "ASOS") {
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price?.current?.text || "Price unavailable",
+        imageUrl: item.imageUrl ? `https://${item.imageUrl}` : "",
+        productUrl: item.url ? `https://www.asos.com/${item.url}` : "",
+        source: "ASOS",
+      };
+    } else if (source === "RealTimeSearch") {
+      return {
+        id: item.product_id,
+        name: item.product_title,
+        price: item.offer?.price || "Price unavailable",
+        imageUrl: item.product_photos?.[0] || "",
+        productUrl: item.product_page_url || "",
+        source: "RealTimeSearch",
+      };
+    }
   };
+
+  const unifiedItem = createUnifiedItemStructure(item, source);
+
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      if (!unifiedItem.id || !userId) return;
+
+      const q = query(
+        collection(db, "saved-items"),
+        where("itemId", "==", unifiedItem.id),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
+      setIsSaved(!querySnapshot.empty);
+    };
+
+    checkIfSaved();
+  }, [unifiedItem.id, userId]);
 
   const handleToggleSave = async () => {
     try {
@@ -44,9 +70,13 @@ function SaveForLaterButton({ item, userId }) {
         });
       } else {
         await addDoc(collection(db, "saved-items"), {
-          itemId: item.id,
+          itemId: unifiedItem.id,
           userId: userId,
-          item: item,
+          name: unifiedItem.name,
+          price: unifiedItem.price,
+          imageUrl: unifiedItem.imageUrl,
+          productUrl: unifiedItem.productUrl,
+          source: unifiedItem.source,
         });
       }
       setIsSaved(!isSaved);

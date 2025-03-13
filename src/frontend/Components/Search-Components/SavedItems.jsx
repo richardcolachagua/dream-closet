@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Grid } from "@mui/material";
-import { db } from "../../../backend/firebase";
+import { db, auth } from "../../../backend/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import SaveForLaterButton from "./Buttons/SaveForLaterButton";
 
 function SavedItems({ userId }) {
   const [SavedItems, setSavedItems] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    fetchSavedItems();
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      if (user) {
+        fetchSavedItems(user.id);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const fetchSavedItems = async () => {
+  const fetchSavedItems = async (userId) => {
     const q = query(
       collection(db, "saved-items"),
       where("userId", "==", userId)

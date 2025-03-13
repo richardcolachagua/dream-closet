@@ -119,8 +119,7 @@ const HomePage = () => {
               },
             }}
           >
-            Example: "A pink strapless dress with a
-            slit on the left side"
+            Example: "A pink strapless dress with a slit on the left side"
           </Typography>
           <Container>
             <AnimatedSearchBar />

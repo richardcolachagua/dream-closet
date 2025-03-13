@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import SaveForLaterButton from "./Buttons/SaveForLaterButton";
 
-const SearchResults = ({ results, onSaveItem, viewMode }) => {
+const SearchResults = ({ results, onSaveItem, viewMode, userId }) => {
   if (!results || results.length === 0) {
     return (
       <Typography
@@ -78,8 +78,9 @@ const SearchResults = ({ results, onSaveItem, viewMode }) => {
               }}
             >
               <SaveForLaterButton
-                itemId={product.id}
-                onSave={() => onSaveItem(product)}
+                item={product}
+                userId={userId}
+                source={product.source} // Pass the source here
               />
               <Button
                 size="small"
