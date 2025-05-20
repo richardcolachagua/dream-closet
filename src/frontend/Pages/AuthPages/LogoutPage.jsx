@@ -28,8 +28,10 @@ const LogoutPage = () => {
             variant="contained"
             sx={{
               borderRadius: "30px",
-              backgroundColor: "black",
+              backgroundColor: "turquoise",
               marginRight: "50px",
+              color: "black",
+              fontWeight: "bold",
             }}
           >
             Home
@@ -38,8 +40,10 @@ const LogoutPage = () => {
             variant="contained"
             sx={{
               borderRadius: "30px",
-              backgroundColor: "black",
+              backgroundColor: "turquoise",
               marginLeft: "100px",
+              color: "black",
+              fontWeight: "bold",
             }}
           >
             Back to Login
