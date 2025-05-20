@@ -3,6 +3,7 @@ import HomePage from "./frontend/Pages/StaticPages/HomePage";
 import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
 import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
 import SignUpPage from "./frontend/Pages/AuthPages/SignUpPage";
+import LogoutPage from "./frontend/Pages/AuthPages/LogoutPage";
 import NotFoundPage from "./frontend/Pages/StaticPages/PageNotFound";
 import ProfilePage from "./frontend/Pages/UserPages/ProfilePage";
 import PrivacyPolicyPage from "./frontend/Pages/StaticPages/PrivacyPolicyPage";
@@ -23,6 +24,7 @@ function App() {
         <Route path="/ContactPage" element={<ContactPage />} />
         <Route path="/LoginPage" element={<LoginPage />} />
         <Route path="/SignUpPage" element={<SignUpPage />} />
+        <Route path="/LogoutPage" element={<LogoutPage />} />
         {/* <Route path="/About" element={<About />} /> */}
         <Route path="/*" element={<NotFoundPage />} />
         <Route path="/profilepage" element={<ProfilePage />} />
