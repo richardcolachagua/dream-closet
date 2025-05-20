@@ -4,6 +4,8 @@ import { Button, Box, Typography } from "@mui/material";
 const LogoutPage = () => {
   return (
     <Box
+      justifyContent="center"
+      alignItems="center"
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -14,11 +16,36 @@ const LogoutPage = () => {
         minHeight: "100vh",
       }}
     >
-      <Typography variant="h2" sx={{ fontWeight: "bold" }}>
-        You have Successfully logged out
-      </Typography>
-      <Button variant="contained">Home</Button>
-      <Button variant="contained">Back to Login</Button>
+      <Box>
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: "bold", color: "white", marginBottom: "20px" }}
+        >
+          You have successfully logged out
+        </Typography>
+        <Box>
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: "30px",
+              backgroundColor: "black",
+              marginRight: "50px",
+            }}
+          >
+            Home
+          </Button>
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: "30px",
+              backgroundColor: "black",
+              marginLeft: "100px",
+            }}
+          >
+            Back to Login
+          </Button>
+        </Box>
+      </Box>
     </Box>
   );
 };
