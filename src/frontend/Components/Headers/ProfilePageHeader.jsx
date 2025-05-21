@@ -1,6 +1,7 @@
 import React from "react";
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import LogoutButton from "../Logout/LogoutButton";
 
 const pages = ["Dream Closet"];
 
@@ -61,23 +62,7 @@ function SearchPageHeader() {
           >
             Searches
           </Button>
-          <Button
-            component={RouterLink}
-            variant="outlined"
-            to="/loginpage"
-            sx={{
-              marginRight: "10px",
-              color: "white",
-              textTransform: "none",
-              fontSize: "15px",
-              fontWeight: "bold",
-              borderColor: "#0063cc",
-              border: "1px solid",
-              borderRadius: "5px",
-            }}
-          >
-            Logout
-          </Button>
+          <LogoutButton />
         </Box>
       </Toolbar>
     </AppBar>

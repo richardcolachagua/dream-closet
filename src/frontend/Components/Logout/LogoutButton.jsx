@@ -1,21 +1,36 @@
 import React from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../backend/firebase";
 
 const LogoutButton = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    //clear user data from local storage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
 
-    //redirect to login page
-    navigate("/loginpage");
+      //clear user data from local storage
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      navigate("/loginpage");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
-
   return (
-    <Button variant="contained" onClick={handleLogout}>
+    <Button
+      variant="contained"
+      sx={{
+        backgroundColor: "turquoise",
+        textTransform: "none",
+        fontSize: "15px",
+        fontWeight: "bold",
+      }}
+      onClick={handleLogout}
+    >
       Logout
     </Button>
   );
