@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Box, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
 const LogoutPage = () => {
   return (
@@ -9,10 +10,10 @@ const LogoutPage = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        backgroundImage: `url(/assets/backgroundImage.png)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        backgroundColor: "black",
         minHeight: "100vh",
       }}
     >
@@ -21,11 +22,13 @@ const LogoutPage = () => {
           variant="h5"
           sx={{ fontWeight: "bold", color: "white", marginBottom: "20px" }}
         >
-          You have successfully logged out
+          You Have Successfully Logged Out
         </Typography>
         <Box>
           <Button
             variant="contained"
+            component={RouterLink}
+            to="/homepage"
             sx={{
               borderRadius: "30px",
               backgroundColor: "turquoise",
@@ -38,10 +41,12 @@ const LogoutPage = () => {
           </Button>
           <Button
             variant="contained"
+            component={RouterLink}
+            to="/loginpage"
             sx={{
               borderRadius: "30px",
               backgroundColor: "turquoise",
-              marginLeft: "100px",
+              marginLeft: "130px",
               color: "black",
               fontWeight: "bold",
             }}
