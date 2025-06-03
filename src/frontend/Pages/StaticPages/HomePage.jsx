@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Container,
   Typography,
@@ -68,39 +67,46 @@ const HomePage = () => {
             direction={{ xs: "column", md: "row" }}
             spacing={4}
             alignItems="center"
+            justifyContent="center"
             p={4}
+            sx={{ flexWrap: "wrap" }}
           >
-            <Typography
-              variant="h4"
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                color: "turquoise",
-                fontFamily: "Times New Roman",
-                padding: { xs: "10px", md: "30px" },
-                fontSize: { xs: "15px", sm: "25px", md: "35px", lg: "45px" },
-              }}
-            >
-              Dream Closet is a clothing search engine that allows you to search
-              for exactly what you are looking for. Looking for a specific set
-              of heels? Dream Closet can find it. Looking for a blue and white
-              spotted button down shirt for the summer? Dream Cloest can help
-              you find it. Sign up today to get started.
-            </Typography>
-            <Container
-              component="img"
-              src="/assets/AI-driven_clothing_search.png"
-              alt="ai-driven-clothing"
-              sx={{
-                width: { xs: "100%", sm: "400px" },
-                height: "auto",
-                maxWidth: "100%",
-                objectFit: "contain",
-              }}
-            />
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="h4"
+                align="center"
+                sx={{
+                  fontWeight: "bold",
+                  color: "turquoise",
+                  fontFamily: "Times New Roman",
+                  padding: { xs: "10px", md: "30px" },
+                  fontSize: { xs: "15px", sm: "25px", md: "35px", lg: "45px" },
+                  maxWidth: "600px",
+                }}
+              >
+                Dream Closet is a clothing search engine that allows you to
+                search for exactly what you are looking for. Looking for a
+                specific set of heels? Dream Closet can find it. Looking for a
+                blue and white spotted button down shirt for the summer? Dream
+                Closet can help you find it. Sign up today to get started.
+              </Typography>
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Container
+                component="img"
+                src="/assets/AI-driven_clothing_search.png"
+                alt="ai-driven-clothing"
+                sx={{
+                  width: { xs: "100%", sm: "400px" },
+                  height: "auto",
+                  maxWidth: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
           </Stack>
           <Typography
-            variant="h8"
+            variant="body1"
             align="center"
             sx={{
               fontFamily: "Times New Roman",

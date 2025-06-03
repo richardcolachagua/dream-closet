@@ -4,12 +4,11 @@ import Layout from "./Layout.tsx";
 const LayoutContainer = () => {
   // Define the container style
   const containerStyle = {
-    "--accent": "##8855ff",
-    background: "var(--accent",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    height: "50vh",
+    flexDirection: "column",
+    minHeight: "100vh",
   };
 
   return (
