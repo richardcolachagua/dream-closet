@@ -34,7 +34,7 @@ const ContactPage = () => {
             variant="h3"
             sx={{
               fontWeight: "bold",
-              color: "white",
+              color: "turquoise",
               fontFamily: "Times New Roman",
             }}
           >

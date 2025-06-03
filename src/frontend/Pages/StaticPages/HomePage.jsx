@@ -22,24 +22,25 @@ const HomePage = () => {
       <CssBaseline />
       <Box
         sx={{
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           backgroundImage: `url(/assets/black_technology_gradient.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          minHeight: "100vh",
-          overflowY: "hidden",
         }}
       >
         <Header />
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Container
+            maxWidth="lg"
             sx={{
-              flexGrow: 1,
+              flex: 1,
               display: "flex",
               flexDirection: "column",
-              padding: "30px",
+              py: 4,
+              overflowX: "hidden",
             }}
           >
             <Typography
@@ -48,7 +49,7 @@ const HomePage = () => {
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "sans-serif",
-                fontSize: { xs: "80px", sm: "100px", md: "120px", lg: "140px" },
+                fontSize: { xs: "12vw", sm: "10vw", md: "8vw", lg: "6vw" },
               }}
             >
               Dream Closet
@@ -59,8 +60,9 @@ const HomePage = () => {
               sx={{
                 fontWeight: "bold",
                 color: "white",
-                fontFamily: "helvetica normal",
+                fontFamily: "helvetica",
                 fontSize: { xs: "15px", sm: "25px", md: "30px", lg: "35px" },
+                mt: 2,
               }}
             >
               The New Way To Search For Your Next Outfit
@@ -70,25 +72,22 @@ const HomePage = () => {
               spacing={4}
               alignItems="center"
               justifyContent="center"
-              p={4}
-              sx={{ flexWrap: "wrap" }}
+              flexWrap="wrap"
             >
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ flex: 1, maxWidth: "600px" }}>
                 <Typography
                   variant="h4"
                   align="center"
                   sx={{
                     fontWeight: "bold",
                     color: "turquoise",
-                    fontFamily: "Times New Roman",
-                    padding: { xs: "10px", md: "30px" },
+                    fontFamily: "helvetica",
                     fontSize: {
                       xs: "15px",
                       sm: "25px",
                       md: "35px",
                       lg: "45px",
                     },
-                    maxWidth: "600px",
                   }}
                 >
                   Dream Closet is a clothing search engine that allows you to
@@ -103,12 +102,10 @@ const HomePage = () => {
                 src="/assets/AI-driven_clothing_search.png"
                 alt="ai-driven-clothing"
                 sx={{
-                  display: "block",
                   width: "100%",
-                  height: "auto",
                   maxWidth: "400px",
                   objectFit: "contain",
-                  margin: "0 auto",
+                  mx: "auto",
                 }}
               />
             </Stack>
@@ -116,20 +113,11 @@ const HomePage = () => {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Times New Roman",
+                fontFamily: "helvetica",
                 color: "white",
                 fontWeight: "bold",
-                fontSize: {
-                  xs: "1rem",
-                  sm: "2rem",
-                  md: "3rem",
-                },
-                padding: {
-                  xs: "30px 15px",
-                  sm: "40px 20px",
-                  md: "50px 30px",
-                  lg: "60px 40px",
-                },
+                fontSize: { xs: "1rem", sm: "2rem", md: "3rem" },
+                my: 4,
               }}
             >
               Example: "A pink strapless dress with a slit on the left side"
@@ -142,31 +130,17 @@ const HomePage = () => {
               variant="h3"
               align="center"
               sx={{
-                fontFamily: "Times New Roman",
+                fontFamily: "helvetica",
                 color: "white",
                 fontWeight: "bold",
-                fontSize: {
-                  xs: "1rem",
-                  sm: "2rem",
-                  md: "3rem",
-                },
-                padding: {
-                  xs: "30px 15px",
-                  sm: "40px 20px",
-                  md: "50px 30px",
-                  lg: "60px 40px",
-                },
+                fontSize: { xs: "1rem", sm: "2rem", md: "3rem" },
+                my: 4,
               }}
             >
               The more you use Dream Closet, the more it recognizes your taste
               in clothing.
             </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
               <Button
                 variant="contained"
                 size="large"
@@ -188,7 +162,7 @@ const HomePage = () => {
 
           <ProfileFeatures />
         </Box>
-        <Footer />{" "}
+        <Footer />
       </Box>
     </ThemeProvider>
   );

@@ -1,4 +1,3 @@
-import * as React from "react";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -15,7 +14,6 @@ export default function ProfileFeatures() {
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundColor: "grey",
-        minHeight: "30vh",
         padding: "15px",
         "&::before": {
           content: '""',
@@ -46,8 +44,8 @@ export default function ProfileFeatures() {
             }}
           />
           <Typography
-            color="turquoise"
             sx={{
+              color: "turquoise",
               fontWeight: "bold",
               fontSize: "20px",
             }}
@@ -55,9 +53,9 @@ export default function ProfileFeatures() {
             Save Clothes
           </Typography>
           <Typography
-            color="white"
             sx={{
-              fontFamily: "Times New Roman",
+              color: "white",
+              fontFamily: "helvetica",
             }}
           >
             Save individual clothes from any search to refer back to.
@@ -84,7 +82,7 @@ export default function ProfileFeatures() {
           <Typography
             color="white"
             sx={{
-              fontFamily: "Times New Roman",
+              fontFamily: "helvetica",
             }}
           >
             Go back down the rabbit hole of those flare pants you were thinking
@@ -113,7 +111,7 @@ export default function ProfileFeatures() {
           <Typography
             color="white"
             sx={{
-              fontFamily: "Times New Roman",
+              fontFamily: "helvetica",
             }}
           >
             customize their profile, including uploading a profile picture and

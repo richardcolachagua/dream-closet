@@ -8,9 +8,7 @@ const Footer = () => {
         direction="row"
         spacing={2}
         sx={{
-          backgroundColor: "black",
           justifyContent: "center",
-          padding: "20px",
         }}
       >
         <Link to="/TOSPage" style={{ textDecoration: "none" }}>
@@ -59,17 +57,16 @@ const Footer = () => {
           flexDirection: "column",
           backgroundColor: "black",
           justifyContent: "center",
-          paddingBottom: "10px",
         }}
       >
         <Typography
-          variant="h4"
+          variant="h6"
           color="white"
           align="center"
           padding="5px"
           sx={{
             fontWeight: "bold",
-            fontFamily: "Times New Roman",
+            fontFamily: "helvetica",
           }}
         >
           A Sixth Sense Production

@@ -1,4 +1,3 @@
-import React from "react";
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -9,30 +8,30 @@ function Header() {
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
       <Toolbar
         sx={{
-          width: "100%",
           justifyContent: "space-between",
-          padding: "0 16px",
         }}
       >
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           {pages.map((page, index) => (
             <Button
               key={index}
               component={RouterLink}
               to={`/${page.toLowerCase()}`}
               sx={{
-                marginRight: "10px",
                 color: "white",
                 textTransform: "none",
                 fontSize: "15px",
                 fontWeight: "bold",
+                borderColor: "#0063cc",
+                border: "1px solid",
+                borderRadius: "5px",
               }}
             >
               {page}
             </Button>
           ))}
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box>
           <Button
             component={RouterLink}
             to="/loginpage"
@@ -53,7 +52,6 @@ function Header() {
             variant="outlined"
             to="/signuppage"
             sx={{
-              marginRight: "10px",
               color: "white",
               textTransform: "none",
               fontSize: "15px",
