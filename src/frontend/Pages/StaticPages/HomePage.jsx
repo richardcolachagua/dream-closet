@@ -40,7 +40,6 @@ const HomePage = () => {
               display: "flex",
               flexDirection: "column",
               py: 4,
-              overflowX: "hidden",
             }}
           >
             <Typography

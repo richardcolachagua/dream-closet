@@ -9,6 +9,7 @@ const Footer = () => {
         spacing={2}
         sx={{
           justifyContent: "center",
+          backgroundColor: "black",
         }}
       >
         <Link to="/TOSPage" style={{ textDecoration: "none" }}>
