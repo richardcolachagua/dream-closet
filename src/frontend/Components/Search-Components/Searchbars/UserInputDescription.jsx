@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { TextField, Button, Box } from "@mui/material";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../../../backend/firebase";
