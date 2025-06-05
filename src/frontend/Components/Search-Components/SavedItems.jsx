@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Typography, Grid } from "@mui/material";
 import { db, auth } from "../../../backend/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -12,7 +12,7 @@ function SavedItems({ userId }) {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
       if (user) {
-        fetchSavedItems(user.id);
+        fetchSavedItems(user.uid);
       }
     });
 

@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SavedSearches from "../../Components/Search-Components/SavedSearches";
