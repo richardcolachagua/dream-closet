@@ -17,6 +17,8 @@ function SaveForLaterButton({ item, userId, source }) {
   const [isSaved, setIsSaved] = useState(false);
 
   const createUnifiedItemStructure = (item, source) => {
+    if (!item) return null;
+
     if (source === "ASOS") {
       return {
         id: item.id,
@@ -36,13 +38,23 @@ function SaveForLaterButton({ item, userId, source }) {
         source: "RealTimeSearch",
       };
     }
+
+    // default case for unknown sources
+    return {
+      id: item.id || item.product_id || Math.random().toString(),
+      name: item.name || item.product_title || "Unknown item",
+      price: "Price unavailable",
+      imageUrl: "",
+      productUrl: "",
+      source: source || "Uknown",
+    };
   };
 
   const unifiedItem = createUnifiedItemStructure(item, source);
 
   useEffect(() => {
     const checkIfSaved = async () => {
-      if (!unifiedItem.id || !userId) return;
+      if (!unifiedItem.id || !unifiedItem.id || !userId) return;
 
       const q = query(
         collection(db, "saved-items"),
@@ -57,6 +69,8 @@ function SaveForLaterButton({ item, userId, source }) {
   }, [unifiedItem.id, userId]);
 
   const handleToggleSave = async () => {
+    if (!unifiedItem || !unifiedItem.id) return;
+
     try {
       if (isSaved) {
         const q = query(
@@ -79,7 +93,6 @@ function SaveForLaterButton({ item, userId, source }) {
           source: unifiedItem.source,
         });
       }
-      setIsSaved(!isSaved);
     } catch (error) {
       console.error("Error toggling save status", error);
     }
