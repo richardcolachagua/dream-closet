@@ -142,6 +142,7 @@ const SearchPage = () => {
             flexGrow: 1,
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
             padding: "30px",
           }}
         >

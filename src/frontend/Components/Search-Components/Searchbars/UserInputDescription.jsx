@@ -155,6 +155,7 @@ function UserDescriptionInput({
         alignItems: "center",
         justifyContent: "center",
         marginBottom: "20px",
+        width: "50%",
       }}
     >
       <TextField
@@ -174,7 +175,7 @@ function UserDescriptionInput({
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={isLoading || description.trim() === ""}
+          disabled={isLoading}
           sx={{
             bgcolor: "primary.main",
             "&:hover": { bgcolor: "primary.dark" },
@@ -193,7 +194,7 @@ function UserDescriptionInput({
             flex: 1,
           }}
           onSave={() => handleSaveSearch(description)}
-          disabled={isLoading || description.trim() === ""}
+          disabled={isLoading}
         />
       </Box>
     </Box>
