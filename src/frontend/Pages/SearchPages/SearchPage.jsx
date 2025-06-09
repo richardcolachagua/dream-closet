@@ -143,7 +143,8 @@ const SearchPage = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "30px",
+            px: 2,
+            py: 4,
           }}
         >
           <Typography

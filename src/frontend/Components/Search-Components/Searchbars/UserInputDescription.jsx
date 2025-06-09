@@ -152,10 +152,12 @@ function UserDescriptionInput({
     <Box
       sx={{
         display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: "20px",
-        width: "50%",
+        mb: 3,
+        width: "100%",
+        px: 2,
       }}
     >
       <TextField
@@ -166,32 +168,38 @@ function UserDescriptionInput({
         sx={{
           width: "90%",
           maxWidth: "500px",
-          mr: 2,
           backgroundColor: "white",
           borderRadius: "10px",
+          mb: { xs: 2, sm: 0 },
+          mr: { xs: 0, sm: 2 },
         }}
       />
-      <Box sx={{ display: "flex", gap: 1, flex: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: 1,
+          width: { xs: "100%", sm: "auto" },
+        }}
+      >
         <Button
           variant="contained"
           onClick={handleSubmit}
           disabled={isLoading}
           sx={{
-            bgcolor: "primary.main",
-            "&:hover": { bgcolor: "primary.dark" },
-            mr: 2,
-            width: "100px",
-            backgroundColor: "turquoise",
+            bgcolor: "turquoise",
+            "&:hover": { bgcolor: "darkturquoise" },
             color: "black",
             fontWeight: "bold",
-            fontSize: "15px",
+            fontSize: "14px",
+            width: { xs: "100%", sm: "auto" },
           }}
         >
           {isLoading ? "Searching..." : "Search"}
         </Button>
         <SaveSearchButton
           sx={{
-            flex: 1,
+            width: { xs: "100%", sm: "auto" },
           }}
           onSave={() => handleSaveSearch(description)}
           disabled={isLoading}

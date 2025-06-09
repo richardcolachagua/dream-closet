@@ -8,14 +8,12 @@ function SaveSearchButton({ onSave, disabled }) {
     <Button
       variant="contained"
       sx={{
-        bgcolor: "primary.main",
-        "&:hover": { bgcolor: "primary.dark" },
-        mr: 2,
-        width: "100px",
-        backgroundColor: "turquoise",
+        bgcolor: "turquoise",
+        "&:hover": { bgcolor: "darkturquoise" },
         color: "black",
         fontWeight: "bold",
-        fontSize: "15px",
+        fontSize: "14px",
+        width: { xs: "100%", sm: "auto" },
       }}
       onClick={handleSaveSearch}
       disabled={Boolean(disabled)}
