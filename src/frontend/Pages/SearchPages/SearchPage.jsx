@@ -132,6 +132,7 @@ const SearchPage = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        overflowX: "hidden",
       }}
     >
       <ThemeProvider theme={defaultTheme}>

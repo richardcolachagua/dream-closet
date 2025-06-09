@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
@@ -25,8 +24,8 @@ const LogoutButton = () => {
       variant="contained"
       sx={{
         backgroundColor: "turquoise",
-        textTransform: "none",
-        fontSize: "15px",
+        fontSize: { xs: "0.7rem", sm: "2rem" },
+        textAlign: "center",
         fontWeight: "bold",
       }}
       onClick={handleLogout}

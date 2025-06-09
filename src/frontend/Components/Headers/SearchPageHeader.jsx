@@ -1,4 +1,3 @@
-import React from "react";
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -8,7 +7,10 @@ const pages = ["Dream Closet"];
 
 function SearchPageHeader() {
   return (
-    <AppBar position="static" sx={{ backgroundColor: "black" }}>
+    <AppBar
+      position="static"
+      sx={{ backgroundColor: "black", display: "flex", alignItems: "center" }}
+    >
       <Toolbar
         sx={{
           width: "100%",
@@ -16,7 +18,7 @@ function SearchPageHeader() {
           padding: "0 16px",
         }}
       >
-        <Box sx={{ display: "flex" }}>
+        <Box>
           {pages.map((page, index) => (
             <Button
               key={index}
@@ -26,15 +28,14 @@ function SearchPageHeader() {
                 marginRight: "10px",
                 color: "white",
                 textTransform: "none",
-                fontSize: "15px",
                 fontWeight: "bold",
+                fontSize: { xs: "1rem", sm: "2rem" },
+                textAlign: "center",
               }}
             >
               {page}
             </Button>
           ))}
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button
             component={RouterLink}
             to="/SavedItemsAndSearches"
@@ -42,8 +43,8 @@ function SearchPageHeader() {
             sx={{
               marginRight: "10px",
               backgroundColor: "turquoise",
-              textTransform: "none",
-              fontSize: "15px",
+              fontSize: { xs: "0.7rem", sm: "2rem" },
+              textAlign: "center",
               fontWeight: "bold",
             }}
           >
@@ -56,14 +57,13 @@ function SearchPageHeader() {
             sx={{
               marginRight: "10px",
               backgroundColor: "turquoise",
-              textTransform: "none",
-              fontSize: "15px",
+              fontSize: { xs: "0.7rem", sm: "2rem" },
+              textAlign: "center",
               fontWeight: "bold",
             }}
           >
             Profile
           </Button>
-
           <LogoutButton />
         </Box>
       </Toolbar>
