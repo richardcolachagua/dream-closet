@@ -24,9 +24,9 @@ const LogoutButton = () => {
       variant="contained"
       sx={{
         backgroundColor: "turquoise",
-        fontSize: { xs: "0.7rem", sm: "2rem" },
         textAlign: "center",
         fontWeight: "bold",
+        textTransform: "none",
       }}
       onClick={handleLogout}
     >

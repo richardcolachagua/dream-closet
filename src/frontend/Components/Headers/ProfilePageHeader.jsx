@@ -4,7 +4,7 @@ import LogoutButton from "../Logout/LogoutButton";
 
 function SearchPageHeader() {
   return (
-    <AppBar position="static" sx={{ backgroundColor: "black" }}>
+    <AppBar position="relative" sx={{ backgroundColor: "black" }}>
       <Toolbar
         sx={{
           width: "100%",
@@ -19,9 +19,8 @@ function SearchPageHeader() {
               alt="Dream Closet Logo"
               src="/assets/Logo-svg.svg"
               sx={{
-                height: { xs: 72, sm: 80, md: 88 }, // Adjust sizes as needed
+                height: { xs: 40, sm: 48, md: 56 },
                 width: "auto",
-                display: "block",
               }}
             />
           </RouterLink>

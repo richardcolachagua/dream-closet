@@ -19,9 +19,8 @@ function ProfileHeader() {
               alt="Dream Closet Logo"
               src="/assets/Logo-svg.svg"
               sx={{
-                height: { xs: 72, sm: 80, md: 88 }, // Adjust sizes as needed
+                height: { xs: 40, sm: 48, md: 56 },
                 width: "auto",
-                display: "block",
               }}
             />
           </RouterLink>
