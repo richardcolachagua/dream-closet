@@ -1,8 +1,6 @@
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
-const pages = ["HomePage"];
-
 function Header() {
   return (
     <AppBar position="static" sx={{ backgroundColor: "black" }}>
@@ -11,25 +9,19 @@ function Header() {
           justifyContent: "space-between",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {pages.map((page, index) => (
-            <Button
-              key={index}
-              component={RouterLink}
-              to={`/${page.toLowerCase()}`}
+        <Box>
+          <RouterLink to="/homepage">
+            <Box
+              component="img"
+              alt="Dream Closet Logo"
+              src="/assets/Logo-svg.svg"
               sx={{
-                color: "white",
-                textTransform: "none",
-                fontSize: "15px",
-                fontWeight: "bold",
-                borderColor: "#0063cc",
-                border: "1px solid",
-                borderRadius: "5px",
+                height: { xs: 72, sm: 80, md: 88 }, // Adjust sizes as needed
+                width: "auto",
+                display: "block",
               }}
-            >
-              {page}
-            </Button>
-          ))}
+            />
+          </RouterLink>
         </Box>
         <Box>
           <Button

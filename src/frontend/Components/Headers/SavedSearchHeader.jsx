@@ -1,9 +1,6 @@
-import React from "react";
 import { AppBar, Box, Toolbar, Button } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import LogoutButton from "../Logout/LogoutButton";
-
-const pages = ["Dream Closet"];
 
 function ProfileHeader() {
   return (
@@ -15,23 +12,19 @@ function ProfileHeader() {
           padding: "0 16px",
         }}
       >
-        <Box sx={{ display: "flex" }}>
-          {pages.map((page, index) => (
-            <Button
-              key={index}
-              component={RouterLink}
-              to="/homepage"
+        <Box>
+          <RouterLink to="/homepage">
+            <Box
+              component="img"
+              alt="Dream Closet Logo"
+              src="/assets/Logo-svg.svg"
               sx={{
-                marginRight: "10px",
-                color: "white",
-                textTransform: "none",
-                fontSize: "15px",
-                fontWeight: "bold",
+                height: { xs: 72, sm: 80, md: 88 }, // Adjust sizes as needed
+                width: "auto",
+                display: "block",
               }}
-            >
-              {page}
-            </Button>
-          ))}
+            />
+          </RouterLink>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button
