@@ -22,9 +22,9 @@ const LogoutButton = () => {
   return (
     <Button
       variant="contained"
+      fullWidth
       sx={{
         backgroundColor: "turquoise",
-        textAlign: "center",
         fontWeight: "bold",
         textTransform: "none",
       }}
