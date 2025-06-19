@@ -73,6 +73,8 @@ function SearchPageHeader() {
                   backgroundColor: "turquoise",
                   fontWeight: "bold",
                   textTransform: "none",
+                  //  width: "100px",
+                  //     height: "40px",
                 }}
               >
                 {btn.label}
@@ -101,13 +103,15 @@ function SearchPageHeader() {
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              anchorOrigin={{ vertical: "top", horizontal: "left" }}
               keepMounted
               transformOrigin={{ vertical: "top", horizontal: "right" }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{
-                "& .MuiPaper-root": { backgroundColor: "black" },
+                "& .MuiPaper-root": {
+                  backgroundColor: "black",
+                },
               }}
             >
               {navButtons.map((btn) => (
@@ -118,9 +122,13 @@ function SearchPageHeader() {
                     fullWidth
                     variant="contained"
                     sx={{
-                      backgroundColor: "turquoise",
+                      bgcolor: "turquoise",
+                      "&:hover": { bgcolor: "darkturquoise" },
+                      color: "white",
                       fontWeight: "bold",
-                      textTransform: "none",
+                      fontSize: "14px",
+                      justifyContent: "space-between",
+                      width: { xs: "100%", sm: "auto" },
                     }}
                   >
                     {btn.label}
@@ -128,7 +136,7 @@ function SearchPageHeader() {
                 </MenuItem>
               ))}
               <MenuItem onClick={handleCloseNavMenu}>
-                <LogoutButton fullWidth />
+                <LogoutButton />
               </MenuItem>
             </Menu>
           </Box>

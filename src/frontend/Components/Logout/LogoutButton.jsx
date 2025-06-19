@@ -24,9 +24,12 @@ const LogoutButton = () => {
       variant="contained"
       fullWidth
       sx={{
-        backgroundColor: "turquoise",
+        bgcolor: "turquoise",
+        "&:hover": { bgcolor: "darkturquoise" },
         fontWeight: "bold",
         textTransform: "none",
+        width: "100px",
+        height: "40px",
       }}
       onClick={handleLogout}
     >

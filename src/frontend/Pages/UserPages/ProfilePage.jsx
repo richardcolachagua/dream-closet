@@ -26,9 +26,8 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import ProfilePageHeader from "../../Components/Headers/ProfilePageHeader.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../../backend/firebase.js";
+import { db, app } from "../../../backend/firebase.js";
 
 const validationSchema = Yup.object({
   firstName: Yup.string(),
@@ -102,7 +101,7 @@ const ProfilePage = () => {
           passwordUpdated = true;
         }
         if (Object.keys(updatedValues).length > 0) {
-          const functions = getFunctions();
+          const functions = getFunctions(app);
           const updateProfile = httpsCallable(functions, "updateUserProfile");
           await updateProfile(updatedValues);
           setCurrentUserInfo((prev) => ({ ...prev, ...updatedValues }));
