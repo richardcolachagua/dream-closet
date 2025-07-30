@@ -9,21 +9,31 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
-import { resetPassword } from "../../auth/services";
 import CheckYourEmail from "./CheckYourEmail";
+import { FirebaseAuth } from "../../../backend/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [lastAttempt, setLastAttempt] = useState("");
-  const [attemptCount, setAttemptCount] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [lastAttempt, setLastAttempt] = useState(0);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setAttemptCount(0), 3600000);
     return () => clearTimeout(timer);
   }, [attemptCount]);
+
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(FirebaseAuth, email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
 
   const handleResetPassword = async (e) => {
     e.preventDefault();

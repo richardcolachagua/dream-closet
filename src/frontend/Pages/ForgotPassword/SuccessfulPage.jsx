@@ -3,7 +3,7 @@ import { Typography, Box, Button, Stack } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 
-const SucessfulPage = () => {
+const SuccessfulPage = () => {
   const navigate = useNavigate();
 
   return (
@@ -74,4 +74,4 @@ const SucessfulPage = () => {
   );
 };
 
-export default SucessfulPage;
+export default SuccessfulPage;

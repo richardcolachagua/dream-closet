@@ -2,44 +2,20 @@ import React, { useState } from "react";
 import { Typography, Box, Stack, Link, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
-import { verifyPasswordResetCode } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { FirebaseAuth } from "../../auth/firebase";
 
 const CheckYourEmail = ({ email }) => {
   const navigate = useNavigate();
-  const [verifcationCode, setVerifcationCode] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const handleVerifyCode = async () => {
-    setError("");
-    setSuccess("");
-    try {
-      const result = await verifyPasswordResetCode(verifcationCode);
-      if (result.success) {
-        setSuccess("Code verified successfully!");
-        navigate("/passwordreset", {
-          state: {
-            code: verifcationCode,
-          },
-        });
-      } else {
-        setError(result.error);
-      }
-    } catch (error) {
-      setError("An error occurred. Please try again");
-    }
-  };
 
   const handleResendEmail = async () => {
     setError("");
     setSuccess("");
     try {
-      const result = await resendPasswordResetEmail(email);
-      if (result.success) {
-        setSuccess("Password reset email resent successfully!");
-      } else {
-        setError(result.error);
-      }
+      await sendPasswordResetEmail(FirebaseAuth, email);
+      setSuccess("Password reset email resent successfully!");
     } catch (error) {
       setError("An error occurred. Please try again");
     }

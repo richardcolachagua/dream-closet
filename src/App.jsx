@@ -11,6 +11,7 @@ import SearchPage from "./frontend/Pages/SearchPages/SearchPage";
 import TOSPage from "./frontend/Pages/StaticPages/TOS-Page";
 import FreeSearchPage from "./frontend/Pages/SearchPages/FreeSearchPage";
 import SavedItemsAndSearches from "./frontend/Pages/UserPages/SavedSearchItemPage";
+import ForgotPassword from "./frontend/Pages/ForgotPassword/ForgotPassword";
 import { QueryClient, QueryClientProvider } from "react-query";
 import SmoothScroll from "./frontend/ScrollingAnimation/SmoothScroll";
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="/FreeSearchPage" element={<FreeSearchPage />} />
           <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
           <Route path="/TOSPage" element={<TOSPage />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
 
           {/* Protected Routes - Member */}
           <Route path="/profilepage" element={<ProfilePage />} />
