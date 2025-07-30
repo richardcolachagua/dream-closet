@@ -14,7 +14,7 @@ const LogoutButton = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
-      navigate("/loginpage");
+      navigate("/logoutpage");
     } catch (error) {
       console.error("Logout failed:", error);
     }
