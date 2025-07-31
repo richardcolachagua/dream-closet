@@ -10,7 +10,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import CheckYourEmail from "./CheckYourEmail";
-import { FirebaseAuth } from "../../../backend/firebase";
+import { auth as FirebaseAuth } from "../../../backend/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 
 const ForgotPassword = () => {
@@ -60,7 +60,17 @@ const ForgotPassword = () => {
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "black",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+      }}
+    >
       <Stack
         direction="column"
         sx={{
@@ -81,10 +91,9 @@ const ForgotPassword = () => {
           <Typography
             variant="h3"
             sx={{
-              alignContent: "center",
-              display: "flex",
               fontWeight: "bold",
-              color: "white",
+              color: "turquoise",
+              fontFamily: "Times New Roman",
             }}
           >
             Forgot Password
@@ -94,7 +103,7 @@ const ForgotPassword = () => {
             sx={{
               alignContent: "center",
               display: "flex",
-              color: "gray",
+              color: "white",
               paddingTop: "10px",
             }}
           >
@@ -129,10 +138,11 @@ const ForgotPassword = () => {
             name="email"
             type="email"
             value={email}
-            variant="outlined"
+            variant="filled"
             sx={{
               width: "400px",
-              paddingBottom: "30px",
+              marginBottom: "10px",
+              backgroundColor: "white",
             }}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -140,7 +150,7 @@ const ForgotPassword = () => {
           <Stack
             direction="column"
             sx={{
-              alignItems: "center",
+              alignItems: "left",
             }}
           >
             <Button

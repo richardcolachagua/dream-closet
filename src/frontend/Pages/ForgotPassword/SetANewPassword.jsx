@@ -11,7 +11,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import { confirmPasswordReset } from "firebase/auth";
-import { FirebaseAuth } from "../../auth/firebase";
+import { auth as FirebaseAuth } from "../../../backend/firebase";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { Visibility, VisibilityOff } from "@mui/icons-material";

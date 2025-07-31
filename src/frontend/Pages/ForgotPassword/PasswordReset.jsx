@@ -7,7 +7,17 @@ const PasswordReset = () => {
   const navigate = useNavigate();
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "black",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+      }}
+    >
       <Stack
         direction="column"
         sx={{
@@ -51,7 +61,7 @@ const PasswordReset = () => {
           }}
         >
           Your password has been successfully reset. Click confirm to set a new
-          password
+          password.
         </Typography>
       </Stack>
       <Stack

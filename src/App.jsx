@@ -14,6 +14,10 @@ import SavedItemsAndSearches from "./frontend/Pages/UserPages/SavedSearchItemPag
 import ForgotPassword from "./frontend/Pages/ForgotPassword/ForgotPassword";
 import { QueryClient, QueryClientProvider } from "react-query";
 import SmoothScroll from "./frontend/ScrollingAnimation/SmoothScroll";
+import CheckYourEmail from "./frontend/Pages/ForgotPassword/CheckYourEmail";
+import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
+import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
+import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +38,12 @@ function App() {
           <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
           <Route path="/TOSPage" element={<TOSPage />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/checkyouremail" element={<CheckYourEmail />} />
+          <Route path="/passwordreset" element={<PasswordReset />} />
+          <Route path="/setpassword" element={<SetANewPassword />} />
+          <Route path="/successful" element={<SuccessfulPage />} />
 
-          {/* Protected Routes - Member */}
+          {/* Protected Routes - Membser */}
           <Route path="/profilepage" element={<ProfilePage />} />
           <Route path="/Searchpage" element={<SearchPage />} />
           <Route
