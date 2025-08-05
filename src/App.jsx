@@ -18,6 +18,7 @@ import CheckYourEmail from "./frontend/Pages/ForgotPassword/CheckYourEmail";
 import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
 import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
+import { ProtectedRoute } from "./backend/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -43,12 +44,23 @@ function App() {
           <Route path="/setpassword" element={<SetANewPassword />} />
           <Route path="/successful" element={<SuccessfulPage />} />
 
-          {/* Protected Routes - Membser */}
-          <Route path="/profilepage" element={<ProfilePage />} />
+          {/* Protected Routes - Member */}
+          <Route
+            path="/profilepage"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/Searchpage" element={<SearchPage />} />
           <Route
             path="/SavedItemsAndSearches"
-            element={<SavedItemsAndSearches />}
+            element={
+              <ProtectedRoute>
+                <SavedItemsAndSearches />
+              </ProtectedRoute>
+            }
           />
         </Routes>
       </QueryClientProvider>
