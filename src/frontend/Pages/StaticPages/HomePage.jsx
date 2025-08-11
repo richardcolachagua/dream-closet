@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -13,9 +14,46 @@ import LayoutContainer from "../../Components/Shared-Layout-Animation/LayoutCont
 import Footer from "../../Components/Footer.jsx";
 import ProfileFeatures from "../../Components/Profile-Features/Profile-Features.jsx";
 import { Link as RouterLink } from "react-router-dom";
+import { keyframes } from "@mui/system";
+
+const fadeFromAbove = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 const HomePage = () => {
   const defaultTheme = createTheme();
+
+  // state to trigger animation on mount
+  const [show, setShow] = useState(false);
+
+  // Typing effect states
+  const fullText = "The New Way To Search For Your Next Outfit";
+  const [typedText, setTypedText] = useState("");
+
+  useEffect(() => {
+    // Trigger animation once on mount
+    setShow(true);
+  }, []);
+
+  useEffect(() => {
+    // Typewriter effect for subheading
+    let index = 0;
+    const interval = setInterval(() => {
+      setTypedText(fullText.slice(0, index + 1));
+      index++;
+      if (index === fullText.length) {
+        clearInterval(interval);
+      }
+    }, 50); // Speed here -> 50ms per letter
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -48,10 +86,13 @@ const HomePage = () => {
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "sans-serif",
-                fontSize: { xs: "12vw", sm: "10vw", md: "8vw", lg: "6vw" },
+                fontSize: { xs: "6vw", sm: "8vw", md: "10vw", lg: "12vw" },
+                animation: show
+                  ? `${fadeFromAbove} 0.5s ease-out forwards`
+                  : "none",
               }}
             >
-              Dream Closet
+              Welcome To Dream Closet
             </Typography>
             <Typography
               variant="h6"
@@ -62,52 +103,78 @@ const HomePage = () => {
                 fontFamily: "helvetica",
                 fontSize: { xs: "15px", sm: "25px", md: "30px", lg: "35px" },
                 mt: 2,
+                whiteSpace: "pre-wrap",
               }}
             >
-              The New Way To Search For Your Next Outfit
-            </Typography>
-            <Stack
-              direction={{ xs: "column", md: "row" }}
-              spacing={4}
-              alignItems="center"
-              justifyContent="center"
-              flexWrap="wrap"
-            >
-              <Box sx={{ flex: 1, maxWidth: "600px" }}>
-                <Typography
-                  variant="h4"
-                  align="center"
-                  sx={{
-                    fontWeight: "bold",
-                    color: "turquoise",
-                    fontFamily: "helvetica",
-                    fontSize: {
-                      xs: "15px",
-                      sm: "25px",
-                      md: "35px",
-                      lg: "45px",
-                    },
-                  }}
-                >
-                  Dream Closet is a clothing search engine that allows you to
-                  search for exactly what you are looking for. Looking for a
-                  specific set of heels? Dream Closet can find it. Looking for a
-                  blue and white spotted button down shirt for the summer? Dream
-                  Closet can help you find it. Sign up today to get started.
-                </Typography>
-              </Box>
+              {typedText}
               <Box
-                component="img"
-                src="/assets/AI-driven_clothing_search.png"
-                alt="ai-driven-clothing"
+                component="span"
                 sx={{
-                  width: "100%",
-                  maxWidth: "400px",
-                  objectFit: "contain",
-                  mx: "auto",
+                  display: "inline-block",
+                  width: "1ch",
+                  bgcolor: "white",
+                  animation: "blink 1s step-start infinite",
+                  "@keyframes blink": {
+                    "50%": { opacity: 0 },
+                  },
                 }}
               />
-            </Stack>
+            </Typography>
+          </Container>
+
+          {/* FULL-WIDTH BLACK BACKGROUND SECTION */}
+          <Box sx={{ width: "100%", backgroundColor: "black", py: 6 }}>
+            <Container maxWidth="lg">
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={4}
+                alignItems="center"
+                justifyContent="center"
+                flexWrap="wrap"
+              >
+                <Box sx={{ flex: 1, maxWidth: "600px" }}>
+                  <Typography
+                    variant="h4"
+                    align="center"
+                    sx={{
+                      fontWeight: "bold",
+                      color: "turquoise",
+                      fontFamily: "helvetica",
+                      fontSize: {
+                        xs: "15px",
+                        sm: "25px",
+                        md: "35px",
+                        lg: "45px",
+                      },
+                    }}
+                  >
+                    Dream Closet is a clothing search engine that allows you to
+                    search for exactly what you are looking for. Looking for a
+                    specific set of heels? Dream Closet can find it. Looking for
+                    a blue and white spotted button down shirt for the summer?
+                    Dream Closet can help you find it. Sign up today to get
+                    started.
+                  </Typography>
+                </Box>
+                <Box
+                  component="img"
+                  src="/assets/AI-driven_clothing_search.png"
+                  alt="ai-driven-clothing"
+                  sx={{
+                    width: "100%",
+                    maxWidth: "400px",
+                    objectFit: "contain",
+                    mx: "auto",
+                  }}
+                />
+              </Stack>
+            </Container>
+          </Box>
+
+          <Container
+            maxWidth="lg"
+            sx={{ flex: 1, display: "flex", flexDirection: "column", py: 4 }}
+          >
             <Typography
               variant="body1"
               align="center"
