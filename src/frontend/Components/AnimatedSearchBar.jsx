@@ -4,10 +4,15 @@ import { motion } from "framer-motion";
 const AnimatedSearchBar = () => {
   const [prompt, setPrompt] = useState("");
   const prompts = [
-    "Search for products",
-    "Find what you need",
-    "Explore clothes in a new way",
+    "I'm searching for a velour blue t-shirt",
+    "I'm searching for high waisted black shorts",
+    "I'm searching for a yellow sundress",
+    "I'm searching for a big black puffer",
   ];
+
+  // "Search for products",
+  //     "Find what you need",
+  //     "Explore clothes in a new way",
 
   useEffect(() => {
     const interval = setInterval(() => {

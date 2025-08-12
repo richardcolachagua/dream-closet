@@ -27,6 +27,11 @@ const fadeFromAbove = keyframes`
   }
 `;
 
+const fadeUp = keyframes`
+0% {opacity: 0; transform: translateY(20px); }
+100% {opacity: 1; transform: translateY(0); }
+`;
+
 const HomePage = () => {
   const defaultTheme = createTheme();
 
@@ -92,7 +97,7 @@ const HomePage = () => {
                   : "none",
               }}
             >
-              Welcome To Dream Closet
+              Dream Closet
             </Typography>
             <Typography
               variant="h6"
@@ -132,7 +137,13 @@ const HomePage = () => {
                 justifyContent="center"
                 flexWrap="wrap"
               >
-                <Box sx={{ flex: 1, maxWidth: "600px" }}>
+                <Box
+                  sx={{
+                    flex: 1,
+                    maxWidth: "600px",
+                    animation: `${fadeUp} 0.8s ease-out both`,
+                  }}
+                >
                   <Typography
                     variant="h4"
                     align="center"
@@ -145,6 +156,15 @@ const HomePage = () => {
                         sm: "25px",
                         md: "35px",
                         lg: "45px",
+                      },
+                      background:
+                        "linear-gradient(90deg, turquoise, violet, turquoise)",
+                      backgroundSize: "200% auto",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      animation: "gradientMove 3s linear infinite",
+                      "@keyframes gradientMove": {
+                        to: { backgroundPosition: "200% center" },
                       },
                     }}
                   >
@@ -175,19 +195,6 @@ const HomePage = () => {
             maxWidth="lg"
             sx={{ flex: 1, display: "flex", flexDirection: "column", py: 4 }}
           >
-            <Typography
-              variant="body1"
-              align="center"
-              sx={{
-                fontFamily: "helvetica",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: { xs: "1rem", sm: "2rem", md: "3rem" },
-                my: 4,
-              }}
-            >
-              Example: "A pink strapless dress with a slit on the left side"
-            </Typography>
             <Box>
               <AnimatedSearchBar />
               <LayoutContainer />
