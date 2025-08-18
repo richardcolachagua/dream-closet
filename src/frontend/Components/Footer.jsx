@@ -6,10 +6,11 @@ const Footer = () => {
     <>
       <Stack
         direction="row"
-        spacing={2}
+        spacing={5}
         sx={{
           justifyContent: "center",
           backgroundColor: "black",
+          margin: "30px",
         }}
       >
         <Link to="/TOSPage" style={{ textDecoration: "none" }}>
@@ -58,13 +59,14 @@ const Footer = () => {
           flexDirection: "column",
           backgroundColor: "black",
           justifyContent: "center",
+          marginBottom: "10px",
+          marginTop: "5px",
         }}
       >
         <Typography
           variant="h6"
           color="white"
           align="center"
-          padding="5px"
           sx={{
             fontWeight: "bold",
             fontFamily: "helvetica",

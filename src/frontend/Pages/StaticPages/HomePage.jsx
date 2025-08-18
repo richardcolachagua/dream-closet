@@ -68,10 +68,11 @@ const HomePage = () => {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          backgroundImage: `url(/assets/black_technology_gradient.png)`,
+          // backgroundImage: `url(/assets/black_technology_gradient.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
+          backgroundColor: "black",
         }}
       >
         <Header />
@@ -91,7 +92,7 @@ const HomePage = () => {
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "sans-serif",
-                fontSize: { xs: "6vw", sm: "8vw", md: "10vw", lg: "12vw" },
+                fontSize: { xs: "4vw", sm: "6vw", md: "8vw", lg: "10vw" },
                 animation: show
                   ? `${fadeFromAbove} 0.5s ease-out forwards`
                   : "none",
@@ -128,8 +129,15 @@ const HomePage = () => {
           </Container>
 
           {/* FULL-WIDTH BLACK BACKGROUND SECTION */}
-          <Box sx={{ width: "100%", backgroundColor: "black", py: 6 }}>
-            <Container maxWidth="lg">
+          <Box
+            sx={{
+              width: "100%",
+              py: 6,
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}
                 spacing={4}
