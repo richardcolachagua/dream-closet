@@ -92,7 +92,7 @@ const HomePage = () => {
                 fontWeight: "bold",
                 color: "white",
                 fontFamily: "sans-serif",
-                fontSize: { xs: "4vw", sm: "6vw", md: "8vw", lg: "10vw" },
+                fontSize: { xs: "2vw", sm: "4vw", md: "6vw", lg: "8vw" },
                 animation: show
                   ? `${fadeFromAbove} 0.5s ease-out forwards`
                   : "none",

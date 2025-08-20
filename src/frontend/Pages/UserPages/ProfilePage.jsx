@@ -122,12 +122,22 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
+      console.log("[ProfilePage] Current user:", user);
       if (user) {
         try {
           const userDocRef = doc(db, "users", user.uid);
+          console.log(
+            "[ProfilePage] Fetching Firestore doc for UID:",
+            user.uid
+          );
           const userDocSnap = await getDoc(userDocRef);
+          console.log(
+            "[ProfilePage] Firestore doc exists:",
+            userDocSnap.exists()
+          );
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
+            console.log("[ProfilePage] Firestore user data:", userData);
             setCurrentUserInfo({
               firstName: userData.firstName || "",
               lastName: userData.lastName || "",
@@ -138,14 +148,18 @@ const ProfilePage = () => {
               lastName: userData.lastName || "",
               email: user.email || "",
             });
+          } else {
+            console.warn("[ProfilePage] No Firestore document found for user.");
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("[ProfilePage] Error fetching user data:", error);
         }
+      } else {
+        console.warn("[ProfilePage] No authenticated user found.");
       }
     };
     fetchUserData();
-  }, [auth, formik]);
+  }, [auth]);
 
   const handleTogglePasswordVisiblity = () => {
     setShowPassword(!showPassword);

@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../Logout/LogoutButton";
+import LogoutButton from "../LogoutButton/LogoutButton";
 
 function ProfileHeader() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
