@@ -147,6 +147,9 @@ const ProfilePage = () => {
               firstName: userData.firstName || "",
               lastName: userData.lastName || "",
               email: user.email || "",
+              currentPassword: "",
+              newPassword: "",
+              confirmNewPassword: "",
             });
           } else {
             console.warn("[ProfilePage] No Firestore document found for user.");

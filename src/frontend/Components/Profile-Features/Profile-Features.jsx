@@ -149,8 +149,7 @@ export default function ProfileFeatures() {
             </Typography>
             <Typography variant="body2" sx={{ color: "lightgray" }}>
               Customize your profile, including uploading a profile picture and
-              personal information, can make the application more engaging and
-              personalized.
+              personal information.
             </Typography>
           </Card>
         </Grid2>
