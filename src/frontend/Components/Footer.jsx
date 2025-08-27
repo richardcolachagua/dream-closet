@@ -3,14 +3,19 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <>
+    <Box
+      sx={{
+        width: "100%",
+        backgroundColor: "black",
+        py: 2,
+      }}
+    >
+      \{" "}
       <Stack
         direction="row"
         spacing={5}
         sx={{
           justifyContent: "center",
-          backgroundColor: "black",
-          margin: "30px",
         }}
       >
         <Link to="/TOSPage" style={{ textDecoration: "none" }}>
@@ -75,7 +80,7 @@ const Footer = () => {
           A Sixth Sense Production
         </Typography>
       </Box>
-    </>
+    </Box>
   );
 };
 
