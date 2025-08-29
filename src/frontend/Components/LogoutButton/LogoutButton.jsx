@@ -28,8 +28,9 @@ const LogoutButton = () => {
         "&:hover": { bgcolor: "darkturquoise" },
         fontWeight: "bold",
         textTransform: "none",
-        width: "100px",
-        height: "40px",
+        px: 3,
+        py: 1.2,
+        minWidth: 100,
       }}
       onClick={handleLogout}
     >

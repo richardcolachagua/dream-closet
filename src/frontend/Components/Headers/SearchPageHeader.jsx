@@ -8,13 +8,23 @@ import {
   MenuItem,
   Button,
   Container,
+  useMediaQuery,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
 import LogoutButton from "../LogoutButton/LogoutButton";
+import { useTheme } from "@mui/material/styles";
 
 function SearchPageHeader() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // tweak breakpoint as desired
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!isMobile && anchorElNav) {
+      setAnchorElNav(null);
+    }
+  }, [isMobile, anchorElNav]);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -40,27 +50,72 @@ function SearchPageHeader() {
             alignItems: "center",
           }}
         >
-          {/* Logo - Left Side */}
-          <Box>
+          {/* Logo & Mobile Menu */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <RouterLink to="/homepage">
               <Box
                 component="img"
                 alt="Dream Closet Logo"
                 src="/assets/Logo-svg.svg"
-                sx={{
-                  height: { xs: 40, sm: 48, md: 56 },
-                  width: "auto",
-                }}
+                sx={{ height: { xs: 40, sm: 48, md: 56 }, width: "auto" }}
               />
             </RouterLink>
+            {/* Show hamburger on mobile */}
+            <Box sx={{ display: { xs: "flex", md: "none" }, ml: 2 }}>
+              <IconButton
+                size="large"
+                aria-label="mobile menu"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                keepMounted
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{ "& .MuiPaper-root": { backgroundColor: "black" } }}
+              >
+                {navButtons.map((btn) => (
+                  <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
+                    <Button
+                      component={RouterLink}
+                      to={btn.to}
+                      fullWidth
+                      variant="contained"
+                      sx={{
+                        bgcolor: "turquoise",
+                        "&:hover": { bgcolor: "darkturquoise" },
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        justifyContent: "flex-start",
+                        width: "100%",
+                      }}
+                    >
+                      {btn.label}
+                    </Button>
+                  </MenuItem>
+                ))}
+                <MenuItem onClick={handleCloseNavMenu}>
+                  <LogoutButton />
+                </MenuItem>
+              </Menu>
+            </Box>
           </Box>
 
-          {/* Desktop Navigation - Right Side */}
+          {/* Desktop Navigation */}
           <Box
             sx={{
               display: { xs: "none", md: "flex" },
               alignItems: "center",
-              gap: "10px",
+              gap: 2,
             }}
           >
             {navButtons.map((btn) => (
@@ -73,72 +128,12 @@ function SearchPageHeader() {
                   backgroundColor: "turquoise",
                   fontWeight: "bold",
                   textTransform: "none",
-                  //  width: "100px",
-                  //     height: "40px",
                 }}
               >
                 {btn.label}
               </Button>
             ))}
             <LogoutButton />
-          </Box>
-
-          {/* Mobile Menu - Right Side */}
-          <Box
-            sx={{
-              display: { xs: "flex", md: "none" },
-              ml: "auto", // Pushes menu to far right
-            }}
-          >
-            <IconButton
-              size="large"
-              aria-label="mobile menu"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
-              keepMounted
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                "& .MuiPaper-root": {
-                  backgroundColor: "black",
-                },
-              }}
-            >
-              {navButtons.map((btn) => (
-                <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
-                  <Button
-                    component={RouterLink}
-                    to={btn.to}
-                    fullWidth
-                    variant="contained"
-                    sx={{
-                      bgcolor: "turquoise",
-                      "&:hover": { bgcolor: "darkturquoise" },
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                      justifyContent: "space-between",
-                      width: { xs: "100%", sm: "auto" },
-                    }}
-                  >
-                    {btn.label}
-                  </Button>
-                </MenuItem>
-              ))}
-              <MenuItem onClick={handleCloseNavMenu}>
-                <LogoutButton />
-              </MenuItem>
-            </Menu>
           </Box>
         </Toolbar>
       </Container>
