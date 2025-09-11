@@ -29,10 +29,21 @@ export default function SmoothScroll({ children }) {
 
   return (
     <>
-      <div style={{ height: contentHeight }} />
+      {/* Spacer div for scroll illusion, height matches content */}
+      <div style={{ height: contentHeight, width: "100vw" }} />
       <motion.div
         ref={contentRef}
-        style={{ y, position: "fixed", top: 0, left: 0, right: 0 }}
+        style={{
+          y,
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          width: "100vw",
+          height: "100vh",
+          overflowY: "auto",
+          zIndex: 1,
+        }}
       >
         {children}
       </motion.div>

@@ -124,10 +124,9 @@ const SearchPage = () => {
   return (
     <Box
       sx={{
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        transition: "background-color 0.3s ease",
-        minHeight: "100vh",
         backgroundColor: "black",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -138,82 +137,85 @@ const SearchPage = () => {
       <ThemeProvider theme={defaultTheme}>
         <SearchPageHeader />
         <CssBaseline />
-        <Container
-          sx={{
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            px: 2,
-            py: 4,
-          }}
-        >
-          <Typography
-            variant="h5"
+        {/* Main content area grows to fill space above footer */}
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <Container
             sx={{
-              color: "white",
-              fontWeight: "bold",
-              textAlign: "center",
-              mb: 2,
+              flexGrow: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              px: 2,
+              py: 4,
             }}
           >
-            What clothes are we looking for today?
-          </Typography>
-          <UserDescriptionInput
-            onSearchStart={handleSearchStart}
-            onSaveSearch={handleSaveSearch}
-            onSearchError={handleSearchError}
-            onSearchResults={handleSearchResults}
-          />
-          {isLoading && (
-            <Box
+            <Typography
+              variant="h5"
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                my: 4,
+                color: "white",
+                fontWeight: "bold",
+                textAlign: "center",
+                mb: 2,
               }}
             >
-              <CircularProgress />
-            </Box>
-          )}
-          {!isLoading && searchResults && searchResults.length > 0 && (
-            <>
+              What clothes are we looking for today?
+            </Typography>
+            <UserDescriptionInput
+              onSearchStart={handleSearchStart}
+              onSaveSearch={handleSaveSearch}
+              onSearchError={handleSearchError}
+              onSearchResults={handleSearchResults}
+            />
+            {isLoading && (
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "flex-end",
-                  mb: 2,
+                  justifyContent: "center",
+                  my: 4,
                 }}
               >
-                <ViewToggle
-                  viewMode={viewMode}
-                  onViewChange={handleViewChange}
-                />
+                <CircularProgress />
               </Box>
+            )}
+            {!isLoading && searchResults && searchResults.length > 0 && (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    mb: 2,
+                  }}
+                >
+                  <ViewToggle
+                    viewMode={viewMode}
+                    onViewChange={handleViewChange}
+                  />
+                </Box>
 
-              <SearchResults
-                results={searchResults}
-                onSaveItem={handleSaveItem}
-                viewMode={viewMode}
-                userId={currentUser?.uid}
-              />
-            </>
-          )}
+                <SearchResults
+                  results={searchResults}
+                  onSaveItem={handleSaveItem}
+                  viewMode={viewMode}
+                  userId={currentUser?.uid}
+                />
+              </>
+            )}
 
-          <Snackbar
-            open={!!error}
-            autoHideDuration={6000}
-            onClose={() => setError(null)}
-          >
-            <Alert
+            <Snackbar
+              open={!!error}
+              autoHideDuration={6000}
               onClose={() => setError(null)}
-              severity="error"
-              sx={{ width: "100%" }}
             >
-              {error}
-            </Alert>
-          </Snackbar>
-        </Container>
+              <Alert
+                onClose={() => setError(null)}
+                severity="error"
+                sx={{ width: "100%" }}
+              >
+                {error}
+              </Alert>
+            </Snackbar>
+          </Container>
+        </Box>
         <Footer />
       </ThemeProvider>
     </Box>
