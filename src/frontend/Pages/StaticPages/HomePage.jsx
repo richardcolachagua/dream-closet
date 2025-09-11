@@ -68,7 +68,6 @@ const HomePage = () => {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          // backgroundImage: `url(/assets/black_technology_gradient.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -76,11 +75,12 @@ const HomePage = () => {
         }}
       >
         <Header />
+        {/* Main content area grows to fill space, pushing footer down */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Container
             maxWidth="lg"
             sx={{
-              flex: 1,
+              flexShrink: 0,
               display: "flex",
               flexDirection: "column",
               py: 4,
@@ -135,6 +135,7 @@ const HomePage = () => {
               py: 6,
               position: "relative",
               overflow: "hidden",
+              flexShrink: 0,
             }}
           >
             <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>

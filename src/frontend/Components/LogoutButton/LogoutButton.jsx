@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../backend/firebase";
 
-const LogoutButton = () => {
+const LogoutButton = ({ fullWidth = false }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -22,15 +22,19 @@ const LogoutButton = () => {
   return (
     <Button
       variant="contained"
-      fullWidth
+      fullWidth={fullWidth}
       sx={{
         bgcolor: "turquoise",
         "&:hover": { bgcolor: "darkturquoise" },
         fontWeight: "bold",
+        fontSize: "16px",
         textTransform: "none",
-        px: 3,
-        py: 1.2,
-        minWidth: 100,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: 120, // Ensures all buttons are at least this width
+        px: 3, // Adds even horizontal padding
+        py: 1.5, // Adds even vertical padding
       }}
       onClick={handleLogout}
     >
