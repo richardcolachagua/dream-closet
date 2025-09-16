@@ -1,60 +1,57 @@
 import React from "react";
-import { Button, Box, Typography } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Box, Typography, Grid, Button } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useNavigate } from "react-router-dom";
+import LogoutButton from "../../Components/Buttons/LogoutButton";
 
 const LogoutPage = () => {
+  const navigate = useNavigate();
+
   return (
     <Box
+      display="flex"
+      flexDirection="column"
       justifyContent="center"
       alignItems="center"
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
         backgroundColor: "black",
         minHeight: "100vh",
+        px: 3,
+        textAlign: "center",
       }}
     >
-      <Box>
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: "bold", color: "white", marginBottom: "20px" }}
-        >
-          You Have Successfully Logged Out
-        </Typography>
-        <Box>
+      <LogoutIcon
+        sx={{ fontSize: 80, color: "turquoise", mb: 3, opacity: 0.8 }}
+        aria-label="Logout Icon"
+      />
+      <Typography
+        variant="h4"
+        color="white"
+        sx={{ fontWeight: "bold", mb: 4, fontFamily: "Helvetica Neue" }}
+      >
+        You Have Successfully Logged Out
+      </Typography>
+      <Grid container spacing={2} maxWidth={400} justifyContent="center">
+        <Grid item xs={12} sm={6}>
+          <LogoutButton fullWidth />
+        </Grid>
+        <Grid item xs={12} sm={6}>
           <Button
+            fullWidth
             variant="contained"
-            component={RouterLink}
-            to="/homepage"
+            onClick={() => navigate("/loginpage")}
             sx={{
-              borderRadius: "30px",
-              backgroundColor: "turquoise",
-              marginRight: "50px",
+              bgcolor: "turquoise",
               color: "black",
               fontWeight: "bold",
-            }}
-          >
-            Home
-          </Button>
-          <Button
-            variant="contained"
-            component={RouterLink}
-            to="/loginpage"
-            sx={{
-              borderRadius: "30px",
-              backgroundColor: "turquoise",
-              marginLeft: "130px",
-              color: "black",
-              fontWeight: "bold",
+              whiteSpace: "nowrap",
+              "&:hover": { bgcolor: "darkturquoise" },
             }}
           >
             Back to Login
           </Button>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
