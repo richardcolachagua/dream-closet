@@ -27,6 +27,7 @@ import { auth } from "../../../backend/firebase";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const defaultTheme = createTheme();
+const MAX_ATTEMPTS = 5;
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -37,8 +38,9 @@ const validationSchema = Yup.object().shape({
 
 const LoginPage = () => {
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0); // for rate limiting
   const navigate = useNavigate();
 
   const formik = useFormik({
@@ -48,20 +50,32 @@ const LoginPage = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
+      if (loginAttempts >= MAX_ATTEMPTS) {
+        setError("Too many attempts. Please wait and try again.");
+        return;
+      }
       setLoading(true);
       try {
         await signInWithEmailAndPassword(auth, values.email, values.password);
+        setLoginAttempts(0);
         navigate("/searchpage");
       } catch (error) {
-        console.error("login failed", error);
-        if (error.code === "auth/user-not-found") {
-          setError("Login failed. Please check your credentials.");
-        } else if (error.code === "auth/wrong-password") {
-          setError("Incorrect password. Please try again.");
-        } else if (error.code === "auth/invalid-email") {
-          setError("Invalid email address. Please check your email.");
-        } else {
-          setError("Login failed, Please try again.");
+        setLoginAttempts((prev) => prev + 1);
+        switch (error.code) {
+          case "auth/user-not-found":
+            setError("Login failed. Please check your credentials.");
+            break;
+          case "auth/wrong-password":
+            setError("Incorrect password. Please try again.");
+            break;
+          case "auth/invalid-email":
+            setError("Invalid email address. Please check your email.");
+            break;
+          case "auth/user-disabled":
+            setError("Your account is disabled. Contact support.");
+            break;
+          default:
+            setError("Login failed. Please try again");
         }
       } finally {
         setLoading(false);
@@ -79,9 +93,6 @@ const LoginPage = () => {
       console.error("Google sign-in failed:", error);
       setError("Google sign-in failed. Please try again.");
     }
-  };
-  const handleTogglePasswordVisiblity = () => {
-    setShowPassword(!showPassword);
   };
 
   return (
@@ -129,6 +140,13 @@ const LoginPage = () => {
               >
                 Sign In
               </Typography>
+
+              {error && (
+                <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+                  {error}
+                </Typography>
+              )}
+
               <form onSubmit={formik.handleSubmit}>
                 <TextField
                   margin="normal"
@@ -149,7 +167,7 @@ const LoginPage = () => {
                   fullWidth
                   name="password"
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   value={formik.values.password}
                   onChange={formik.handleChange}
@@ -163,7 +181,7 @@ const LoginPage = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={handleTogglePasswordVisiblity}
+                          onClick={() => setShowPassword((prev) => !prev)}
                           edge="end"
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -172,11 +190,6 @@ const LoginPage = () => {
                     ),
                   }}
                 />
-                {error && (
-                  <Typography variant="body2" color="error">
-                    {error}
-                  </Typography>
-                )}
                 <Button
                   type="submit"
                   fullWidth
