@@ -1,22 +1,16 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
-import { LoadingCircle } from "../frontend/Components/LoadingCircle"; // fix import typo if needed
+import { useAuth } from "./AuthContext.js";
+import { LoadingCircle } from "../frontend/Components/LoadingCircle";
 
-export const ProtectedRoute = ({ children, redirectPath = "/LoginPage" }) => {
-  const [user, setUser] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+export const ProtectedRoute = ({
+  children,
+  roles = [],
+  redirectPath = "/LoginPage",
+}) => {
+  const { user, role, loading } = useAuth();
 
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setIsLoaded(true);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  if (!isLoaded) {
+  if (loading) {
     return <LoadingCircle />;
   }
 
@@ -24,7 +18,8 @@ export const ProtectedRoute = ({ children, redirectPath = "/LoginPage" }) => {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Future: If you want to support roles, check here
-
+  //Role-based access control
+  if (roles.length > 0 && (!role || !roles.includes(role))) {
+  }
   return <>{children}</>;
 };
