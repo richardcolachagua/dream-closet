@@ -1,4 +1,9 @@
-import { Route, Routes } from "react-router-dom";
+import React, { useState } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./backend/AuthContext";
+import { ProtectedRoute } from "./backend/ProtectedRoute";
+
 import HomePage from "./frontend/Pages/StaticPages/HomePage";
 import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
 import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
@@ -12,57 +17,67 @@ import TOSPage from "./frontend/Pages/StaticPages/TOS-Page";
 import FreeSearchPage from "./frontend/Pages/SearchPages/FreeSearchPage";
 import SavedItemsAndSearches from "./frontend/Pages/UserPages/SavedSearchItemPage";
 import ForgotPassword from "./frontend/Pages/ForgotPassword/ForgotPassword";
-import { QueryClient, QueryClientProvider } from "react-query";
 import SmoothScroll from "./frontend/ScrollingAnimation/SmoothScroll";
 import CheckYourEmail from "./frontend/Pages/ForgotPassword/CheckYourEmail";
 import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
 import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
-import { ProtectedRoute } from "./backend/ProtectedRoute";
 
-const queryClient = new QueryClient();
+const ROUTES = [
+  { path: "/", element: <Navigate to="/homepage" replace /> },
+  { path: "/homepage", element: <HomePage /> },
+  { path: "/contactpage", element: <ContactPage /> },
+  { path: "/loginpage", element: <LoginPage /> },
+  { path: "/signuppage", element: <SignUpPage /> },
+  { path: "/logoutpage", element: <LogoutPage /> },
+  { path: "/freesearchpage", element: <FreeSearchPage /> },
+  { path: "/privacypolicypage", element: <PrivacyPolicyPage /> },
+  { path: "/tospage", element: <TOSPage /> },
+  { path: "/forgotpassword", element: <ForgotPassword /> },
+  { path: "/checkyouremail", element: <CheckYourEmail /> },
+  { path: "/passwordreset", element: <PasswordReset /> },
+  { path: "/setpassword", element: <SetANewPassword /> },
+  { path: "/successful", element: <SuccessfulPage /> },
+  {
+    path: "/profilepage",
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/searchpage",
+    element: (
+      <ProtectedRoute>
+        <SearchPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/saveditemsandsearches",
+    element: (
+      <ProtectedRoute>
+        <SavedItemsAndSearches />
+      </ProtectedRoute>
+    ),
+  },
+  { path: "*", element: <Navigate to="/homepage" replace /> },
+];
 
 function App() {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <SmoothScroll>
       <QueryClientProvider client={queryClient}>
-        <Routes>
-          {/* Public Routes */}
-
-          <Route path="/HomePage" element={<HomePage />} />
-          <Route path="/ContactPage" element={<ContactPage />} />
-          <Route path="/LoginPage" element={<LoginPage />} />
-          <Route path="/SignUpPage" element={<SignUpPage />} />
-          <Route path="/LogoutPage" element={<LogoutPage />} />
-          <Route path="/*" element={<NotFoundPage />} />
-          <Route path="/FreeSearchPage" element={<FreeSearchPage />} />
-          <Route path="/privacypolicypage" element={<PrivacyPolicyPage />} />
-          <Route path="/TOSPage" element={<TOSPage />} />
-          <Route path="/forgotpassword" element={<ForgotPassword />} />
-          <Route path="/checkyouremail" element={<CheckYourEmail />} />
-          <Route path="/passwordreset" element={<PasswordReset />} />
-          <Route path="/setpassword" element={<SetANewPassword />} />
-          <Route path="/successful" element={<SuccessfulPage />} />
-
-          {/* Protected Routes - Member */}
-          <Route
-            path="/profilepage"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/Searchpage" element={<SearchPage />} />
-          <Route
-            path="/SavedItemsAndSearches"
-            element={
-              <ProtectedRoute>
-                <SavedItemsAndSearches />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {ROUTES.map(({ path, element }) => (
+              <Route key={path} path={path.toLowerCase()} element={element} />
+            ))}
+          </Routes>
+        </AuthProvider>
       </QueryClientProvider>
     </SmoothScroll>
   );
