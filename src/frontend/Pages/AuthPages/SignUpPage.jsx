@@ -14,30 +14,64 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth, db } from "../../../backend/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import Header from "../../Components/Headers/Header";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
 
+// Simple sanitizer example function (for demo purposes)
+const sanitize = (str) => str.replace(/[<>]/g, "");
+
+const theme = createTheme();
+
+const validationSchema = Yup.object().shape({
+  firstName: Yup.string().required("First Name is required"),
+  lastName: Yup.string().required("Last Name is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[@$!%*?&]/,
+      "Password must contain at least one special character"
+    ),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm Password is required"),
+});
+
 const SignUpPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleGoogleSignUp = async () => {
+    setError("");
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      const uid = user.uid;
+      // Safe extraction of first and last name
+      const fullName = user.displayName || "User";
+      const names = fullName.split(" ");
+      const firstName = sanitize(names[0] || "User");
+      const lastName = sanitize(names.slice(1).join(" ") || "");
 
-      await setDoc(doc(db, "users", uid), {
-        firstName: user.displayName.split(" ")[0],
-        lastName: user.displayName.split(" ")[1] || "",
-        email: user.email,
+      await setDoc(doc(db, "users", user.uid), {
+        firstName,
+        lastName,
+        email: sanitize(user.email),
       });
 
       console.log("User signed up successfully with Google:", user);
@@ -47,20 +81,6 @@ const SignUpPage = () => {
       setError("Google sign-up failed. Please try again.");
     }
   };
-
-  const validationSchema = Yup.object().shape({
-    firstName: Yup.string().required("First Name is required"),
-    lastName: Yup.string().required("Last Name is required"),
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    password: Yup.string()
-      .required("Password is required")
-      .min(8, "Password must be at least 8 characters"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Passwords must match")
-      .required("Confirm Password is required"),
-  });
 
   const formik = useFormik({
     initialValues: {
@@ -72,6 +92,7 @@ const SignUpPage = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
+      setError("");
       try {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
@@ -79,10 +100,11 @@ const SignUpPage = () => {
           values.password
         );
         const user = userCredential.user;
+
         await setDoc(doc(db, "users", user.uid), {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          email: values.email,
+          firstName: sanitize(values.firstName),
+          lastName: sanitize(values.lastName),
+          email: sanitize(values.email),
         });
 
         console.log("user registered sucessfully:", user);
@@ -110,7 +132,7 @@ const SignUpPage = () => {
         minHeight: "100vh",
       }}
     >
-      <ThemeProvider theme={createTheme()}>
+      <ThemeProvider theme={theme}>
         <Header />
         <Grid
           container
