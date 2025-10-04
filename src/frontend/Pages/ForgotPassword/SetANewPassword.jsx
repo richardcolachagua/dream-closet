@@ -7,32 +7,39 @@ import {
   Alert,
   Stack,
   CircularProgress,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { confirmPasswordReset } from "firebase/auth";
 import { auth as FirebaseAuth } from "../../../backend/firebase";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { IconButton, InputAdornment } from "@mui/material";
+
+// Password complexity rules: min 8 chars, upper, lower, number, special char
+const validationSchema = Yup.object().shape({
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters.")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(
+      /[^A-Za-z0-9]/,
+      "Password must contain at least one special character"
+    )
+    .required("Enter a password."),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm your new password"),
+});
 
 const SetANewPassword = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const validationSchema = Yup.object().shape({
-    password: Yup.string()
-      .min(8, "Password must be at least 8 characters.")
-      .matches(/[a-zA-Z]/, "Password must contain at least one letter")
-      .matches(/[0-9]/, "Password must contain at least one number.")
-      .required("Enter a password."),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Passwords must match")
-      .required("Confirm your new password"),
-  });
 
   const formik = useFormik({
     initialValues: {
@@ -51,7 +58,6 @@ const SetANewPassword = () => {
         navigate("/successfulpage");
       } catch (error) {
         setError("An error occurred. Please try again.");
-        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -76,9 +82,15 @@ const SetANewPassword = () => {
           sx={{
             color: "white",
             marginBottom: "30px",
+            cursor: "pointer",
           }}
           onClick={() => navigate(-1)}
-          aria-label="Go back"
+          aria-label="Go back to previous page"
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" || e.key === " ") navigate(-1);
+          }}
         />
         <Box>
           <Typography
@@ -116,6 +128,7 @@ const SetANewPassword = () => {
               type={showPassword ? "text" : "password"}
               value={formik.values.password}
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
               variant="outlined"
@@ -127,9 +140,11 @@ const SetANewPassword = () => {
                     <IconButton
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
-                      aria-label="toggle password visibility"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -153,6 +168,7 @@ const SetANewPassword = () => {
               type={showPassword ? "text" : "password"}
               value={formik.values.confirmPassword}
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               error={
                 formik.touched.confirmPassword &&
                 Boolean(formik.errors.confirmPassword)
@@ -169,9 +185,11 @@ const SetANewPassword = () => {
                     <IconButton
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
-                      aria-label="toggle password visbility"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -187,10 +205,8 @@ const SetANewPassword = () => {
                 variant="contained"
                 type="submit"
                 disabled={loading}
-                sx={{
-                  borderRadius: "10px",
-                  width: "200px",
-                }}
+                sx={{ borderRadius: "10px", width: "200px" }}
+                aria-label="Confirm new password"
               >
                 {loading ? <CircularProgress size={24} /> : "Update Password"}
               </Button>
