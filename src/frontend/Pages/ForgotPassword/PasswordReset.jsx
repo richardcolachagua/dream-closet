@@ -34,9 +34,15 @@ const PasswordReset = () => {
           sx={{
             color: "white",
             marginBottom: "30px",
+            cursor: "pointer",
           }}
           onClick={() => navigate(-1)}
-          aria-label="Go back"
+          aria-label="Go back to previous page"
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" || e.key === " ") navigate(-1);
+          }}
         />
         <Typography
           variant="h3"
@@ -74,9 +80,8 @@ const PasswordReset = () => {
         <Button
           variant="contained"
           sx={{ borderRadius: "10px", width: "200px" }}
-          onClick={() => {
-            navigate("/setanewpassword");
-          }}
+          onClick={() => navigate("/setanewpassword")}
+          aria-label="Confirm password reset and set a new password"
         >
           Confirm
         </Button>
