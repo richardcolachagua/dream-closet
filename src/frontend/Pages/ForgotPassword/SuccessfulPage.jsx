@@ -7,13 +7,21 @@ const SuccessfulPage = () => {
   const navigate = useNavigate();
 
   return (
-    <Box>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "black",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        paddingLeft: "40px",
+        paddingTop: "40px",
+        paddingBottom: "30px",
+      }}
+    >
       <Stack
         direction="column"
         sx={{
-          paddingLeft: "40px",
-          paddingTop: "40px",
-          paddingBottom: "30px",
           alignContent: "center",
           justifyContent: "center",
           display: "flex",
@@ -21,19 +29,22 @@ const SuccessfulPage = () => {
       >
         <ArrowBackIcon
           fontSize="large"
-          sx={{
-            color: "white",
-            marginBottom: "30px",
-          }}
+          sx={{ color: "white", mb: 3, cursor: "pointer" }}
           onClick={() => navigate(-1)}
+          aria-label="Go back to previous page"
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" || e.key === " ") navigate(-1);
+          }}
         />
         <Typography
           variant="h3"
           sx={{
-            alignContent: "center",
-            display: "flex",
             fontWeight: "bold",
             color: "white",
+            display: "flex",
+            alignContent: "center",
           }}
         >
           Successful
@@ -41,34 +52,25 @@ const SuccessfulPage = () => {
         <Typography
           variant="h5"
           sx={{
-            alignContent: "center",
-            display: "flex",
             color: "white",
-            paddingTop: "10px",
-            marginBottom: "20px",
+            pt: 1,
+            mb: 3,
+            display: "flex",
+            alignContent: "center",
           }}
         >
           Congratulations! Your password has been changed. Click below to login.
         </Typography>
-        <>
-          <Stack
-            direction="column"
-            sx={{
-              alignItems: "center",
-            }}
+        <Stack direction="column" alignItems="center">
+          <Button
+            variant="contained"
+            sx={{ borderRadius: "10px", width: "200px" }}
+            onClick={() => navigate("/login")}
+            aria-label="Return to Login page"
           >
-            <Button
-              variant="contained"
-              sx={{
-                borderRadius: "10px",
-                width: "200px",
-              }}
-              onClick={() => navigate("/login")}
-            >
-              Return to Login
-            </Button>
-          </Stack>
-        </>
+            Return to Login
+          </Button>
+        </Stack>
       </Stack>
     </Box>
   );
