@@ -21,6 +21,13 @@ const CheckYourEmail = ({ email }) => {
     }
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleResendEmail();
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -46,8 +53,14 @@ const CheckYourEmail = ({ email }) => {
       >
         <ArrowBackIcon
           fontSize="large"
-          sx={{ color: "white", marginBottom: "30px" }}
+          sx={{ color: "white", mb: "3" }}
           onClick={() => navigate(-1)}
+          aria-label="Go back"
+          role="button"
+          tabIndex={0}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" || e.key === " ") navigate(-1);
+          }}
         />
         <Box>
           <Typography
@@ -67,14 +80,14 @@ const CheckYourEmail = ({ email }) => {
               alignContent: "center",
               display: "flex",
               color: "white",
-              paddingTop: "10px",
+              pt: 1,
             }}
           >
             We sent a reset link to {email}. Click the link to reset your
             password.
           </Typography>
         </Box>
-        <Stack direction="row" sx={{ marginTop: "20px" }}>
+        <Stack direction="row" sx={{ mt: 2 }}>
           <Typography
             variant="h5"
             sx={{
@@ -88,8 +101,13 @@ const CheckYourEmail = ({ email }) => {
             variant="h5"
             sx={{
               color: "white",
+              cursor: "pointer",
             }}
             onClick={handleResendEmail}
+            onKeyPress={handleKeyPress}
+            tabIndex={0}
+            role="button"
+            aria-label="Resend password reset email"
           >
             Resend Email
           </Link>
