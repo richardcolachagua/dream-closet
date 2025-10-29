@@ -7,49 +7,34 @@ import {
   CardContent,
   IconButton,
   CssBaseline,
-  Stack,
   Skeleton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  deleteDoc,
+  doc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../../../backend/firebase";
+import { auth } from "../../../backend/firebase";
 
-const useSavedItems = () => {
-  const [savedItems, setSavedItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchSavedItems = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const querySnapshot = await getDocs(collection(db, "saved-items"));
-      const items = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setSavedItems(items);
-    } catch (error) {
-      console.error("Error fetching saved items", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSavedItems();
-  }, [fetchSavedItems]);
-
-  return { savedItems, isLoading, fetchSavedItems, setSavedItems };
-};
-
-const useSavedSearches = () => {
+const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);
   const [isLoadingSearches, setIsLoadingSearches] = useState(true);
 
   const fetchSavedSearches = useCallback(async () => {
+    if (!userId) return;
     try {
       setIsLoadingSearches(true);
-      const querySnapshot = await getDocs(collection(db, "saved-searches"));
+      const q = query(
+        collection(db, "saved-searches"),
+        where("userId", "==", userId)
+      );
+      const querySnapshot = await getDocs(q);
       const searches = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -60,10 +45,12 @@ const useSavedSearches = () => {
     } finally {
       setIsLoadingSearches(false);
     }
-  }, []);
+  }, [userId]);
+
   useEffect(() => {
     fetchSavedSearches();
   }, [fetchSavedSearches]);
+
   return {
     savedSearches,
     isLoadingSearches,
@@ -74,23 +61,28 @@ const useSavedSearches = () => {
 
 const SavedSearches = () => {
   const defaultTheme = createTheme();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const userId = currentUser?.uid;
   const {
-    savedItems,
-    isLoading: isLoadingItems,
-    setSavedItems,
-  } = useSavedItems();
+    savedSearches,
+    isLoadingSearches,
+    fetchSavedSearches,
+    setSavedSearches,
+  } = useSavedSearches(userId);
 
-  const { savedSearches, isLoadingSearches, setSavedSearches } =
-    useSavedSearches();
-
-  const handleDeleteItem = async (itemId) => {
-    try {
-      await deleteDoc(doc(db, "saved-items", itemId));
-      setSavedItems(savedItems.filter((item) => item.id !== itemId));
-    } catch (error) {
-      console.error("Error deleting saved item", error);
+  useEffect(() => {
+    if (userId) {
+      fetchSavedSearches();
     }
-  };
+  }, [userId, fetchSavedSearches]);
 
   const handleDeleteSearch = async (searchId) => {
     try {
@@ -128,108 +120,37 @@ const SavedSearches = () => {
         >
           Your Saved Searches
         </Typography>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          sx={{ width: "100%" }}
-        >
-          <Box sx={{ width: "40%" }}>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 3,
-                fontWeight: "bold",
-                color: "white",
-                justifyContent: "center",
-                display: "flex",
-              }}
-            >
-              Saved Items
-            </Typography>
-            <Grid container spacing={2}>
-              {isLoadingItems ? (
-                [1, 2, 3].map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item}>
-                    <Skeleton variant="rectangular" height={200} />
-                  </Grid>
-                ))
-              ) : savedItems.length > 0 ? (
-                savedItems.map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item.id}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6">{item.name}</Typography>
-                        <Typography variant="body2">
-                          {item.description}
-                        </Typography>
-                        <IconButton onClick={() => handleDeleteItem(item.id)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))
-              ) : (
-                <Grid item xs={12}>
-                  <Typography
-                    variant="body1"
-                    color="white"
-                    sx={{
-                      mb: 3,
-                      color: "white",
-                      justifyContent: "center",
-                      display: "flex",
-                    }}
-                  >
-                    No saved items found.
-                  </Typography>
-                </Grid>
-              )}
+        <Grid container spacing={2}>
+          {isLoadingSearches ? (
+            [1, 2, 3].map((item) => (
+              <Grid item xs={12} sm={6} md={4} key={item}>
+                <Skeleton variant="rectangular" height={200} />
+              </Grid>
+            ))
+          ) : savedSearches.length > 0 ? (
+            savedSearches.map((search) => (
+              <Grid item xs={12} sm={6} md={4} key={search.id}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6">{search.query}</Typography>
+                    <Typography variant="body2">
+                      Date: {new Date(search.date).toLocaleDateString()}
+                    </Typography>
+                    <IconButton onClick={() => handleDeleteSearch(search.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Typography variant="body1" color="white">
+                No saved searches found.
+              </Typography>
             </Grid>
-          </Box>
-          <Box sx={{ width: "40%" }}>
-            <Typography
-              variant="h5"
-              sx={{ mb: 3, fontWeight: "bold", color: "white" }}
-            >
-              Saved Searches
-            </Typography>
-
-            <Grid container spacing={2}>
-              {isLoadingSearches ? (
-                [1, 2, 3].map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item}>
-                    <Skeleton variant="rectangular" height={200} />
-                  </Grid>
-                ))
-              ) : savedSearches.length > 0 ? (
-                savedSearches.map((search) => (
-                  <Grid item xs={12} sm={6} md={4} key={search.id}>
-                    <Card>
-                      <CardContent>
-                        <Typography variant="h6">{search.query}</Typography>
-                        <Typography variant="body2">
-                          Date: {new Date(search.date).toLocaleDateString()}{" "}
-                        </Typography>
-                        <IconButton
-                          onClick={() => handleDeleteSearch(search.id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))
-              ) : (
-                <Grid item xs={12}>
-                  <Typography variant="body1" color="white">
-                    No saved searches found.
-                  </Typography>
-                </Grid>
-              )}
-            </Grid>
-          </Box>
-        </Stack>
+          )}
+        </Grid>
       </ThemeProvider>
     </Box>
   );

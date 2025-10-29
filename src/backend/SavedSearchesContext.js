@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { db } from "../backend/firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
 
 const SavedSearchesContext = createContext();
 
@@ -10,9 +17,13 @@ export function SavedSearchesProvider({ children }) {
   const [savedSearches, setSavedSearches] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchSavedSearches = useCallback(async () => {
+  const fetchSavedSearches = useCallback(async (userId) => {
     setLoading(true);
-    const snapshot = await getDocs(collection(db, "saved-searches"));
+    const userQuery = query(
+      collection(db, "saved-searches"),
+      where("userId", "==", userId)
+    );
+    const snapshot = await getDocs(userQuery);
     setSavedSearches(
       snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
     );
