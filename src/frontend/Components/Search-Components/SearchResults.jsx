@@ -31,7 +31,7 @@ const SearchResults = ({ results, onSaveItem, viewMode, userId }) => {
           xs={viewMode === "list" ? 12 : 6}
           sm={viewMode === "list" ? 12 : 4}
           md={viewMode === "list" ? 12 : 3}
-          key={product.id}
+          key={product.itemId}
         >
           <Card
             sx={{ display: "flex", flexDirection: "column", height: "100%" }}

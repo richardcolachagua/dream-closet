@@ -90,7 +90,7 @@ function UserDescriptionInput({
 
       const combinedResults = [
         ...(Array.isArray(asosResults) ? asosResults : []).map((product) => ({
-          id: product.id,
+          itemId: product.id, // <-- always itemId!
           name: product.name,
           price: product.price?.current?.text || "Price unavailable",
           imageUrl: product.imageUrl ? `https://${product.imageUrl}` : "",
@@ -99,7 +99,7 @@ function UserDescriptionInput({
         })),
         ...(Array.isArray(realTimeResults) ? realTimeResults : []).map(
           (product) => ({
-            id: product.product_id,
+            itemId: product.product_id, // <-- always itemId!
             name: product.product_title,
             price: product.offer?.price || "Price unavailable",
             imageUrl: product.product_photos?.[0] || "",
