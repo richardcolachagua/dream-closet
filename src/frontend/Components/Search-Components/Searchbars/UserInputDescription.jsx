@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { TextField, Button, Box } from "@mui/material";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../../../backend/firebase";
 import axios from "axios";
 import SaveSearchButton from "../Buttons/SaveSearchButton";
 
@@ -130,22 +128,12 @@ function UserDescriptionInput({
     setDescription(event.target.value);
   };
 
-  const handleSaveSearch = async () => {
+  const handleSaveSearch = () => {
     if (description.trim() === "") {
       onSearchError("Cannot save empty search");
       return;
     }
-    try {
-      await addDoc(collection(db, "saved-searches"), {
-        query: description,
-        timestamp: new Date(),
-      });
-      console.log("Search saved successfully");
-      onSaveSearch(description);
-    } catch (error) {
-      console.error("Error saving search", error);
-      onSearchError("Failed to save search. Please try again");
-    }
+    onSaveSearch(description);
   };
 
   return (

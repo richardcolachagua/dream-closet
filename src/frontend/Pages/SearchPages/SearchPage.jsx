@@ -29,6 +29,7 @@ const SearchPage = () => {
   const [savedSearches, setSavedSearches] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
   const [currentUser, setCurrentUser] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -91,22 +92,24 @@ const SearchPage = () => {
 
   const handleSaveSearch = async (searchQuery) => {
     try {
-      const docRef = await addDoc(collection(db, "saved-searches"), {
+      await addDoc(collection(db, "saved-searches"), {
         query: searchQuery,
+        userId: currentUser?.uid, // Make sure to include userId!
         date: new Date().toISOString(),
       });
-      setSavedSearches([
-        ...savedSearches,
-        { id: docRef.id, query: searchQuery, date: new Date().toISOString() },
-      ]);
+      setSuccessMessage("Search saved successfully!"); // <-- Success
     } catch (error) {
+      setError("Error saving search."); // <-- Error
       console.error("Error saving search", error);
     }
   };
 
   const handleSaveItem = async (item) => {
     try {
-      await addDoc(collection(db, "saved-items"), item);
+      await addDoc(collection(db, "saved-items"), {
+        ...item,
+        userId: currentUser.uid,
+      });
     } catch (error) {
       console.error("Error saving item", error);
     }
@@ -200,6 +203,20 @@ const SearchPage = () => {
                 />
               </>
             )}
+
+            <Snackbar
+              open={!!successMessage}
+              autoHideDuration={6000}
+              onClose={() => setSuccessMessage(null)}
+            >
+              <Alert
+                onClose={() => setSuccessMessage(null)}
+                severity="success"
+                sx={{ width: "100%" }}
+              >
+                {successMessage}
+              </Alert>
+            </Snackbar>
 
             <Snackbar
               open={!!error}
