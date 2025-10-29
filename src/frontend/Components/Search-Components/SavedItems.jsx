@@ -44,7 +44,6 @@ function SavedItems({ userId }) {
           </Typography>
         ) : (
           savedItems.map((savedItem) => {
-            console.log("Passing item to SaveForLaterButton:", savedItem);
             return (
               <Grid item xs={12} sm={6} md={4} key={savedItem.id}>
                 <SaveForLaterButton item={savedItem} userId={userId} />

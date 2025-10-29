@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./backend/AuthContext";
 import { ProtectedRoute } from "./backend/ProtectedRoute";
+import { auth } from "./backend/firebase";
 
 import HomePage from "./frontend/Pages/StaticPages/HomePage";
 import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
@@ -22,6 +23,8 @@ import CheckYourEmail from "./frontend/Pages/ForgotPassword/CheckYourEmail";
 import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
 import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
+
+const currentUser = auth.currentUser;
 
 const ROUTES = [
   { path: "/", element: <Navigate to="/homepage" replace /> },
@@ -58,7 +61,7 @@ const ROUTES = [
     path: "/saveditemsandsearches",
     element: (
       <ProtectedRoute>
-        <SavedItemsAndSearches />
+        <SavedItemsAndSearches userId={currentUser?.uid} />
       </ProtectedRoute>
     ),
   },
