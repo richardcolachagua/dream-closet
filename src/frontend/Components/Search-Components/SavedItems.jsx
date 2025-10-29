@@ -40,7 +40,7 @@ function SavedItems({ userId }) {
       <Grid container spacing={2}>
         {SavedItems.map((SavedItem) => (
           <Grid item xs={12} sm={6} md={4} key={SavedItem.id}>
-            <SaveForLaterButton item={SavedItem.item} userId={userId} />
+            <SaveForLaterButton item={SavedItem} userId={userId} />
           </Grid>
         ))}
       </Grid>
