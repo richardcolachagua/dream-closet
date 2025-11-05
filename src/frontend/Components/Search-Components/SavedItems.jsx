@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import {
-  Box,
   Typography,
   Grid,
   Card,
   CardContent,
   CardMedia,
+  CardActions,
   Container,
+  Button,
 } from "@mui/material";
 import { db } from "../../../backend/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -14,18 +15,18 @@ import SaveForLaterButton from "./Buttons/SaveForLaterButton";
 
 const cardHover = {
   transition: "transform 0.2s, box-shadow 0.2s",
-  boxShadow: "0 2px 12px rgba(0,0,0,0.8)",
   backgroundColor: "#181818",
   color: "white",
   borderRadius: "14px",
   minWidth: 270,
   maxWidth: 340,
   mx: "auto",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.8)",
   "&:hover": {
-    boxShadow: "0 6px 20px rgba(36,175,255,0.3)",
-    transform: "translateY(-6px) scale(1.04)",
+    boxShadow: "0 8px 28px rgba(36,175,255,0.18)",
+    transform: "translateY(-8px) scale(1.05)",
     backgroundColor: "#232323",
-    BorderColor: "#30e3ca",
+    borderColor: "#30e3ca",
     color: "#30e3ca",
   },
 };
@@ -98,18 +99,22 @@ function SavedItems({ userId }) {
                     image={savedItem.imageUrl}
                     alt={savedItem.name}
                     sx={{
+                      width: "100%",
+                      height: "60%",
                       objectFit: "cover",
-                      height: 230,
-                      borderRadius: "10px 10px 0 0",
+                      borderRadius: "12px 12px 0 0",
                     }}
                   />
                 )}
                 <CardContent>
-                  <Typography variant="h6" sx={{ color: "#fff", mb: 1 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ color: "#fff", mb: 1, fontWeight: "bold" }}
+                  >
                     {savedItem.name}
                   </Typography>
                   {savedItem.price && (
-                    <Typography variant="body2" sx={{ color: "#bbb", mb: 2 }}>
+                    <Typography variant="body2" sx={{ color: "#bbb", mb: 1 }}>
                       {savedItem.price}
                     </Typography>
                   )}
@@ -119,10 +124,26 @@ function SavedItems({ userId }) {
                   >
                     Source: {savedItem.source}
                   </Typography>
-                  <Box sx={{ mt: 2 }}>
-                    <SaveForLaterButton item={savedItem} userId={userId} />
-                  </Box>
                 </CardContent>
+                <CardActions
+                  sx={{ justifyContent: "space-between", px: 2, py: 1 }}
+                >
+                  <SaveForLaterButton item={savedItem} userId={userId} />
+                  <Button
+                    size="small"
+                    variant="contained"
+                    sx={{
+                      fontWeight: "bold",
+                      backgroundColor: "turquoise",
+                      color: "black",
+                      borderRadius: 3,
+                    }}
+                    href={savedItem.productUrl}
+                    target="_blank"
+                  >
+                    View Product
+                  </Button>
+                </CardActions>
               </Card>
             </Grid>
           ))
