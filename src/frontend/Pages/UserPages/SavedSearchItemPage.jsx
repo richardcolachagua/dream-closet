@@ -4,16 +4,19 @@ import SavedSearches from "../../Components/Search-Components/SavedSearches";
 import SavedItems from "../../Components/Search-Components/SavedItems";
 import Footer from "../../Components/Footer";
 import ProfileHeader from "../../Components/Headers/SavedSearchHeader";
+import { useAuth } from "../../../backend/AuthContext";
 
 const defaultTheme = createTheme();
 
-const SavedItemsAndSearches = ({ userId }) => {
+const SavedItemsAndSearches = () => {
+  const { user } = useAuth();
+  const userId = user?.uid;
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        transition: "background-color 0.3s ease",
         minHeight: "100vh",
         backgroundColor: "black",
         backgroundSize: "cover",

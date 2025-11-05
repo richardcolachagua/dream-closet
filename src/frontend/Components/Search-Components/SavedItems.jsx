@@ -7,6 +7,8 @@ import SaveForLaterButton from "./Buttons/SaveForLaterButton";
 function SavedItems({ userId }) {
   const [savedItems, setSavedItems] = useState([]);
 
+  console.log("SavedItems component received userId:", userId);
+
   useEffect(() => {
     if (userId) {
       fetchSavedItems(userId);
