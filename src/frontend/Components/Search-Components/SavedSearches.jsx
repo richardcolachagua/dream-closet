@@ -8,6 +8,7 @@ import {
   IconButton,
   CssBaseline,
   Skeleton,
+  Container,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -21,6 +22,24 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 import { auth } from "../../../backend/firebase";
+
+const cardHover = {
+  transition: "transform 0.2s, box-shadow 0.2s",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.8)",
+  backgroundColor: "#181818",
+  color: "white",
+  borderRadius: "14px",
+  minWidth: 270,
+  maxWidth: 340,
+  mx: "auto",
+  "&:hover": {
+    boxShadow: "0 6px 20px rgba(36,175,255,0.3)",
+    transform: "translateY(-6px) scale(1.04)",
+    backgroundColor: "#232323",
+    borderColor: "#30e3ca",
+    color: "#30e3ca",
+  },
+};
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);
@@ -96,22 +115,13 @@ const SavedSearches = () => {
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        minHeight: "100vh",
-        paddingTop: "30px",
-      }}
-    >
+    <Container maxWidth="lg" sx={{ mt: 6, mb: 8 }}>
       <ThemeProvider theme={defaultTheme}>
         <CssBaseline />
         <Typography
           variant="h4"
           sx={{
-            mb: 3,
+            mb: 4,
             fontWeight: "bold",
             color: "white",
             justifyContent: "center",
@@ -120,24 +130,26 @@ const SavedSearches = () => {
         >
           Your Saved Searches
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={4} justifyContent="center">
           {isLoadingSearches ? (
             [1, 2, 3].map((item) => (
               <Grid item xs={12} sm={6} md={4} key={item}>
-                <Skeleton variant="rectangular" height={200} />
+                <Skeleton variant="rectangular" height={180} />
               </Grid>
             ))
           ) : savedSearches.length > 0 ? (
             savedSearches.map((search) => (
-              <Grid item xs={12} sm={6} md={4} key={search.id}>
-                <Card>
+              <Grid item xs={12} sm={6} md={4} lg={3} key={search.id}>
+                <Card sx={cardHover}>
                   <CardContent>
-                    <Typography variant="h6">{search.query}</Typography>
-                    <Typography variant="body2">
+                    <Typography variant="h6" sx={{ color: "#fff", mb: 1 }}>
+                      {search.query}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#bbb", mb: 2 }}>
                       Date: {new Date(search.date).toLocaleDateString()}
                     </Typography>
                     <IconButton onClick={() => handleDeleteSearch(search.id)}>
-                      <DeleteIcon />
+                      <DeleteIcon sx={{ color: "#30e3ca" }} />
                     </IconButton>
                   </CardContent>
                 </Card>
@@ -145,14 +157,14 @@ const SavedSearches = () => {
             ))
           ) : (
             <Grid item xs={12}>
-              <Typography variant="body1" color="white">
+              <Typography variant="body1" color="white" align="center">
                 No saved searches found.
               </Typography>
             </Grid>
           )}
         </Grid>
       </ThemeProvider>
-    </Box>
+    </Container>
   );
 };
 
