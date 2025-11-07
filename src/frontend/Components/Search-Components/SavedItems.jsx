@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Typography, Grid, Container, Button } from "@mui/material";
+import { Typography, Grid, Container } from "@mui/material";
 import { db } from "../../../backend/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import SaveForLaterButton from "./Buttons/SaveForLaterButton";
 import SavedItemCard from "./Cards/SavedItemCard";
 
 function SavedItems({ userId }) {
@@ -63,25 +62,9 @@ function SavedItems({ userId }) {
                 title={savedItem.name}
                 subtitle={savedItem.price}
                 source={savedItem.source}
-                actions={
-                  <>
-                    <SaveForLaterButton item={savedItem} userId={userId} />
-                    <Button
-                      size="small"
-                      variant="contained"
-                      sx={{
-                        fontWeight: "bold",
-                        backgroundColor: "turquoise",
-                        color: "black",
-                        borderRadius: 3,
-                      }}
-                      href={savedItem.productUrl}
-                      target="_blank"
-                    >
-                      View Product
-                    </Button>
-                  </>
-                }
+                savedItem={savedItem}
+                userId={userId}
+                productUrl={savedItem.productUrl}
               />
             </Grid>
           ))

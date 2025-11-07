@@ -13,7 +13,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-function SaveForLaterButton({ item, userId }) {
+function SaveForLaterButton({ item, userId, sx }) {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -83,11 +83,10 @@ function SaveForLaterButton({ item, userId }) {
 
   return (
     <Tooltip title={isSaved ? "Remove from saved items" : "Save for later"}>
-      <IconButton onClick={handleToggleSave} sx={{ color: "primary.main" }}>
+      <IconButton onClick={handleToggleSave} sx={sx}>
         {isSaved ? <BookmarkIcon /> : <BookmarkBorderIcon />}
       </IconButton>
     </Tooltip>
   );
 }
-
 export default SaveForLaterButton;
