@@ -19,8 +19,8 @@ const cardHover = {
   },
 };
 
-const SavedSearchCard = ({ query, date, onDelete }) => (
-  <Card sx={cardHover}>
+const SavedSearchCard = ({ query, date, onDelete, onClick }) => (
+  <Card sx={{ ...cardHover, cursor: "pointer" }} onClick={onClick}>
     <CardContent>
       <Typography variant="h6" sx={{ color: "#fff", mb: 1 }}>
         {query}
@@ -30,7 +30,12 @@ const SavedSearchCard = ({ query, date, onDelete }) => (
       </Typography>
     </CardContent>
     <Box sx={{ px: 2, pb: 2 }}>
-      <IconButton onClick={onDelete}>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+      >
         <DeleteIcon sx={{ color: "#30e3ca" }} />
       </IconButton>
     </Box>

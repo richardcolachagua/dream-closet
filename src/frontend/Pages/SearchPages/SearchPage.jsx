@@ -15,53 +15,53 @@ import UserDescriptionInput from "../../Components/Search-Components/Searchbars/
 import SearchResults from "../../Components/Search-Components/SearchResults";
 import Footer from "../../Components/Footer";
 import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
-import { addDoc, collection, deleteDoc, doc } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "../../../backend/firebase";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import { useLocation } from "react-router-dom";
+import { fetchCombinedResults } from "../../Components/Search-Components/utils/fetchCombinedResults";
 
 const defaultTheme = createTheme();
 
 const SearchPage = () => {
-  const [searchResults, setSearchResults] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsloading] = useState(false);
   const [error, setError] = useState(null);
-  const [savedSearches, setSavedSearches] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
   const [currentUser, setCurrentUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [searchInputValue, setSearchInputValue] = useState("");
+
+  const location = useLocation();
+
+  const runSearch = async (query) => {
+    setIsloading(true);
+    try {
+      const results = await fetchCombinedResults(query);
+      handleSearchResults(results);
+    } catch (error) {
+      setIsloading(false);
+      setError("Failed to fetch search results.");
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get("query");
+    if (query) {
+      setSearchInputValue(query);
+      handleSearchStart();
+      runSearch(query);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
     });
-
     return () => unsubscribe();
   }, []);
-
-  const ViewToggle = ({ viewMode, onViewChange }) => (
-    <ToggleButtonGroup
-      value={viewMode}
-      exclusive
-      onChange={onViewChange}
-      aria-label="view-mode"
-    >
-      <ToggleButton value="list" aria-label="list view">
-        <ViewListIcon
-          sx={{
-            color: "white",
-          }}
-        />
-      </ToggleButton>
-      <ToggleButton value="grid" aria-label="grid view">
-        <ViewModuleIcon
-          sx={{
-            color: "white",
-          }}
-        />
-      </ToggleButton>
-    </ToggleButtonGroup>
-  );
 
   const handleViewChange = (event, newView) => {
     if (newView !== null) {
@@ -74,19 +74,13 @@ const SearchPage = () => {
     setError(null);
   };
 
-  const handleSearchResults = async (results) => {
-    const resultsWithSource = results.map((result) => ({
-      ...result,
-      source:
-        result.source ||
-        (result.id.toString().startsWith("asos") ? "ASOS" : "RealTimeSearch"),
-    }));
-    setSearchResults(resultsWithSource);
+  const handleSearchResults = (results) => {
+    setSearchResults(results);
     setIsloading(false);
   };
 
-  const handleSearchError = (ErrorMessage) => {
-    setError(ErrorMessage);
+  const handleSearchError = (errorMessage) => {
+    setError(errorMessage);
     setIsloading(false);
   };
 
@@ -94,12 +88,12 @@ const SearchPage = () => {
     try {
       await addDoc(collection(db, "saved-searches"), {
         query: searchQuery,
-        userId: currentUser?.uid, // Make sure to include userId!
+        userId: currentUser?.uid,
         date: new Date().toISOString(),
       });
-      setSuccessMessage("Search saved successfully!"); // <-- Success
+      setSuccessMessage("Search saved successfully!");
     } catch (error) {
-      setError("Error saving search."); // <-- Error
+      setError("Error saving search.");
       console.error("Error saving search", error);
     }
   };
@@ -112,15 +106,6 @@ const SearchPage = () => {
       });
     } catch (error) {
       console.error("Error saving item", error);
-    }
-  };
-
-  const handleDeleteSearch = async (id) => {
-    try {
-      await deleteDoc(doc(db, "saved-searches", id));
-      setSavedSearches(savedSearches.filter((search) => search.id !== id));
-    } catch (error) {
-      console.error("Error deleting search:", error);
     }
   };
 
@@ -140,7 +125,6 @@ const SearchPage = () => {
       <ThemeProvider theme={defaultTheme}>
         <SearchPageHeader />
         <CssBaseline />
-        {/* Main content area grows to fill space above footer */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Container
             sx={{
@@ -164,6 +148,8 @@ const SearchPage = () => {
               What clothes are we looking for today?
             </Typography>
             <UserDescriptionInput
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
               onSearchStart={handleSearchStart}
               onSaveSearch={handleSaveSearch}
               onSearchError={handleSearchError}
@@ -189,12 +175,20 @@ const SearchPage = () => {
                     mb: 2,
                   }}
                 >
-                  <ViewToggle
-                    viewMode={viewMode}
-                    onViewChange={handleViewChange}
-                  />
+                  <ToggleButtonGroup
+                    value={viewMode}
+                    exclusive
+                    onChange={handleViewChange}
+                    aria-label="view-mode"
+                  >
+                    <ToggleButton value="list" aria-label="list view">
+                      <ViewListIcon sx={{ color: "white" }} />
+                    </ToggleButton>
+                    <ToggleButton value="grid" aria-label="grid view">
+                      <ViewModuleIcon sx={{ color: "white" }} />
+                    </ToggleButton>
+                  </ToggleButtonGroup>
                 </Box>
-
                 <SearchResults
                   results={searchResults}
                   onSaveItem={handleSaveItem}
@@ -203,7 +197,6 @@ const SearchPage = () => {
                 />
               </>
             )}
-
             <Snackbar
               open={!!successMessage}
               autoHideDuration={6000}
@@ -217,7 +210,6 @@ const SearchPage = () => {
                 {successMessage}
               </Alert>
             </Snackbar>
-
             <Snackbar
               open={!!error}
               autoHideDuration={6000}

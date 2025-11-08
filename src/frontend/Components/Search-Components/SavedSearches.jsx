@@ -11,6 +11,7 @@ import {
 import { db } from "../../../backend/firebase";
 import { auth } from "../../../backend/firebase";
 import SavedSearchCard from "./Cards/SavedSearchCard";
+import { useNavigate } from "react-router-dom";
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);
@@ -74,6 +75,11 @@ const SavedSearches = () => {
     }
   };
 
+  const navigate = useNavigate();
+  const handleRunSavedSearch = (query) => {
+    navigate(`/searchpage?query=${encodeURIComponent(query)}`);
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 6, mb: 8 }}>
       <Typography
@@ -104,6 +110,7 @@ const SavedSearches = () => {
                   search.date ? new Date(search.date).toLocaleDateString() : "—"
                 }
                 onDelete={() => handleDeleteSearch(search.id)}
+                onClick={() => handleRunSavedSearch(search.query)}
               />
             </Grid>
           ))
