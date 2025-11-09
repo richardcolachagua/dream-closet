@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -35,34 +35,6 @@ const SearchPage = () => {
 
   const location = useLocation();
 
-  const runSearch = async (query) => {
-    setIsloading(true);
-    try {
-      const results = await fetchCombinedResults(query);
-      handleSearchResults(results);
-    } catch (error) {
-      setIsloading(false);
-      setError("Failed to fetch search results.");
-    }
-  };
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const query = params.get("query");
-    if (query) {
-      setSearchInputValue(query);
-      handleSearchStart();
-      runSearch(query);
-    }
-  }, [location.search]);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
-
   const handleViewChange = (event, newView) => {
     if (newView !== null) {
       setViewMode(newView);
@@ -72,11 +44,6 @@ const SearchPage = () => {
   const handleSearchStart = () => {
     setIsloading(true);
     setError(null);
-  };
-
-  const handleSearchResults = (results) => {
-    setSearchResults(results);
-    setIsloading(false);
   };
 
   const handleSearchError = (errorMessage) => {
@@ -108,6 +75,42 @@ const SearchPage = () => {
       console.error("Error saving item", error);
     }
   };
+
+  const handleSearchResults = useCallback((results) => {
+    setSearchResults(results);
+    setIsloading(false);
+  }, []);
+
+  const runSearch = useCallback(
+    async (query) => {
+      setIsloading(true);
+      try {
+        const results = await fetchCombinedResults(query);
+        handleSearchResults(results);
+      } catch (error) {
+        setIsloading(false);
+        setError("Failed to fetch search results.");
+      }
+    },
+    [handleSearchResults, setIsloading, setError]
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get("query");
+    if (query) {
+      setSearchInputValue(query);
+      handleSearchStart();
+      runSearch(query);
+    }
+  }, [location.search, runSearch]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Box
