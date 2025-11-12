@@ -6,41 +6,54 @@ import {
   Typography,
   Box,
   Button,
+  IconButton,
+  Chip,
+  Modal,
 } from "@mui/material";
 import SaveForLaterButton from "../Buttons/SaveForLaterButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { useState } from "react";
 
-// Styles
 const cardHover = {
-  transition: "transform 0.2s, box-shadow 0.2s",
+  boxShadow: "0 2px 14px rgba(0,0,0,0.72)",
   backgroundColor: "#181818",
   color: "white",
-  borderRadius: "14px",
+  borderRadius: "22px",
   minWidth: 270,
   maxWidth: 340,
   mx: "auto",
-  boxShadow: "0 2px 12px rgba(0,0,0,0.8)",
+  overflow: "hidden",
+  cursor: "pointer",
+  border: "2px solid transparent", // Always present
+  transition: "box-shadow 0.22s, transform 0.18s, border 0.22s, color 0.22s",
   "&:hover": {
-    boxShadow: "0 8px 28px rgba(36,175,255,0.18)",
-    transform: "translateY(-8px) scale(1.02)",
-    backgroundColor: "#232323",
-    borderColor: "#30e3ca",
+    boxShadow: "0 12px 36px #30e3ca44, 0 2px 18px #2626f533",
+    border: "2px solid #30e3ca", // SOLID color border for reliable rounding
     color: "#30e3ca",
+    transform: "scale(1.035) translateY(-6px)",
+  },
+  "&.Mui-selected": {
+    border: "2.5px solid #ffd700",
+    background: "#212125",
   },
 };
+
 const mediaStyles = {
   width: "100%",
-  height: 400,
+  height: 260,
   objectFit: "cover",
-  borderRadius: "12px 12px 0 0",
-};
-const placeholderStyles = {
-  width: "100%",
-  height: 180,
-  background: "#333",
-  borderRadius: "12px 12px 0 0",
+  borderRadius: "16px 16px 0 0",
+  cursor: "pointer",
 };
 
-// The presentational card
+const placeholderStyles = {
+  width: "100%",
+  height: 260,
+  background: "#333",
+  borderRadius: "16px 16px 0 0",
+};
+
 const SavedItemCard = ({
   imageUrl,
   title,
@@ -49,99 +62,137 @@ const SavedItemCard = ({
   savedItem,
   userId,
   productUrl,
-}) => (
-  <Card sx={cardHover}>
-    {imageUrl ? (
-      <CardMedia
-        component="img"
-        image={imageUrl}
-        alt={title}
-        sx={mediaStyles}
-      />
-    ) : (
-      <Box sx={placeholderStyles} />
-    )}
-    <CardContent
-      sx={{
-        minHeight: 120, // or the value determined by your typical content
-        maxHeight: 120,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-      }}
-    >
-      <Typography
-        variant="h6"
+  badge,
+  onRemove,
+}) => {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const renderBadge = () =>
+    badge ? (
+      <Chip
+        label={badge}
+        color="primary"
+        size="small"
         sx={{
-          mb: 1,
+          position: "absolute",
+          top: 12,
+          left: 12,
+          background: "linear-gradient(90deg, #30e3ca, #1198fb 90%)",
+          color: "#181818",
           fontWeight: "bold",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          // For multi-line clamp:
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          whiteSpace: "normal",
-          minHeight: 120, // adjust this for one/two line variant height
         }}
-      >
-        {title || "—"}
-      </Typography>
-      {subtitle && (
+      />
+    ) : null;
+
+  return (
+    <Card sx={cardHover} elevation={3} tabIndex={0}>
+      <Box sx={{ position: "relative" }}>
+        {renderBadge()}
+        {imageUrl ? (
+          <CardMedia
+            component="img"
+            image={imageUrl}
+            alt={title}
+            sx={mediaStyles}
+            onClick={() => setModalOpen(true)}
+            aria-label="View Details"
+          />
+        ) : (
+          <Box sx={placeholderStyles} />
+        )}
+      </Box>
+      <CardContent sx={{ minHeight: 120, maxHeight: 140, px: 1 }}>
         <Typography
-          variant="body2"
+          variant="h6"
           sx={{
-            color: "#bbb",
             mb: 1,
+            fontWeight: "bold",
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
-            WebkitLineClamp: 1,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             whiteSpace: "normal",
-            minHeight: 20, // adjust for body2 height
+            minHeight: 52,
           }}
         >
-          {subtitle || "—"}
+          {title || "—"}
         </Typography>
-      )}
-      {source && (
-        <Typography
-          variant="body2"
-          sx={{
-            color: "#aaa",
-            fontSize: 14,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 1,
-            WebkitBoxOrient: "vertical",
-            whiteSpace: "normal",
-            minHeight: 20,
-          }}
-        >
-          Source: {source || "—"}
-        </Typography>
-      )}
-    </CardContent>
-    <CardActions
-      sx={{
-        px: 6,
-        py: 12,
-      }}
-    >
-      <Box
+        {subtitle && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#30e3ca",
+              fontWeight: 600,
+              mb: 1,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: "vertical",
+              whiteSpace: "normal",
+              fontSize: 18,
+              minHeight: 18,
+            }}
+          >
+            {subtitle}
+          </Typography>
+        )}
+        {source && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#aaa",
+              fontSize: 14,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: "vertical",
+              whiteSpace: "normal",
+              minHeight: 18,
+            }}
+          >
+            Source: {source || "—"}
+          </Typography>
+        )}
+      </CardContent>
+      <CardActions
         sx={{
+          px: 2,
+          pb: 1,
+          pt: 0.5,
           display: "flex",
-          justifyContent: "space-around",
-          alignItems: "flex-end",
+          justifyContent: "space-between",
         }}
       >
-        <SaveForLaterButton
-          item={savedItem}
-          userId={userId}
-          sx={{ color: "#30e3ca", minWidth: 40, minHeight: 40 }}
-        />
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <SaveForLaterButton
+            item={savedItem}
+            userId={userId}
+            sx={{ color: "#30e3ca", minWidth: 38, minHeight: 38 }}
+            aria-label="Bookmark"
+          />
+          <IconButton
+            size="small"
+            sx={{ color: "#fff", background: "#30e3ca", borderRadius: 2 }}
+            component="a"
+            href={productUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View Product"
+          >
+            <OpenInNewIcon />
+          </IconButton>
+          <IconButton
+            size="small"
+            sx={{ color: "#fff", background: "#ff4181", borderRadius: 2 }}
+            onClick={onRemove}
+            aria-label="Remove Item"
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
         <Button
           size="small"
           variant="contained"
@@ -149,19 +200,75 @@ const SavedItemCard = ({
             fontWeight: "bold",
             backgroundColor: "turquoise",
             color: "black",
-            borderRadius: 3,
-            minWidth: 110,
+            borderRadius: 4,
+            minWidth: 90,
             minHeight: 40,
             textTransform: "none",
+            ml: 1,
           }}
-          href={productUrl}
-          target="_blank"
+          onClick={() => navigator.clipboard.writeText(productUrl)}
+          aria-label="Copy Link"
         >
-          View Product
+          Copy Link
         </Button>
-      </Box>
-    </CardActions>
-  </Card>
-);
+      </CardActions>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-desc"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#222",
+            color: "#fff",
+            borderRadius: "18px",
+            boxShadow: 24,
+            p: 4,
+            outline: "none",
+            maxWidth: 400,
+          }}
+        >
+          <CardMedia
+            component="img"
+            image={imageUrl}
+            alt={title}
+            sx={{
+              width: "100%",
+              maxHeight: 250,
+              borderRadius: 4,
+              mb: 2,
+              objectFit: "cover",
+            }}
+          />
+          <Typography
+            id="modal-title"
+            variant="h6"
+            sx={{ fontWeight: "bold", mb: 1 }}
+          >
+            {title}
+          </Typography>
+          <Typography id="modal-desc" variant="body2" sx={{ mb: 2 }}>
+            {savedItem?.description || "No description available."}
+          </Typography>
+          <Button
+            variant="outlined"
+            color="primary"
+            fullWidth
+            href={productUrl}
+            target="_blank"
+            sx={{ mt: 2 }}
+          >
+            View Product
+          </Button>
+        </Box>
+      </Modal>
+    </Card>
+  );
+};
 
 export default SavedItemCard;
