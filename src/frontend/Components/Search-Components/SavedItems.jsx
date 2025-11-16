@@ -3,6 +3,7 @@ import { Typography, Grid, Container } from "@mui/material";
 import { db } from "../../../backend/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import SavedItemCard from "./Cards/SavedItemCard";
+import { deleteDoc, doc } from "firebase/firestore";
 
 function SavedItems({ userId }) {
   const [savedItems, setSavedItems] = useState([]);
@@ -27,6 +28,15 @@ function SavedItems({ userId }) {
       setSavedItems(items);
     } catch (error) {
       console.error("Error fetching saved items:", error);
+    }
+  };
+
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await deleteDoc(doc(db, "saved-items", itemId));
+      setSavedItems((items) => items.filter((item) => item.id !== itemId));
+    } catch (error) {
+      console.error("Error deleting item:", error);
     }
   };
 
@@ -65,6 +75,7 @@ function SavedItems({ userId }) {
                 savedItem={savedItem}
                 userId={userId}
                 productUrl={savedItem.productUrl}
+                onRemove={() => handleDeleteItem(savedItem.id)}
               />
             </Grid>
           ))
