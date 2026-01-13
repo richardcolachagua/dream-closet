@@ -24,6 +24,7 @@ import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
 import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
 import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
+import OnboardingCategories from "./frontend/Pages/Onboarding/OnboardingCategories";
 
 const currentUser = auth.currentUser;
 
@@ -42,7 +43,6 @@ const ROUTES = [
   { path: "/passwordreset", element: <PasswordReset /> },
   { path: "/setpassword", element: <SetANewPassword /> },
   { path: "/successful", element: <SuccessfulPage /> },
-  {path: "/onboarding/gender", element: <OnboardingGender />},
 
   {
     path: "/profilepage",
@@ -68,6 +68,23 @@ const ROUTES = [
       </ProtectedRoute>
     ),
   },
+  {
+    path: "/onboarding/gender",
+    element: (
+      <ProtectedRoute>
+        <OnboardingGender />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/onboarding/categories",
+    element: (
+      <ProtectedRoute>
+        <OnboardingCategories />
+      </ProtectedRoute>
+    ),
+  },
+
   { path: "*", element: <Navigate to="/homepage" replace /> },
 ];
 
