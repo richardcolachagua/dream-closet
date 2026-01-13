@@ -23,6 +23,7 @@ import CheckYourEmail from "./frontend/Pages/ForgotPassword/CheckYourEmail";
 import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
 import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
+import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
 
 const currentUser = auth.currentUser;
 
@@ -41,6 +42,8 @@ const ROUTES = [
   { path: "/passwordreset", element: <PasswordReset /> },
   { path: "/setpassword", element: <SetANewPassword /> },
   { path: "/successful", element: <SuccessfulPage /> },
+  {path: "/onboarding/gender", element: <OnboardingGender />},
+
   {
     path: "/profilepage",
     element: (

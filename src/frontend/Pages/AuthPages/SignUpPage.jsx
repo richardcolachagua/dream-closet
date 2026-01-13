@@ -25,6 +25,7 @@ import Header from "../../Components/Headers/Header";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
 
+
 // Simple sanitizer example function (for demo purposes)
 const sanitize = (str) => str.replace(/[<>]/g, "");
 
@@ -72,10 +73,16 @@ const SignUpPage = () => {
         firstName,
         lastName,
         email: sanitize(user.email),
+        onboarding: {
+          gender: null,
+          categories: [],
+          brands: [],
+          completed: false,
+        },
       });
 
       console.log("User signed up successfully with Google:", user);
-      navigate("/searchpage");
+      navigate("/onboarding/gender");
     } catch (error) {
       console.error("Google sign-up failed:", error);
       setError("Google sign-up failed. Please try again.");
@@ -105,10 +112,16 @@ const SignUpPage = () => {
           firstName: sanitize(values.firstName),
           lastName: sanitize(values.lastName),
           email: sanitize(values.email),
+          onboarding: {
+            gender: null,
+            categories: [],
+            brands: [],
+            completed: false,
+          },
         });
 
         console.log("user registered sucessfully:", user);
-        navigate("/searchpage");
+        navigate("/onboarding/gender");
       } catch (error) {
         console.error("Signup error:", error);
         if (error.code === "auth/email-already-in-use") {
@@ -290,11 +303,10 @@ const SignUpPage = () => {
                       backgroundColor: "turquoise",
                       color: "black",
                     }}
-                    onClick={() => handleGoogleSignUp("google")}
+                    onClick={handleGoogleSignUp}
                   >
                     SIGN UP WITH GOOGLE
                   </Button>
-                  {/* Error message display */}
                   {error && (
                     <Typography color="error" align="center">
                       {error}
@@ -307,8 +319,6 @@ const SignUpPage = () => {
                   <Link
                     href="/loginpage"
                     variant="body2"
-                    to="/LoginPage"
-                    sx={{ Link: "/loginpage" }}
                     style={{ textDecoration: "none" }}
                   >
                     Already have an account? Sign in
