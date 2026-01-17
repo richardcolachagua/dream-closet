@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 import { useAuth } from "../../../backend/AuthContext";
+import OnboardingLayout from "./OnboardingLayout";
+import GenderSelectStep from "./GenderSelectStep";
 
 const OnboardingGender = () => {
   const theme = useTheme();
@@ -122,17 +124,19 @@ const OnboardingGender = () => {
             justifyContent: "center",
           }}
         >
-          <Typography
-            variant={isMobile ? "h5" : "h4"}
-            sx={{
-              fontWeight: "bold",
-              textAlign: "center",
-              mb: 2,
-            }}
-          >
-            Tell Dream Closet about you
-          </Typography>
-
+    <OnboardingLayout
+  title="Tell Dream Closet about you"
+  subtitle="Start by letting us know which clothing styles to prioritize."
+  stepLabel="Step 1 of 3"
+>
+  <GenderSelectStep
+    selectedGender={selectedGender}
+    onChangeGender={setSelectedGender}
+    onBack={() => navigate("/homepage")}
+    onNext={handleContinue}
+    loading={loading}
+  />
+</OnboardingLayout>
           <Typography
             variant="subtitle1"
             sx={{
