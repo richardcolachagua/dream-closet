@@ -1,22 +1,18 @@
-// frontend/Pages/Onboarding/OnboardingCategories.jsx
+// src/frontend/Pages/Onboarding/OnboardingCategories.jsx
 import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  CssBaseline,
-  Typography,
-  Stack,
   CircularProgress,
   Alert,
-  useMediaQuery,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery, Box } from "@mui/material";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 import { useAuth } from "../../../backend/AuthContext";
+
+import OnboardingLayout from "./OnboardingLayout";
+import CategoryMultiSelectStep from "./CategoryMultiSelectStep";
 
 const femaleCategories = [
   "Tops",
@@ -93,14 +89,15 @@ const OnboardingCategories = () => {
           setError("Could not find your profile. Please sign up again.");
           return;
         }
+
         const data = snap.data();
         const onboarding = data.onboarding || {};
 
         if (!onboarding.gender) {
-          // If gender not set, send them back to first step
           navigate("/onboarding/gender");
           return;
         }
+
         setGender(onboarding.gender);
         setSelectedCategories(onboarding.categories || []);
       } catch (err) {
@@ -127,15 +124,17 @@ const OnboardingCategories = () => {
       navigate("/loginpage");
       return;
     }
+
     if (selectedCategories.length === 0) {
-      setError("Pick at least oen category you like.");
+      setError("Pick at least one category you like.");
       return;
     }
+
     setSaving(true);
     setError("");
 
     try {
-      const userRef = doc(db, "uesrs", currentUser.uid);
+      const userRef = doc(db, "users", currentUser.uid);
       await setDoc(
         userRef,
         {
@@ -146,6 +145,7 @@ const OnboardingCategories = () => {
         },
         { merge: true }
       );
+
       navigate("/onboarding/brands");
     } catch (err) {
       console.error("Error saving categories:", err);
@@ -157,167 +157,44 @@ const OnboardingCategories = () => {
 
   if (initialLoading) {
     return (
-      <>
-        <CssBaseline />
-        <Box
-          sx={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "black",
-          }}
-        >
-          <CircularProgress sx={{ color: "turquoise" }} />
-        </Box>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <CssBaseline />
       <Box
         sx={{
           minHeight: "100vh",
           display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           bgcolor: "black",
-          color: "white",
         }}
       >
-        <Container
-          maxWidth="md"
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            py: 6,
-          }}
-        >
-          <Typography
-            variant={isMobile ? "h5" : "h4"}
-            sx={{
-              fontWeight: "bold",
-              textAlign: "center",
-              mb: 2,
-            }}
-          >
-            What do you like to wear?
-          </Typography>
-
-          <Typography
-            variant="subtitle1"
-            sx={{
-              textAlign: "center",
-              mb: 3,
-              color: "grey.300",
-            }}
-          >
-            Choose the clothing categories you’re most into. Dream Closet will
-            use this to prioritize results and recommendations.
-          </Typography>
-
-          <Typography
-            variant="subtitle2"
-            sx={{
-              textAlign: "center",
-              mb: 3,
-              textTransform: "uppercase",
-              letterSpacing: 1,
-              color: "grey.400",
-            }}
-          >
-            Step 2 of 3
-          </Typography>
-
-          {error && (
-            <Alert
-              severity="error"
-              sx={{
-                mb: 3,
-                bgcolor: "#2b0000",
-                color: "error.main",
-              }}
-            >
-              {error}
-            </Alert>
-          )}
-
-          <Stack
-            direction="row"
-            flexWrap="wrap"
-            spacing={1}
-            useFlexGap
-            sx={{
-              justifyContent: "center",
-              mb: 4,
-            }}
-          >
-            {categories.map((category) => {
-              const selected = selectedCategories.includes(category);
-              return (
-                <Chip
-                  key={category}
-                  label={category}
-                  clickable
-                  onClick={() => toggleCategory(category)}
-                  sx={{
-                    m: 0.5,
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "999px",
-                    border: "1px solid turquoise",
-                    bgcolor: selected ? "turquoise" : "transparent",
-                    color: selected ? "black" : "grey.100",
-                    fontWeight: selected ? "bold" : "normal",
-                    "&:hover": {
-                      bgcolor: selected
-                        ? "turquoise"
-                        : "rgba(64, 224, 208, 0.12)",
-                    },
-                  }}
-                />
-              );
-            })}
-          </Stack>
-
-          <Stack direction="row" spacing={2} justifyContent="space-between">
-            <Button
-              variant="text"
-              onClick={() => navigate("/onboarding/gender")}
-              sx={{
-                color: "grey.300",
-                textTransform: "none",
-              }}
-            >
-              Back
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              disabled={saving}
-              sx={{
-                ml: "auto",
-                px: 4,
-                py: 1.2,
-                borderRadius: "999px",
-                textTransform: "none",
-                fontSize: 16,
-                fontWeight: "bold",
-                bgcolor: "turquoise",
-                color: "black",
-                "&:hover": {
-                  bgcolor: "#00b4aa",
-                },
-              }}
-            >
-              {saving ? "Saving..." : "Next: Favorite Brands"}
-            </Button>
-          </Stack>
-        </Container>
+        <CircularProgress sx={{ color: "turquoise" }} />
       </Box>
-    </>
+    );
+  }
+
+  return (
+    <OnboardingLayout
+      title="What do you like to wear?"
+      subtitle="Choose the clothing categories you’re most into."
+      stepLabel="Step 2 of 3"
+    >
+      {error && (
+        <Alert
+          severity="error"
+          sx={{ mb: 3, bgcolor: "#2b0000", color: "error.main" }}
+        >
+          {error}
+        </Alert>
+      )}
+
+      <CategoryMultiSelectStep
+        categories={categories}
+        selectedCategories={selectedCategories}
+        onToggleCategory={toggleCategory}
+        onBack={() => navigate("/onboarding/gender")}
+        onNext={handleNext}
+        loading={saving}
+      />
+    </OnboardingLayout>
   );
 };
 
