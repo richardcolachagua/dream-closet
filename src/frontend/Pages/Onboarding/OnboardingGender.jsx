@@ -23,7 +23,7 @@ const OnboardingGender = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { user: currentUser, loading: authLoading } = useAuth();
 
   const [selectedGender, setSelectedGender] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +32,8 @@ const OnboardingGender = () => {
 
   useEffect(() => {
     const fetchExistingProfile = async () => {
+      if (authLoading) return; // wait until auth finished
+
       if (!currentUser) {
         navigate("/loginpage");
         return;
@@ -40,7 +42,6 @@ const OnboardingGender = () => {
       try {
         const userRef = doc(db, "users", currentUser.uid);
         const snap = await getDoc(userRef);
-
         if (snap.exists()) {
           const data = snap.data();
           if (data.onboarding?.gender) {
@@ -49,14 +50,16 @@ const OnboardingGender = () => {
         }
       } catch (err) {
         console.error("Error loading onboarding data:", err);
-        setError("Something went wrong loading your profile. Please try again.");
+        setError(
+          "Something went wrong loading your profile. Please try again.",
+        );
       } finally {
         setInitialLoading(false);
       }
     };
 
     fetchExistingProfile();
-  }, [currentUser, navigate]);
+  }, [authLoading, currentUser, navigate]);
 
   const handleContinue = async () => {
     if (!selectedGender || !currentUser) return;
@@ -74,7 +77,7 @@ const OnboardingGender = () => {
             gender: selectedGender,
           },
         },
-        { merge: true }
+        { merge: true },
       );
 
       navigate("/onboarding/categories");
@@ -86,24 +89,25 @@ const OnboardingGender = () => {
     }
   };
 
-  if (initialLoading) {
-    return (
-      <>
-        <CssBaseline />
-        <Box
-          sx={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "black",
-          }}
-        >
-          <CircularProgress sx={{ color: "turquoise" }} />
-        </Box>
-      </>
-    );
-  }
+if (authLoading || initialLoading) {
+  return (
+    <>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "black",
+        }}
+      >
+        <CircularProgress sx={{ color: "turquoise" }} />
+      </Box>
+    </>
+  );
+}
+
 
   return (
     <>
@@ -124,19 +128,19 @@ const OnboardingGender = () => {
             justifyContent: "center",
           }}
         >
-    <OnboardingLayout
-  title="Tell Dream Closet about you"
-  subtitle="Start by letting us know which clothing styles to prioritize."
-  stepLabel="Step 1 of 3"
->
-  <GenderSelectStep
-    selectedGender={selectedGender}
-    onChangeGender={setSelectedGender}
-    onBack={() => navigate("/homepage")}
-    onNext={handleContinue}
-    loading={loading}
-  />
-</OnboardingLayout>
+          <OnboardingLayout
+            title="Tell Dream Closet about you"
+            subtitle="Start by letting us know which clothing styles to prioritize."
+            stepLabel="Step 1 of 3"
+          >
+            <GenderSelectStep
+              selectedGender={selectedGender}
+              onChangeGender={setSelectedGender}
+              onBack={() => navigate("/homepage")}
+              onNext={handleContinue}
+              loading={loading}
+            />
+          </OnboardingLayout>
           <Typography
             variant="subtitle1"
             sx={{
@@ -194,8 +198,7 @@ const OnboardingGender = () => {
                 fontWeight: "bold",
                 bgcolor:
                   selectedGender === "female" ? "turquoise" : "transparent",
-                color:
-                  selectedGender === "female" ? "black" : "grey.100",
+                color: selectedGender === "female" ? "black" : "grey.100",
                 borderColor: "turquoise",
                 "&:hover": {
                   bgcolor:
@@ -220,8 +223,7 @@ const OnboardingGender = () => {
                 fontWeight: "bold",
                 bgcolor:
                   selectedGender === "male" ? "turquoise" : "transparent",
-                color:
-                  selectedGender === "male" ? "black" : "grey.100",
+                color: selectedGender === "male" ? "black" : "grey.100",
                 borderColor: "turquoise",
                 "&:hover": {
                   bgcolor:

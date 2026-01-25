@@ -1,12 +1,8 @@
 // src/frontend/Pages/Onboarding/OnboardingCategories.jsx
 import React, { useEffect, useState } from "react";
-import {
-  CircularProgress,
-  Alert,
-} from "@mui/material";
+import { CircularProgress, Alert, CssBaseline, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
-import { useMediaQuery, Box } from "@mui/material";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 import { useAuth } from "../../../backend/AuthContext";
@@ -57,9 +53,8 @@ const maleCategories = [
 
 const OnboardingCategories = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: authLoading } = useAuth();
 
   const [gender, setGender] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -71,11 +66,13 @@ const OnboardingCategories = () => {
     gender === "female"
       ? femaleCategories
       : gender === "male"
-      ? maleCategories
-      : [];
+        ? maleCategories
+        : [];
 
   useEffect(() => {
     const loadOnboarding = async () => {
+      if (authLoading) return;
+
       if (!currentUser) {
         navigate("/loginpage");
         return;
@@ -109,13 +106,13 @@ const OnboardingCategories = () => {
     };
 
     loadOnboarding();
-  }, [currentUser, navigate]);
+  }, [authLoading, currentUser, navigate]);
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
-        : [...prev, category]
+        : [...prev, category],
     );
   };
 
@@ -143,7 +140,7 @@ const OnboardingCategories = () => {
             categories: selectedCategories,
           },
         },
-        { merge: true }
+        { merge: true },
       );
 
       navigate("/onboarding/brands");
@@ -155,19 +152,22 @@ const OnboardingCategories = () => {
     }
   };
 
-  if (initialLoading) {
+  if (authLoading || initialLoading) {
     return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "black",
-        }}
-      >
-        <CircularProgress sx={{ color: "turquoise" }} />
-      </Box>
+      <>
+        <CssBaseline />
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "black",
+          }}
+        >
+          <CircularProgress sx={{ color: "turquoise" }} />
+        </Box>
+      </>
     );
   }
 

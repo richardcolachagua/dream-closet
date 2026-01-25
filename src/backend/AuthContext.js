@@ -3,6 +3,7 @@ import { onAuthStateChanged, getAuth } from "firebase/auth";
 
 const AuthContext = createContext();
 
+// backend/AuthContext.js
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
@@ -12,10 +13,10 @@ export const AuthProvider = ({ children }) => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      // Fetch user role from Firestore or other service
       // setRole(...)
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -25,5 +26,6 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = () => useContext(AuthContext);

@@ -25,6 +25,7 @@ import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
 import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
 import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
 import OnboardingCategories from "./frontend/Pages/Onboarding/OnboardingCategories";
+import OnboardingBrands from "./frontend/Pages/Onboarding/OnboardingBrands";
 
 const currentUser = auth.currentUser;
 
@@ -68,6 +69,7 @@ const ROUTES = [
       </ProtectedRoute>
     ),
   },
+
   {
     path: "/onboarding/gender",
     element: (
@@ -81,6 +83,15 @@ const ROUTES = [
     element: (
       <ProtectedRoute>
         <OnboardingCategories />
+      </ProtectedRoute>
+    ),
+  },
+
+  {
+    path: "/onboarding/brands",
+    element: (
+      <ProtectedRoute>
+        <OnboardingBrands />
       </ProtectedRoute>
     ),
   },

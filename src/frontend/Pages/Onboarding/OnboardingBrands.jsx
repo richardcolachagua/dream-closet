@@ -1,6 +1,6 @@
 // src/frontend/Pages/Onboarding/OnboardingBrands.jsx
 import React, { useEffect, useState } from "react";
-import { CircularProgress, Alert, Box } from "@mui/material";
+import { CircularProgress, Alert, Box, CssBaseline } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
@@ -55,7 +55,7 @@ const maleUpAndComing = ["Corteiz", "La Familia Forever"];
 
 const OnboardingBrands = () => {
   const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
+const { user: currentUser, loading: authLoading } = useAuth();
 
   const [gender, setGender] = useState(null);
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -107,42 +107,43 @@ const OnboardingBrands = () => {
 
   const brandGroups = buildBrandGroups();
 
-  useEffect(() => {
-    const loadOnboarding = async () => {
-      if (!currentUser) {
-        navigate("/loginpage");
+ useEffect(() => {
+  const loadOnboarding = async () => {
+    if (authLoading) return;      // wait for auth to resolve
+
+    if (!currentUser) {
+      navigate("/loginpage");
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        setError("Could not find your profile. Please sign up again.");
         return;
       }
 
-      try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const snap = await getDoc(userRef);
+      const data = snap.data();
+      const onboarding = data.onboarding || {};
 
-        if (!snap.exists()) {
-          setError("Could not find your profile. Please sign up again.");
-          return;
-        }
-
-        const data = snap.data();
-        const onboarding = data.onboarding || {};
-
-        if (!onboarding.gender) {
-          navigate("/onboarding/gender");
-          return;
-        }
-
-        setGender(onboarding.gender);
-        setSelectedBrands(onboarding.brands || []);
-      } catch (err) {
-        console.error("Error loading onboarding brands:", err);
-        setError("Something went wrong loading your preferences.");
-      } finally {
-        setInitialLoading(false);
+      if (!onboarding.gender) {
+        navigate("/onboarding/gender");
+        return;
       }
-    };
 
-    loadOnboarding();
-  }, [currentUser, navigate]);
+      setGender(onboarding.gender);
+      setSelectedBrands(onboarding.brands || []);
+    } catch (err) {
+      console.error("Error loading onboarding brands:", err);
+      setError("Something went wrong loading your preferences.");
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  loadOnboarding();
+}, [authLoading, currentUser, navigate]);
 
   const toggleBrand = (brand) => {
     setSelectedBrands((prev) =>
@@ -189,8 +190,10 @@ const OnboardingBrands = () => {
     }
   };
 
-  if (initialLoading) {
-    return (
+if (authLoading || initialLoading) {
+  return (
+    <>
+      <CssBaseline />
       <Box
         sx={{
           minHeight: "100vh",
@@ -202,8 +205,9 @@ const OnboardingBrands = () => {
       >
         <CircularProgress sx={{ color: "turquoise" }} />
       </Box>
-    );
-  }
+    </>
+  );
+}
 
   return (
     <OnboardingLayout
