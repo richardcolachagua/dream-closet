@@ -6,11 +6,11 @@ import { useTheme } from "@mui/material/styles";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 import { useAuth } from "../../../backend/AuthContext";
-
 import OnboardingLayout from "./OnboardingLayout";
 import CategoryMultiSelectStep from "./CategoryMultiSelectStep";
 
-const femaleCategories = [
+// EXPORT these so ProfilePage can reuse them
+export const femaleCategories = [
   "Tops",
   "Blouses",
   "Crop Tops",
@@ -31,7 +31,7 @@ const femaleCategories = [
   "Accessories",
 ];
 
-const maleCategories = [
+export const maleCategories = [
   "T‑Shirts",
   "Button‑Ups",
   "Polos",
@@ -66,13 +66,12 @@ const OnboardingCategories = () => {
     gender === "female"
       ? femaleCategories
       : gender === "male"
-        ? maleCategories
-        : [];
+      ? maleCategories
+      : [];
 
   useEffect(() => {
     const loadOnboarding = async () => {
       if (authLoading) return;
-
       if (!currentUser) {
         navigate("/loginpage");
         return;
@@ -112,7 +111,7 @@ const OnboardingCategories = () => {
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
-        : [...prev, category],
+        : [...prev, category]
     );
   };
 
@@ -138,11 +137,11 @@ const OnboardingCategories = () => {
           onboarding: {
             gender,
             categories: selectedCategories,
+            completed: false,
           },
         },
-        { merge: true },
+        { merge: true }
       );
-
       navigate("/onboarding/brands");
     } catch (err) {
       console.error("Error saving categories:", err);
@@ -165,36 +164,36 @@ const OnboardingCategories = () => {
             bgcolor: "black",
           }}
         >
-          <CircularProgress sx={{ color: "turquoise" }} />
+          <CircularProgress />
         </Box>
       </>
     );
   }
 
   return (
-    <OnboardingLayout
-      title="What do you like to wear?"
-      subtitle="Choose the clothing categories you’re most into."
-      stepLabel="Step 2 of 3"
-    >
-      {error && (
-        <Alert
-          severity="error"
-          sx={{ mb: 3, bgcolor: "#2b0000", color: "error.main" }}
-        >
-          {error}
-        </Alert>
-      )}
+    <>
+      <CssBaseline />
+      <OnboardingLayout
+        stepLabel="STEP 2 OF 3"
+        title="What do you like to wear?"
+        subtitle="Choose the clothing categories you're most into. Dream closet will use this to prioritize results and recommendations."
+      >
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-      <CategoryMultiSelectStep
-        categories={categories}
-        selectedCategories={selectedCategories}
-        onToggleCategory={toggleCategory}
-        onBack={() => navigate("/onboarding/gender")}
-        onNext={handleNext}
-        loading={saving}
-      />
-    </OnboardingLayout>
+        <CategoryMultiSelectStep
+          categories={categories}
+          selectedCategories={selectedCategories}
+          onToggleCategory={toggleCategory}
+          onBack={() => navigate("/onboarding/gender")}
+          onNext={handleNext}
+          loading={saving}
+        />
+      </OnboardingLayout>
+    </>
   );
 };
 

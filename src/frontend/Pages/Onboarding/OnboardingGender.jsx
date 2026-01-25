@@ -70,15 +70,16 @@ const OnboardingGender = () => {
     try {
       const userRef = doc(db, "users", currentUser.uid);
 
-      await setDoc(
-        userRef,
-        {
-          onboarding: {
-            gender: selectedGender,
-          },
-        },
-        { merge: true },
-      );
+await setDoc(
+  userRef,
+  {
+    onboarding: {
+      gender: selectedGender,
+      completed: false,
+    },
+  },
+  { merge: true }
+);
 
       navigate("/onboarding/categories");
     } catch (err) {
