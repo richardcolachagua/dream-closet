@@ -16,7 +16,9 @@ export const OnboardingGuard = ({ children }) => {
   }
 
   // Not logged in: let your existing ProtectedRoute handle redirect to login
-  if (!user) return <>{children}</>;
+  if (!user) {
+    return <>{children}</>;
+  }
 
   const completed = Boolean(onboarding?.completed);
   const path = location.pathname;

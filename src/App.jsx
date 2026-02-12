@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./backend/AuthContext";
 import { ProtectedRoute } from "./backend/ProtectedRoute";
 import { auth } from "./backend/firebase";
-
+import { OnboardingGuard } from "./backend/OnboardingGuard";
 import HomePage from "./frontend/Pages/StaticPages/HomePage";
 import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
 import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
@@ -49,7 +49,9 @@ const ROUTES = [
     path: "/profilepage",
     element: (
       <ProtectedRoute>
-        <ProfilePage />
+        <OnboardingGuard>
+          <ProfilePage />
+        </OnboardingGuard>
       </ProtectedRoute>
     ),
   },
@@ -57,7 +59,9 @@ const ROUTES = [
     path: "/searchpage",
     element: (
       <ProtectedRoute>
-        <SearchPage />
+        <OnboardingGuard>
+          <SearchPage />
+        </OnboardingGuard>
       </ProtectedRoute>
     ),
   },
@@ -65,7 +69,9 @@ const ROUTES = [
     path: "/saveditemsandsearches",
     element: (
       <ProtectedRoute>
-        <SavedItemsAndSearches userId={currentUser?.uid} />
+        <OnboardingGuard>
+          <SavedItemsAndSearches />
+        </OnboardingGuard>
       </ProtectedRoute>
     ),
   },
