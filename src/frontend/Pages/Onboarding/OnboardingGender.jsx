@@ -2,14 +2,10 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Button,
   Container,
   CssBaseline,
-  Typography,
-  Stack,
   CircularProgress,
   Alert,
-  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +17,6 @@ import GenderSelectStep from "./GenderSelectStep";
 
 const OnboardingGender = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const { user: currentUser, loading: authLoading } = useAuth();
 
@@ -70,16 +65,16 @@ const OnboardingGender = () => {
     try {
       const userRef = doc(db, "users", currentUser.uid);
 
-await setDoc(
-  userRef,
-  {
-    onboarding: {
-      gender: selectedGender,
-      completed: false,
-    },
-  },
-  { merge: true }
-);
+      await setDoc(
+        userRef,
+        {
+          onboarding: {
+            gender: selectedGender,
+            completed: false,
+          },
+        },
+        { merge: true },
+      );
 
       navigate("/onboarding/categories");
     } catch (err) {
@@ -90,25 +85,24 @@ await setDoc(
     }
   };
 
-if (authLoading || initialLoading) {
-  return (
-    <>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "black",
-        }}
-      >
-        <CircularProgress sx={{ color: "turquoise" }} />
-      </Box>
-    </>
-  );
-}
-
+  if (authLoading || initialLoading) {
+    return (
+      <>
+        <CssBaseline />
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "black",
+          }}
+        >
+          <CircularProgress sx={{ color: "turquoise" }} />
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
@@ -134,6 +128,15 @@ if (authLoading || initialLoading) {
             subtitle="Start by letting us know which clothing styles to prioritize."
             stepLabel="Step 1 of 3"
           >
+            {error && (
+              <Alert
+                severity="error"
+                sx={{ mb: 3, bgcolor: "#2b0000", color: "error.main" }}
+              >
+                {error}
+              </Alert>
+            )}
+
             <GenderSelectStep
               selectedGender={selectedGender}
               onChangeGender={setSelectedGender}
@@ -142,147 +145,9 @@ if (authLoading || initialLoading) {
               loading={loading}
             />
           </OnboardingLayout>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              textAlign: "center",
-              mb: 4,
-              color: "grey.300",
-            }}
-          >
-            Start by letting us know which clothing styles to prioritize.
-          </Typography>
-
-          {error && (
-            <Alert
-              severity="error"
-              sx={{ mb: 3, bgcolor: "#2b0000", color: "error.main" }}
-            >
-              {error}
-            </Alert>
-          )}
-
-          <Typography
-            variant="subtitle2"
-            sx={{
-              textAlign: "center",
-              mb: 3,
-              textTransform: "uppercase",
-              letterSpacing: 1,
-              color: "grey.400",
-            }}
-          >
-            Step 1 of 3
-          </Typography>
-
-          <Typography
-            variant="h6"
-            sx={{ textAlign: "center", mb: 3, fontWeight: "bold" }}
-          >
-            How do you primarily shop for clothes?
-          </Typography>
-
-          <Stack
-            direction={isMobile ? "column" : "row"}
-            spacing={2}
-            sx={{ justifyContent: "center", mb: 4 }}
-          >
-            <Button
-              variant={selectedGender === "female" ? "contained" : "outlined"}
-              onClick={() => setSelectedGender("female")}
-              sx={{
-                flex: 1,
-                py: 1.5,
-                borderRadius: "999px",
-                textTransform: "none",
-                fontSize: 16,
-                fontWeight: "bold",
-                bgcolor:
-                  selectedGender === "female" ? "turquoise" : "transparent",
-                color: selectedGender === "female" ? "black" : "grey.100",
-                borderColor: "turquoise",
-                "&:hover": {
-                  bgcolor:
-                    selectedGender === "female"
-                      ? "turquoise"
-                      : "rgba(64, 224, 208, 0.12)",
-                },
-              }}
-            >
-              I shop mostly in women&apos;s sections
-            </Button>
-
-            <Button
-              variant={selectedGender === "male" ? "contained" : "outlined"}
-              onClick={() => setSelectedGender("male")}
-              sx={{
-                flex: 1,
-                py: 1.5,
-                borderRadius: "999px",
-                textTransform: "none",
-                fontSize: 16,
-                fontWeight: "bold",
-                bgcolor:
-                  selectedGender === "male" ? "turquoise" : "transparent",
-                color: selectedGender === "male" ? "black" : "grey.100",
-                borderColor: "turquoise",
-                "&:hover": {
-                  bgcolor:
-                    selectedGender === "male"
-                      ? "turquoise"
-                      : "rgba(64, 224, 208, 0.12)",
-                },
-              }}
-            >
-              I shop mostly in men&apos;s sections
-            </Button>
-          </Stack>
-
-          <Typography
-            variant="body2"
-            sx={{ textAlign: "center", mb: 4, color: "grey.500" }}
-          >
-            This helps tailor brands, categories, and recommendations.
-          </Typography>
-
-          <Stack direction="row" spacing={2} justifyContent="space-between">
-            <Button
-              variant="text"
-              onClick={() => navigate("/homepage")}
-              sx={{
-                color: "grey.300",
-                textTransform: "none",
-              }}
-            >
-              Back to Home
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleContinue}
-              disabled={!selectedGender || loading}
-              sx={{
-                ml: "auto",
-                px: 4,
-                py: 1.2,
-                borderRadius: "999px",
-                textTransform: "none",
-                fontSize: 16,
-                fontWeight: "bold",
-                bgcolor: "turquoise",
-                color: "black",
-                "&:hover": {
-                  bgcolor: "#00b4aa",
-                },
-              }}
-            >
-              {loading ? "Saving..." : "Next: Clothing Types"}
-            </Button>
-          </Stack>
         </Container>
       </Box>
     </>
   );
 };
-
 export default OnboardingGender;

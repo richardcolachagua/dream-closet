@@ -30,7 +30,7 @@ const useSavedSearches = (userId) => {
       setIsLoadingSearches(true);
       const q = query(
         collection(db, "saved-searches"),
-        where("userId", "==", userId)
+        where("userId", "==", userId),
       );
       const querySnapshot = await getDocs(q);
       const searches = querySnapshot.docs.map((doc) => ({
@@ -88,7 +88,7 @@ const SavedSearches = () => {
 
   const handleToggleSelect = (id) => {
     setSelected((sel) =>
-      sel.includes(id) ? sel.filter((sid) => sid !== id) : [...sel, id]
+      sel.includes(id) ? sel.filter((sid) => sid !== id) : [...sel, id],
     );
   };
 
@@ -159,7 +159,7 @@ const SavedSearches = () => {
           ))
         ) : (
           <Grid item xs={12}>
-            <Box sx={{ textAlign: "center", color: "#aaa", mt: 6 }}>
+            <Box sx={{ textAlign: "center", color: "white", mt: 6 }}>
               <Typography variant="h6" sx={{ mt: 2 }}>
                 No saved searches yet!
               </Typography>

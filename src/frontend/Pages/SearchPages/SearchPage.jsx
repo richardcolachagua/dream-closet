@@ -52,10 +52,14 @@ const SearchPage = () => {
   };
 
   const handleSaveSearch = async (searchQuery) => {
+    if (!currentUser) {
+      setError("You must be logged in to save searches.");
+      return;
+    }
     try {
       await addDoc(collection(db, "saved-searches"), {
         query: searchQuery,
-        userId: currentUser?.uid,
+        userId: currentUser.uid,
         date: new Date().toISOString(),
       });
       setSuccessMessage("Search saved successfully!");
@@ -92,7 +96,7 @@ const SearchPage = () => {
         setError("Failed to fetch search results.");
       }
     },
-    [handleSearchResults, setIsloading, setError]
+    [handleSearchResults, setIsloading, setError],
   );
 
   useEffect(() => {

@@ -27,14 +27,14 @@ const BrandMultiSelectStep = ({
     <>
       <Typography
         variant="h6"
-        sx={{ textAlign: "center", mb: 3, fontWeight: "bold" }}
+        sx={{ textAlign: "center", mb: 3, fontWeight: "bold", color: "white" }}
       >
         Which brands feel like you?
       </Typography>
 
       <Typography
-        variant="body2"
-        sx={{ textAlign: "center", mb: 4, color: "grey.400" }}
+        variant="body1"
+        sx={{ textAlign: "center", mb: 4, color: "white" }}
       >
         Select your favorite luxury, streetwear, athletic, and up-and-coming
         brands so Dream Closet can prioritize results that match your vibe.

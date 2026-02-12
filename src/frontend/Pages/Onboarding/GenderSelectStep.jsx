@@ -18,7 +18,7 @@ const GenderSelectStep = ({
         <>
         <Typography
         variant="h6"
-        sx={{ textAlign: "center", mb: 3, fontWeight: "bold"}}  
+        sx={{ textAlign: "center", mb: 3, fontWeight: "bold", color: "white"}}  
         >
             How do you primarily shop for clothes?
         </Typography>
@@ -76,14 +76,14 @@ const GenderSelectStep = ({
         </Stack>
 
         <Typography
-        variant="body2"
+        variant="body1"
         sx={{
             textAlign: "center",
             mb: 4,
-            color: "grey.500"
+            color: "white"
         }}
         >
-            This helps tailor brands, categories, and recommendations.
+            This helps us tailor your brands, categories, and recommendations.
         </Typography>
 
         <Stack direction="row" spacing={2} justifyContent="space-between">

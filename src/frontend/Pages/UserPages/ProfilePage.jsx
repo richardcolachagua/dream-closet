@@ -52,7 +52,7 @@ const validationSchema = Yup.object({
   newPassword: Yup.string().min(8, "Password must be at least 8 characters"),
   confirmNewPassword: Yup.string().oneOf(
     [Yup.ref("newPassword")],
-    "Passwords must match"
+    "Passwords must match",
   ),
 });
 
@@ -122,7 +122,7 @@ const ProfilePage = () => {
 
           const credential = EmailAuthProvider.credential(
             user.email,
-            values.currentPassword
+            values.currentPassword,
           );
           await reauthenticateWithCredential(user, credential);
           await updatePassword(user, values.newPassword);
@@ -190,9 +190,7 @@ const ProfilePage = () => {
           setEditCategories(onboarding.categories || []);
           setEditBrands(onboarding.brands || []);
         } else {
-          console.warn(
-            "[ProfilePage] No Firestore document found for user."
-          );
+          console.warn("[ProfilePage] No Firestore document found for user.");
         }
       } catch (error) {
         console.error("[ProfilePage] Error fetching user data:", error);
@@ -234,7 +232,7 @@ const ProfilePage = () => {
               editBrands.length > 0,
           },
         },
-        { merge: true }
+        { merge: true },
       );
 
       setCurrentUserInfo((prev) => ({
@@ -258,112 +256,312 @@ const ProfilePage = () => {
   const brandGroups = buildBrandGroupsForGender(editGender);
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <CssBaseline />
-      <ProfilePageHeader />
-      <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
-        <Typography variant="h4" color="grey.100" gutterBottom>
-          Welcome {currentUserInfo.firstName}
-        </Typography>
-
-        {/* Existing profile form */}
-        <Box
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          sx={{ mt: 2 }}
-        >
-          {/* ... keep all your existing Grid/TextField/password fields ... */}
-          <Grid container spacing={2}>
-            {/* firstName, lastName, email, password fields, etc. */}
-          </Grid>
-
-          <Box sx={{ mt: 3 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={formik.isSubmitting}
-            >
-              {formik.isSubmitting ? <CircularProgress size={20} /> : "Update Profile"}
-            </Button>
-          </Box>
-        </Box>
-
-        {/* Style preferences card */}
-        <Box
-          sx={{
-            mt: 6,
-            p: 3,
-            borderRadius: 2,
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            bgcolor: "rgba(0,0,0,0.6)",
-          }}
-        >
-          <Typography variant="h5" color="grey.100" gutterBottom>
-            Style preferences
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "black",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        overflowX: "hidden",
+      }}
+    >
+      <ThemeProvider theme={defaultTheme}>
+        <CssBaseline />
+        <ProfilePageHeader />
+        <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
+          <Typography
+            variant="h3"
+            gutterBottom
+            sx={{
+              color: "turquoise",
+              fontWeight: "bold",
+            }}
+          >
+            Welcome, {currentUserInfo.firstName}
           </Typography>
 
-          {/* Gender */}
-          <Box sx={{ mb: 3 }}>
-            <GenderSelectStep
-              selectedGender={editGender}
-              onChangeGender={setEditGender}
-              loading={false}
-            />
-          </Box>
-
-          {/* Categories */}
-          <Box sx={{ mb: 3 }}>
-            <CategoryMultiSelectStep
-              categories={
-                editGender === "female"
-                  ? femaleCategories
-                  : editGender === "male"
-                  ? maleCategories
-                  : []
-              }
-              selectedCategories={editCategories}
-              onToggleCategory={(c) =>
-                setEditCategories((prev) =>
-                  prev.includes(c)
-                    ? prev.filter((x) => x !== c)
-                    : [...prev, c]
-                )
-              }
-              loading={false}
-            />
-          </Box>
-
-          {/* Brands */}
-          <Box sx={{ mb: 3 }}>
-            <BrandMultiSelectStep
-              brandGroups={brandGroups}
-              selectedBrands={editBrands}
-              onToggleBrand={(b) =>
-                setEditBrands((prev) =>
-                  prev.includes(b)
-                    ? prev.filter((x) => x !== b)
-                    : [...prev, b]
-                )
-              }
-              loading={savingOnboarding}
-            />
-          </Box>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSaveOnboarding}
-            disabled={!editGender || savingOnboarding}
+          {/* Existing profile form */}
+          <Box
+            component="form"
+            onSubmit={formik.handleSubmit}
+            noValidate
+            sx={{ mt: 2, bgcolor: "white" }}
           >
-            {savingOnboarding ? <CircularProgress size={20} /> : "Save style preferences"}
-          </Button>
-        </Box>
-      </Container>
+            {/* ... keep all your existing Grid/TextField/password fields ... */}
+            <Grid container spacing={2}>
+              <Box
+                sx={{
+                  marginTop: 6,
+                  marginBottom: 6,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <Typography
+                  component="h1"
+                  variant="h5"
+                  sx={{
+                    mb: 3,
+                    fontWeight: "bold",
+                    color: "white",
+                  }}
+                >
+                  Update Your Profile
+                </Typography>
+                <form onSubmit={formik.handleSubmit}>
+                  <TextField
+                    fullWidth
+                    id="firstName"
+                    name="firstName"
+                    label="First Name"
+                    variant="outlined"
+                    value={formik.values.firstName}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.firstName &&
+                      Boolean(formik.errors.firstName)
+                    }
+                    helperText={
+                      formik.touched.firstName && formik.errors.firstName
+                    }
+                    sx={{ mb: 2 }}
+                  />
 
-      <Footer />
-      <ToastContainer />
-    </ThemeProvider>
+                  <TextField
+                    fullWidth
+                    id="lastName"
+                    name="lastName"
+                    label="Last Name"
+                    variant="outlined"
+                    value={formik.values.lastName}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.lastName && Boolean(formik.errors.lastName)
+                    }
+                    helperText={
+                      formik.touched.lastName && formik.errors.lastName
+                    }
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    id="email"
+                    name="email"
+                    label="Email"
+                    variant="outlined"
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    id="currentPassword"
+                    name="currentPassword"
+                    label="Current Password"
+                    type={showPassword ? "text" : "password"}
+                    value={formik.values.currentPassword}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.currentPassword &&
+                      Boolean(formik.errors.currentPassword)
+                    }
+                    helperText={
+                      formik.touched.currentPassword &&
+                      formik.errors.currentPassword
+                    }
+                    sx={{ mb: 2 }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleTogglePasswordVisiblity}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    id="newPassword"
+                    name="newPassword"
+                    label="New Password"
+                    type={showPassword ? "text" : "password"}
+                    value={formik.values.newPassword}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.newPassword &&
+                      Boolean(formik.errors.newPassword)
+                    }
+                    helperText={
+                      formik.touched.newPassword && formik.errors.newPassword
+                    }
+                    sx={{ mb: 2 }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleTogglePasswordVisiblity}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    id="confirmNewPassword"
+                    name="confirmNewPassword"
+                    label="Confirm New Password"
+                    type={showPassword ? "text" : "password"}
+                    value={formik.values.confirmNewPassword}
+                    onChange={formik.handleChange}
+                    error={
+                      formik.touched.confirmNewPassword &&
+                      Boolean(formik.errors.confirmNewPassword)
+                    }
+                    helperText={
+                      formik.touched.confirmNewPassword &&
+                      formik.errors.confirmNewPassword
+                    }
+                    sx={{ mb: 2 }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={handleTogglePasswordVisiblity}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={formik.isSubmitting}
+                    fullWidth
+                    sx={{
+                      marginRight: "10px",
+                      backgroundColor: "turquoise",
+                      textTransform: "none",
+                      fontSize: "15px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {formik.isSubmitting ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "Update Profile"
+                    )}
+                  </Button>
+                </form>
+              </Box>
+            </Grid>
+          </Box>
+
+          {/* Style preferences card */}
+          <Box
+            sx={{
+              mt: 6,
+              p: 3,
+              borderRadius: 2,
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              bgcolor: "black",
+            }}
+          >
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{
+                color: "turquoise",
+                fontWeight: "bold",
+              }}
+            >
+              Style Preferences
+            </Typography>
+
+            {/* Gender */}
+            <Box sx={{ mb: 3 }}>
+              <GenderSelectStep
+                selectedGender={editGender}
+                onChangeGender={setEditGender}
+                loading={false}
+              />
+            </Box>
+
+            {/* Categories */}
+            <Box sx={{ mb: 3 }}>
+              <CategoryMultiSelectStep
+                categories={
+                  editGender === "female"
+                    ? femaleCategories
+                    : editGender === "male"
+                      ? maleCategories
+                      : []
+                }
+                selectedCategories={editCategories}
+                onToggleCategory={(c) =>
+                  setEditCategories((prev) =>
+                    prev.includes(c)
+                      ? prev.filter((x) => x !== c)
+                      : [...prev, c],
+                  )
+                }
+                loading={false}
+              />
+            </Box>
+
+            {/* Brands */}
+            <Box sx={{ mb: 3 }}>
+              <BrandMultiSelectStep
+                brandGroups={brandGroups}
+                selectedBrands={editBrands}
+                onToggleBrand={(b) =>
+                  setEditBrands((prev) =>
+                    prev.includes(b)
+                      ? prev.filter((x) => x !== b)
+                      : [...prev, b],
+                  )
+                }
+                loading={savingOnboarding}
+              />
+            </Box>
+
+            <Button
+              variant="contained"
+              onClick={handleSaveOnboarding}
+              disabled={!editGender || savingOnboarding}
+              sx={{
+                bgcolor: "turquoise",
+                fontWeight: "bold",
+              }}
+            >
+              {savingOnboarding ? (
+                <CircularProgress size={20} />
+              ) : (
+                "Save style preferences"
+              )}
+            </Button>
+          </Box>
+        </Container>
+
+        <Footer />
+        <ToastContainer />
+      </ThemeProvider>
+    </Box>
   );
 };
 

@@ -24,19 +24,20 @@ const CategoryMultiSelectStep = ({
           textAlign: "center",
           mb: 3,
           fontWeight: "bold",
+          color: "white"
         }}
       >
-        What do you like to wear
+        What do you like to wear?
       </Typography>
       <Typography
-        variant="body2"
+        variant="body1"
         sx={{
           textAlign: "center",
           mb: 4,
-          color: "grey.400",
+          color: "white",
         }}
       >
-        Choose the clothing categories you're most into. Dream closet will use
+        Choose the clothing categories you're most into. Dream Closet will use
         this to prioritize results and recommendations.
       </Typography>
 
