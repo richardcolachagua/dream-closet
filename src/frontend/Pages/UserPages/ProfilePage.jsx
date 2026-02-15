@@ -278,6 +278,7 @@ const ProfilePage = () => {
             sx={{
               color: "turquoise",
               fontWeight: "bold",
+              paddingBottom: "5px"
             }}
           >
             Welcome, {currentUserInfo.firstName}
@@ -288,17 +289,20 @@ const ProfilePage = () => {
             component="form"
             onSubmit={formik.handleSubmit}
             noValidate
-            sx={{ mt: 2, bgcolor: "white" }}
+            sx={{ mt: 2, bgcolor: "white", borderRadius: "20px" }}
           >
             {/* ... keep all your existing Grid/TextField/password fields ... */}
             <Grid container spacing={2}>
               <Box
                 sx={{
                   marginTop: 6,
+                  marginLeft: 6,
+                  marginRight: 6,
                   marginBottom: 6,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
+                  bgcolor: "white",
                 }}
               >
                 <Typography
@@ -307,7 +311,7 @@ const ProfilePage = () => {
                   sx={{
                     mb: 3,
                     fontWeight: "bold",
-                    color: "white",
+                    color: "black",
                   }}
                 >
                   Update Your Profile
