@@ -12,8 +12,9 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../LogoutButton/LogoutButton";
+import LogoutButton from "../../Components/Buttons/LogoutButton/LogoutButton";
 import { useTheme } from "@mui/material/styles";
+import { navButtonSx } from "../Buttons/navButtonSx";
 
 function SearchPageHeader() {
   const theme = useTheme();
@@ -119,19 +120,17 @@ function SearchPageHeader() {
             }}
           >
             {navButtons.map((btn) => (
-              <Button
-                key={btn.label}
-                component={RouterLink}
-                to={btn.to}
-                variant="contained"
-                sx={{
-                  backgroundColor: "turquoise",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                }}
-              >
-                {btn.label}
-              </Button>
+              <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
+                <Button
+                  component={RouterLink}
+                  to={btn.to}
+                  fullWidth
+                  variant="contained"
+                  sx={navButtonSx}
+                >
+                  {btn.label}
+                </Button>
+              </MenuItem>
             ))}
             <LogoutButton />
           </Box>

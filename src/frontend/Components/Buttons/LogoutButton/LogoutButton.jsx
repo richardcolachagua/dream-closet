@@ -1,7 +1,8 @@
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../../../backend/firebase";
+import {auth } from "../../../../backend/firebase"
+import { navButtonSx } from "../navButtonSx";
 
 const LogoutButton = ({ fullWidth = false }) => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const LogoutButton = ({ fullWidth = false }) => {
     try {
       await signOut(auth);
 
-      //clear user data from local storage
+      // clear user data from local storage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
@@ -19,24 +20,13 @@ const LogoutButton = ({ fullWidth = false }) => {
       console.error("Logout failed:", error);
     }
   };
+
   return (
     <Button
+      onClick={handleLogout}
       variant="contained"
       fullWidth={fullWidth}
-      sx={{
-        bgcolor: "turquoise",
-        "&:hover": { bgcolor: "darkturquoise" },
-        fontWeight: "bold",
-        fontSize: "16px",
-        textTransform: "none",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        minWidth: 120, // Ensures all buttons are at least this width
-        px: 3, // Adds even horizontal padding
-        py: 1.5, // Adds even vertical padding
-      }}
-      onClick={handleLogout}
+          sx={navButtonSx}
     >
       Logout
     </Button>

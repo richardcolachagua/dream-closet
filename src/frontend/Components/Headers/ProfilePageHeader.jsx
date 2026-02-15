@@ -11,7 +11,8 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../LogoutButton/LogoutButton";
+import LogoutButton from "../../Components/Buttons/LogoutButton/LogoutButton";
+import { navButtonSx } from "../Buttons/navButtonSx";
 
 function ProfileSearchPageHeader() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -116,11 +117,7 @@ function ProfileSearchPageHeader() {
                     to={btn.to}
                     fullWidth
                     variant="contained"
-                    sx={{
-                      backgroundColor: "turquoise",
-                      fontWeight: "bold",
-                      textTransform: "none",
-                    }}
+                    sx={navButtonSx}
                   >
                     {btn.label}
                   </Button>

@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography, Grid, Button } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
-import LogoutButton from "../../Components/LogoutButton/LogoutButton";
+import LogoutButton from "../../Components/Buttons/LogoutButton/LogoutButton"
 
 const LogoutPage = () => {
   const navigate = useNavigate();
