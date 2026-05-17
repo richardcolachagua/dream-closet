@@ -21,6 +21,16 @@ import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import { useLocation } from "react-router-dom";
 import { fetchCombinedResults } from "../../Components/Search-Components/utils/fetchCombinedResults";
+import FilterDrawer from "../../Components/Search-Components/filters/FilterDrawer";
+import {
+  createDefaultFilters,
+  toggleFilterValue,
+  setPriceFilterValue,
+  clearFilterGroup,
+  clearAllFilters,
+  removeFilterValue,
+  getActiveFilterCount,
+} from "../../Components/Search-Components/utils/filterHelpers";
 
 const defaultTheme = createTheme();
 
@@ -32,6 +42,8 @@ const SearchPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [searchInputValue, setSearchInputValue] = useState("");
+  const [filters, setFilters] = useState(createDefaultFilters());
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const location = useLocation();
 
@@ -56,9 +68,11 @@ const SearchPage = () => {
       setError("You must be logged in to save searches.");
       return;
     }
+
     try {
       await addDoc(collection(db, "saved-searches"), {
         query: searchQuery,
+        filters,
         userId: currentUser.uid,
         date: new Date().toISOString(),
       });
@@ -86,26 +100,73 @@ const SearchPage = () => {
   }, []);
 
   const runSearch = useCallback(
-    async (query) => {
+    async (query, activeFilters = filters) => {
       setIsloading(true);
+
       try {
-        const results = await fetchCombinedResults(query);
+        const results = await fetchCombinedResults(query, activeFilters);
         handleSearchResults(results);
+        return results;
       } catch (error) {
         setIsloading(false);
         setError("Failed to fetch search results.");
+        throw error;
       }
     },
-    [handleSearchResults, setIsloading, setError],
+    [filters, handleSearchResults],
   );
+
+  const handleToggleFilter = (key, value) => {
+    setFilters((prev) => toggleFilterValue(prev, key, value));
+  };
+
+  const handlePriceChange = (key, value) => {
+    setFilters((prev) => setPriceFilterValue(prev, key, value));
+  };
+
+  const handleClearGroup = (key) => {
+    setFilters((prev) => clearFilterGroup(prev, key));
+  };
+
+  const handleClearAll = () => {
+    const clearedFilters = clearAllFilters();
+    setFilters(clearedFilters);
+
+    if (searchInputValue.trim()) {
+      runSearch(searchInputValue, clearedFilters);
+    }
+  };
+
+  const handleRemoveFilter = (key, value) => {
+    setFilters((prev) => {
+      const updatedFilters = removeFilterValue(prev, key, value);
+
+      if (searchInputValue.trim()) {
+        runSearch(searchInputValue, updatedFilters);
+      }
+
+      return updatedFilters;
+    });
+  };
+
+  const handleApplyFilters = async () => {
+    if (!searchInputValue.trim()) {
+      setIsFilterDrawerOpen(false);
+      return;
+    }
+
+    await runSearch(searchInputValue, filters);
+    setIsFilterDrawerOpen(false);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const query = params.get("query");
+
     if (query) {
       setSearchInputValue(query);
       handleSearchStart();
-      runSearch(query);
+      runSearch(query, filters);
     }
   }, [location.search, runSearch]);
 
@@ -132,6 +193,7 @@ const SearchPage = () => {
       <ThemeProvider theme={defaultTheme}>
         <SearchPageHeader />
         <CssBaseline />
+
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Container
             sx={{
@@ -154,6 +216,7 @@ const SearchPage = () => {
             >
               What clothes are we looking for today?
             </Typography>
+
             <UserDescriptionInput
               value={searchInputValue}
               onChange={(e) => setSearchInputValue(e.target.value)}
@@ -161,7 +224,11 @@ const SearchPage = () => {
               onSaveSearch={handleSaveSearch}
               onSearchError={handleSearchError}
               onSearchResults={handleSearchResults}
+              onSearchSubmit={(query) => runSearch(query, filters)}
+              onOpenFilters={() => setIsFilterDrawerOpen(true)}
+              activeFilterCount={getActiveFilterCount(filters)}
             />
+
             {isLoading && (
               <Box
                 sx={{
@@ -173,37 +240,57 @@ const SearchPage = () => {
                 <CircularProgress />
               </Box>
             )}
-            {!isLoading && searchResults && searchResults.length > 0 && (
+
+            {!isLoading && (
               <>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    mb: 2,
-                  }}
-                >
-                  <ToggleButtonGroup
-                    value={viewMode}
-                    exclusive
-                    onChange={handleViewChange}
-                    aria-label="view-mode"
+                {searchResults && searchResults.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      width: "100%",
+                      mb: 2,
+                    }}
                   >
-                    <ToggleButton value="list" aria-label="list view">
-                      <ViewListIcon sx={{ color: "white" }} />
-                    </ToggleButton>
-                    <ToggleButton value="grid" aria-label="grid view">
-                      <ViewModuleIcon sx={{ color: "white" }} />
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
+                    <ToggleButtonGroup
+                      value={viewMode}
+                      exclusive
+                      onChange={handleViewChange}
+                      aria-label="view-mode"
+                    >
+                      <ToggleButton value="list" aria-label="list view">
+                        <ViewListIcon sx={{ color: "white" }} />
+                      </ToggleButton>
+                      <ToggleButton value="grid" aria-label="grid view">
+                        <ViewModuleIcon sx={{ color: "white" }} />
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Box>
+                )}
+
                 <SearchResults
                   results={searchResults}
                   onSaveItem={handleSaveItem}
                   viewMode={viewMode}
                   userId={currentUser?.uid}
+                  filters={filters}
+                  onRemoveFilter={handleRemoveFilter}
+                  onClearAllFilters={handleClearAll}
                 />
               </>
             )}
+
+            <FilterDrawer
+              open={isFilterDrawerOpen}
+              onClose={() => setIsFilterDrawerOpen(false)}
+              filters={filters}
+              onToggleFilter={handleToggleFilter}
+              onPriceChange={handlePriceChange}
+              onClearGroup={handleClearGroup}
+              onClearAll={handleClearAll}
+              onApply={handleApplyFilters}
+            />
+
             <Snackbar
               open={!!successMessage}
               autoHideDuration={6000}
@@ -217,6 +304,7 @@ const SearchPage = () => {
                 {successMessage}
               </Alert>
             </Snackbar>
+
             <Snackbar
               open={!!error}
               autoHideDuration={6000}
@@ -232,6 +320,7 @@ const SearchPage = () => {
             </Snackbar>
           </Container>
         </Box>
+
         <Footer />
       </ThemeProvider>
     </Box>

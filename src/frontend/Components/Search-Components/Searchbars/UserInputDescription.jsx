@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TextField, Button, Box } from "@mui/material";
+import TuneIcon from "@mui/icons-material/Tune";
 import SaveSearchButton from "../Buttons/SaveSearchButton";
-import { fetchCombinedResults } from "../utils/fetchCombinedResults";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -10,6 +10,9 @@ function UserDescriptionInput({
   onSaveSearch,
   value,
   onChange,
+  onSearchSubmit,
+  onOpenFilters,
+  activeFilterCount = 0,
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,17 +21,18 @@ function UserDescriptionInput({
       onSearchError("Please enter a description.");
       return;
     }
+
     onSearchStart();
     setIsLoading(true);
 
     try {
-      const results = await fetchCombinedResults(value);
+      const results = await onSearchSubmit(value);
       onSearchResults(results);
     } catch (error) {
       onSearchError(
-        error.response?.status === 429
+        error?.response?.status === 429
           ? "Too many requests. Please wait a moment."
-          : "Error fetching results. Please try again."
+          : "Error fetching results. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -43,6 +47,9 @@ function UserDescriptionInput({
     onSaveSearch(value);
   };
 
+  const filterButtonLabel =
+    activeFilterCount > 0 ? `Filters (${activeFilterCount})` : "Filters";
+
   return (
     <Box
       sx={{
@@ -53,6 +60,7 @@ function UserDescriptionInput({
         mb: 3,
         width: "100%",
         px: 2,
+        gap: 1.5,
       }}
     >
       <TextField
@@ -60,15 +68,17 @@ function UserDescriptionInput({
         variant="filled"
         value={value}
         onChange={onChange}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSubmit();
+        }}
         sx={{
-          width: "90%",
+          width: "100%",
           maxWidth: "500px",
           backgroundColor: "white",
           borderRadius: "10px",
-          mb: { xs: 2, sm: 0 },
-          mr: { xs: 0, sm: 2 },
         }}
       />
+
       <Box
         sx={{
           display: "flex",
@@ -77,6 +87,20 @@ function UserDescriptionInput({
           width: { xs: "100%", sm: "auto" },
         }}
       >
+        <Button
+          variant="outlined"
+          startIcon={<TuneIcon />}
+          onClick={onOpenFilters}
+          sx={{
+            borderColor: "turquoise",
+            color: "turquoise",
+            fontWeight: "bold",
+            width: { xs: "100%", sm: "auto" },
+          }}
+        >
+          {filterButtonLabel}
+        </Button>
+
         <Button
           variant="contained"
           onClick={handleSubmit}
@@ -92,6 +116,7 @@ function UserDescriptionInput({
         >
           {isLoading ? "Searching..." : "Search"}
         </Button>
+
         <SaveSearchButton
           sx={{
             width: { xs: "100%", sm: "auto" },

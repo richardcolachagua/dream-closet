@@ -278,7 +278,7 @@ const ProfilePage = () => {
             sx={{
               color: "turquoise",
               fontWeight: "bold",
-              paddingBottom: "5px"
+              paddingBottom: "5px",
             }}
           >
             Welcome, {currentUserInfo.firstName}

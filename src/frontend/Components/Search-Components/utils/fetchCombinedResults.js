@@ -1,4 +1,5 @@
 import axios from "axios";
+import { normalizeCombinedResults, applyProductFilters } from "./filterResults";
 
 export const searchAsos = async (query) => {
   const options = {
@@ -21,8 +22,9 @@ export const searchAsos = async (query) => {
       "x-rapidapi-host": "asos2.p.rapidapi.com",
     },
   };
+
   const response = await axios.request(options);
-  return response.data.products;
+  return response.data?.products || [];
 };
 
 export const searchRealTimeProducts = async (query) => {
@@ -45,33 +47,21 @@ export const searchRealTimeProducts = async (query) => {
       "x-rapidapi-host": "real-time-product-search.p.rapidapi.com",
     },
   };
+
   const response = await axios.request(options);
   return response.data?.data?.products || [];
 };
 
-export const fetchCombinedResults = async (query) => {
+export const fetchCombinedResults = async (query, filters = {}) => {
   const [asosResults, realTimeResults] = await Promise.all([
     searchAsos(query),
     searchRealTimeProducts(query),
   ]);
-  return [
-    ...(Array.isArray(asosResults) ? asosResults : []).map((product) => ({
-      itemId: product.id,
-      name: product.name,
-      price: product.price?.current?.text || "Price unavailable",
-      imageUrl: product.imageUrl ? `https://${product.imageUrl}` : "",
-      productUrl: product.url ? `https://www.asos.com/${product.url}` : "",
-      source: "ASOS",
-    })),
-    ...(Array.isArray(realTimeResults) ? realTimeResults : []).map(
-      (product) => ({
-        itemId: product.product_id,
-        name: product.product_title,
-        price: product.offer?.price || "Price unavailable",
-        imageUrl: product.product_photos?.[0] || "",
-        productUrl: product.offer?.offer_page_url || "",
-        source: product.offer?.store_name || "Unknown",
-      })
-    ),
-  ];
+
+  const normalizedResults = normalizeCombinedResults(
+    asosResults,
+    realTimeResults,
+  );
+
+  return applyProductFilters(normalizedResults, filters);
 };
