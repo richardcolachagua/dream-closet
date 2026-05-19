@@ -16,16 +16,26 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 import { db, auth } from "../../../backend/firebase";
 import SavedSearchCard from "./Cards/SavedSearchCard";
-import { useNavigate } from "react-router-dom";
+import {
+  buildSearchStateQuery,
+  DEFAULT_SORT,
+  DEFAULT_PAGE,
+} from "../utils/searchStateHelpers";
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);
   const [isLoadingSearches, setIsLoadingSearches] = useState(true);
 
   const fetchSavedSearches = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {
+      setSavedSearches([]);
+      setIsLoadingSearches(false);
+      return;
+    }
+
     try {
       setIsLoadingSearches(true);
       const q = query(
@@ -33,9 +43,9 @@ const useSavedSearches = (userId) => {
         where("userId", "==", userId),
       );
       const querySnapshot = await getDocs(q);
-      const searches = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const searches = querySnapshot.docs.map((savedDoc) => ({
+        id: savedDoc.id,
+        ...savedDoc.data(),
       }));
       setSavedSearches(searches);
     } catch (error) {
@@ -62,10 +72,13 @@ const SavedSearches = () => {
   const [selected, setSelected] = useState([]);
   const [justDeleted, setJustDeleted] = useState(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -74,27 +87,41 @@ const SavedSearches = () => {
     useSavedSearches(userId);
 
   const handleDeleteSearch = async (searchId) => {
-    await deleteDoc(doc(db, "saved-searches", searchId));
-    setSavedSearches((s) => s.filter((search) => search.id !== searchId));
-    setSelected((sel) => sel.filter((id) => id !== searchId));
-    setJustDeleted(searchId);
-    setTimeout(() => setJustDeleted(null), 850);
+    try {
+      await deleteDoc(doc(db, "saved-searches", searchId));
+      setSavedSearches((prev) =>
+        prev.filter((search) => search.id !== searchId),
+      );
+      setSelected((prev) => prev.filter((id) => id !== searchId));
+      setJustDeleted(searchId);
+      setTimeout(() => setJustDeleted(null), 850);
+    } catch (error) {
+      console.error("Error deleting saved search", error);
+    }
   };
 
-  const handleBulkDelete = () => {
-    selected.forEach(handleDeleteSearch);
+  const handleBulkDelete = async () => {
+    await Promise.all(selected.map((searchId) => handleDeleteSearch(searchId)));
     setSelected([]);
   };
 
   const handleToggleSelect = (id) => {
-    setSelected((sel) =>
-      sel.includes(id) ? sel.filter((sid) => sid !== id) : [...sel, id],
+    setSelected((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((savedId) => savedId !== id)
+        : [...prevSelected, id],
     );
   };
 
-  const navigate = useNavigate();
-  const handleRunSavedSearch = (query) => {
-    navigate(`/searchpage?query=${encodeURIComponent(query)}`);
+  const handleRunSavedSearch = (search) => {
+    const searchQueryString = buildSearchStateQuery({
+      query: search.query || "",
+      filters: search.filters || {},
+      sort: search.sort || DEFAULT_SORT,
+      page: search.page || DEFAULT_PAGE,
+    });
+
+    navigate(`/searchpage${searchQueryString ? `?${searchQueryString}` : ""}`);
   };
 
   return (
@@ -111,6 +138,7 @@ const SavedSearches = () => {
       >
         Saved Searches
       </Typography>
+
       {selected.length > 0 && (
         <Fade in={!!selected.length}>
           <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
@@ -125,6 +153,7 @@ const SavedSearches = () => {
           </Box>
         </Fade>
       )}
+
       <Grid container spacing={6} justifyContent="center">
         {isLoadingSearches ? (
           Array.from({ length: 6 }).map((_, idx) => (
@@ -148,8 +177,11 @@ const SavedSearches = () => {
                         ? new Date(search.date).toLocaleDateString()
                         : null
                     }
+                    filters={search.filters || {}}
+                    sort={search.sort || "relevance"}
+                    page={search.page || 1}
                     onDelete={() => handleDeleteSearch(search.id)}
-                    onClick={() => handleRunSavedSearch(search.query)}
+                    onClick={() => handleRunSavedSearch(search)}
                     selected={selected.includes(search.id)}
                     onSelect={() => handleToggleSelect(search.id)}
                   />
