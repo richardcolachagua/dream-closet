@@ -15,13 +15,13 @@ import UserDescriptionInput from "../../Components/Search-Components/Searchbars/
 import SearchResults from "../../Components/Search-Components/SearchResults";
 import Footer from "../../Components/Footer";
 import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../../backend/firebase";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import { useLocation } from "react-router-dom";
 import { fetchCombinedResults } from "../../Components/Search-Components/utils/fetchCombinedResults";
-import FilterDrawer from "../../Components/Search-Components/filters/FilterDrawer";
+import FilterDrawer from "../../Components/Search-Components/Filters/FilterDrawer";
 import {
   createDefaultFilters,
   toggleFilterValue,
@@ -44,6 +44,7 @@ const SearchPage = () => {
   const [searchInputValue, setSearchInputValue] = useState("");
   const [filters, setFilters] = useState(createDefaultFilters());
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [onboardingGender, setOnboardingGender] = useState("");
 
   const location = useLocation();
 
@@ -100,11 +101,15 @@ const SearchPage = () => {
   }, []);
 
   const runSearch = useCallback(
-    async (query, activeFilters = filters) => {
+    async (query, activeFilters = filters, activeGender = onboardingGender) => {
       setIsloading(true);
 
       try {
-        const results = await fetchCombinedResults(query, activeFilters);
+        const results = await fetchCombinedResults({
+          query,
+          filters: activeFilters,
+          onboardingGender: activeGender,
+        });
         handleSearchResults(results);
         return results;
       } catch (error) {
@@ -113,7 +118,7 @@ const SearchPage = () => {
         throw error;
       }
     },
-    [filters, handleSearchResults],
+    [filters, onboardingGender, handleSearchResults],
   );
 
   const handleToggleFilter = (key, value) => {
@@ -171,9 +176,27 @@ const SearchPage = () => {
   }, [location.search, runSearch]);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
+
+      if (!user) {
+        setOnboardingGender("");
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          setOnboardingGender(data?.onboarding?.gender || "");
+        }
+      } catch (error) {
+        console.error("Error loading onboarding gender", error);
+      }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -224,7 +247,10 @@ const SearchPage = () => {
               onSaveSearch={handleSaveSearch}
               onSearchError={handleSearchError}
               onSearchResults={handleSearchResults}
-              onSearchSubmit={(query) => runSearch(query, filters)}
+              onSearchSubmit={(query) => {
+                setSearchInputValue(query);
+                return runSearch(query, filters);
+              }}
               onOpenFilters={() => setIsFilterDrawerOpen(true)}
               activeFilterCount={getActiveFilterCount(filters)}
             />

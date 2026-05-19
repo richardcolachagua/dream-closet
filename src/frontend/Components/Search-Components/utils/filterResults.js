@@ -174,9 +174,17 @@ const matchesBrandFilter = (brand, selectedBrands = []) => {
   if (!selectedBrands.length) return true;
 
   const normalizedBrand = normalizeString(brand);
-  return selectedBrands.some(
-    (selectedBrand) => normalizedBrand === normalizeString(selectedBrand),
-  );
+  if (!normalizedBrand) return false;
+
+  return selectedBrands.some((selectedBrand) => {
+    const normalizedSelectedBrand = normalizeString(selectedBrand);
+    if (!normalizedSelectedBrand) return false;
+
+    return (
+      normalizedBrand.includes(normalizedSelectedBrand) ||
+      normalizedSelectedBrand.includes(normalizedBrand)
+    );
+  });
 };
 
 export const applyProductFilters = (products = [], filters = {}) => {
@@ -201,10 +209,11 @@ export const applyProductFilters = (products = [], filters = {}) => {
       product.category,
       normalizedFilters.category,
     );
-    const matchesSize = matchesArrayFilter(
-      product.size,
-      normalizedFilters.size,
-    );
+    const matchesSize =
+      !normalizedFilters.size.length ||
+      (Array.isArray(product.size) && product.size.length > 0
+        ? matchesArrayFilter(product.size, normalizedFilters.size)
+        : true);
     const matchesColor = matchesArrayFilter(
       product.color,
       normalizedFilters.color,

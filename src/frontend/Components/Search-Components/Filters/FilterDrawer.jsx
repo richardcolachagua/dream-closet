@@ -1,4 +1,4 @@
-import { Drawer, Box, IconButton, Typography } from "@mui/material";
+import { Drawer, Box, IconButton, Typography, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchFiltersPanel from "./SearchFiltersPanel";
 
@@ -20,6 +20,9 @@ function FilterDrawer({
       PaperProps={{
         sx: {
           width: { xs: "100%", sm: 400 },
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
           bgcolor: "black",
           color: "white",
         },
@@ -42,6 +45,26 @@ function FilterDrawer({
         <IconButton onClick={onClose} sx={{ color: "white" }}>
           <CloseIcon />
         </IconButton>
+      </Box>
+
+      <Box
+        sx={{
+          px: 2,
+          pt: 1,
+          pb: 0,
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <Button
+          onClick={onClearAll}
+          sx={{
+            color: "turquoise",
+            fontWeight: "bold",
+          }}
+        >
+          Clear all
+        </Button>
       </Box>
 
       <Box

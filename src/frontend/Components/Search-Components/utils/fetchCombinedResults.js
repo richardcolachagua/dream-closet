@@ -1,7 +1,21 @@
 import axios from "axios";
 import { normalizeCombinedResults, applyProductFilters } from "./filterResults";
 
-export const searchAsos = async (query) => {
+const buildSearchQuery = (query, onboardingGender) => {
+  if (!onboardingGender) return query;
+
+  const normalizedGender = String(onboardingGender).toLowerCase();
+
+  if (normalizedGender === "female") return `women ${query}`;
+  if (normalizedGender === "male") return `men ${query}`;
+  if (normalizedGender === "unisex") return `unisex ${query}`;
+
+  return query;
+};
+
+export const searchAsos = async (query, onboardingGender) => {
+  const finalQuery = buildSearchQuery(query, onboardingGender);
+
   const options = {
     method: "GET",
     url: "https://asos2.p.rapidapi.com/products/v2/list",
@@ -12,13 +26,13 @@ export const searchAsos = async (query) => {
       limit: "48",
       country: "US",
       sort: "freshness",
-      q: query,
+      q: finalQuery,
       currency: "USD",
       sizeSchema: "US",
       lang: "en-US",
     },
     headers: {
-      "x-rapidapi-key": "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
+      "x-rapidapi-key": "YOUR_KEY",
       "x-rapidapi-host": "asos2.p.rapidapi.com",
     },
   };
@@ -27,12 +41,14 @@ export const searchAsos = async (query) => {
   return response.data?.products || [];
 };
 
-export const searchRealTimeProducts = async (query) => {
+export const searchRealTimeProducts = async (query, onboardingGender) => {
+  const finalQuery = buildSearchQuery(query, onboardingGender);
+
   const options = {
     method: "GET",
     url: "https://real-time-product-search.p.rapidapi.com/search-v2",
     params: {
-      q: query,
+      q: finalQuery,
       country: "us",
       language: "en",
       page: "1",
@@ -43,7 +59,7 @@ export const searchRealTimeProducts = async (query) => {
       return_filters: "true",
     },
     headers: {
-      "x-rapidapi-key": "233692490cmshbe0b78ebe511b8fp11e5edjsn1fd2a3a5fc14",
+      "x-rapidapi-key": "YOUR_KEY",
       "x-rapidapi-host": "real-time-product-search.p.rapidapi.com",
     },
   };
@@ -52,10 +68,14 @@ export const searchRealTimeProducts = async (query) => {
   return response.data?.data?.products || [];
 };
 
-export const fetchCombinedResults = async (query, filters = {}) => {
+export const fetchCombinedResults = async ({
+  query,
+  filters = {},
+  onboardingGender = "",
+}) => {
   const [asosResults, realTimeResults] = await Promise.all([
-    searchAsos(query),
-    searchRealTimeProducts(query),
+    searchAsos(query, onboardingGender),
+    searchRealTimeProducts(query, onboardingGender),
   ]);
 
   const normalizedResults = normalizeCombinedResults(

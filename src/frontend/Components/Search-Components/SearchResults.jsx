@@ -10,7 +10,7 @@ import {
   Box,
 } from "@mui/material";
 import SaveForLaterButton from "./Buttons/SaveForLaterButton";
-import AppliedFiltersChips from "./filters/AppliedFiltersChips";
+import AppliedFiltersChips from "./Filters/AppliedFiltersChips";
 
 const SearchResults = ({
   results,
@@ -37,9 +37,12 @@ const SearchResults = ({
           sx={{
             color: "white",
             fontWeight: "bold",
+            textAlign: "center",
+            mt: 2,
           }}
         >
-          No results found
+          No results found. Try removing a few filters or searching with a
+          broader description.
         </Typography>
       ) : (
         <Grid container spacing={2} justifyContent="center">
@@ -63,10 +66,10 @@ const SearchResults = ({
                   image={product.imageUrl || ""}
                   alt={product.name || ""}
                   sx={{
-                    objectFit: "cover",
                     width: "100%",
-                    height: "100%",
-                    flexGrow: 1,
+                    height: 320,
+                    objectFit: "cover",
+                    backgroundColor: "#1a1a1a",
                   }}
                 />
 
