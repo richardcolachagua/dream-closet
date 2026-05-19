@@ -1,137 +1,176 @@
-import React from "react";
-import {
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
-  Grid,
-  Button,
-  Box,
-} from "@mui/material";
-import SaveForLaterButton from "./Buttons/SaveForLaterButton";
-import AppliedFiltersChips from "./Filters/AppliedFiltersChips";
+import { Box, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
+import SearchResultCard from "./SearchResultCard";
+import SearchEmptyState from "./SearchEmptyState";
 
-const SearchResults = ({
-  results,
+const renderFilterChips = ({ filters, onRemoveFilter }) => {
+  if (!filters) return [];
+
+  const chips = [];
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        chips.push({ key, value: item, label: `${key}: ${item}` });
+      });
+    } else if (value !== "" && value !== null && value !== undefined) {
+      chips.push({ key, value, label: `${key}: ${value}` });
+    }
+  });
+
+  return chips.map((chip) => (
+    <Chip
+      key={`${chip.key}-${chip.value}`}
+      label={chip.label}
+      onDelete={
+        onRemoveFilter ? () => onRemoveFilter(chip.key, chip.value) : undefined
+      }
+      sx={{
+        bgcolor: "rgba(255,255,255,0.05)",
+        color: "white",
+        border: "1px solid rgba(255,255,255,0.12)",
+      }}
+    />
+  ));
+};
+
+function SearchResults({
+  results = [],
+  isLoading = false,
+  hasSearched = false,
+  query = "",
+  suggestions = [],
   onSaveItem,
-  viewMode,
+  viewMode = "grid",
   userId,
   filters,
   onRemoveFilter,
   onClearAllFilters,
-}) => {
-  const hasResults = results && results.length > 0;
+}) {
+  const activeFilterChips = renderFilterChips({ filters, onRemoveFilter });
+  const hasResults = results.length > 0;
+
+  if (isLoading) {
+    return (
+      <Box sx={{ width: "100%" }}>
+        <Typography
+          variant="h6"
+          sx={{ color: "white", mb: 2, fontWeight: 700 }}
+        >
+          Finding matching pieces...
+        </Typography>
+
+        <Grid container spacing={2.5}>
+          {Array.from({ length: viewMode === "list" ? 4 : 8 }).map(
+            (_, index) => (
+              <Grid
+                key={index}
+                item
+                xs={12}
+                sm={viewMode === "list" ? 12 : 6}
+                md={viewMode === "list" ? 12 : 4}
+                lg={viewMode === "list" ? 12 : 3}
+              >
+                <Box
+                  sx={{
+                    borderRadius: 3,
+                    overflow: "hidden",
+                    bgcolor: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <Skeleton
+                    variant="rectangular"
+                    height={280}
+                    animation="wave"
+                  />
+                  <Box sx={{ p: 2 }}>
+                    <Skeleton width="40%" height={28} animation="wave" />
+                    <Skeleton width="85%" height={32} animation="wave" />
+                    <Skeleton width="55%" height={24} animation="wave" />
+                    <Skeleton width="35%" height={30} animation="wave" />
+                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                      <Skeleton width={70} height={28} animation="wave" />
+                      <Skeleton width={90} height={28} animation="wave" />
+                    </Stack>
+                  </Box>
+                </Box>
+              </Grid>
+            ),
+          )}
+        </Grid>
+      </Box>
+    );
+  }
+
+  if (!hasResults) {
+    return (
+      <SearchEmptyState
+        hasSearched={hasSearched}
+        query={query}
+        activeFilterCount={activeFilterChips.length}
+        suggestions={suggestions}
+        onClearAllFilters={onClearAllFilters}
+      />
+    );
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
-      <AppliedFiltersChips
-        filters={filters}
-        onRemoveFilter={onRemoveFilter}
-        onClearAll={onClearAllFilters}
-        resultCount={results?.length || 0}
-      />
-
-      {!hasResults ? (
-        <Typography
-          sx={{
-            color: "white",
-            fontWeight: "bold",
-            textAlign: "center",
-            mt: 2,
-          }}
-        >
-          No results found. Try removing a few filters or searching with a
-          broader description.
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", md: "center" }}
+        spacing={1.5}
+        sx={{ mb: 2 }}
+      >
+        <Typography variant="h6" sx={{ color: "white", fontWeight: 700 }}>
+          {results.length} result{results.length === 1 ? "" : "s"}
+          {query ? ` for “${query}”` : ""}
         </Typography>
-      ) : (
-        <Grid container spacing={2} justifyContent="center">
-          {results.map((product) => (
-            <Grid
-              item
-              xs={viewMode === "list" ? 12 : 6}
-              sm={viewMode === "list" ? 12 : 4}
-              md={viewMode === "list" ? 12 : 3}
-              key={product.itemId}
-            >
-              <Card
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  image={product.imageUrl || ""}
-                  alt={product.name || ""}
-                  sx={{
-                    width: "100%",
-                    height: 320,
-                    objectFit: "cover",
-                    backgroundColor: "#1a1a1a",
-                  }}
-                />
 
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography
-                    gutterBottom
-                    variant="h6"
-                    component="div"
-                    sx={{
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {product.name}
-                  </Typography>
+        {activeFilterChips.length > 0 && (
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.68)" }}>
+            Narrowed by {activeFilterChips.length} active filter
+            {activeFilterChips.length === 1 ? "" : "s"}
+          </Typography>
+        )}
+      </Stack>
 
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {product.price}
-                  </Typography>
-
-                  <Typography variant="body2" color="text.secondary">
-                    Source: {product.source}
-                  </Typography>
-                </CardContent>
-
-                <CardActions
-                  sx={{
-                    justifyContent: "center",
-                  }}
-                >
-                  <SaveForLaterButton
-                    item={product}
-                    userId={userId}
-                    source={product.source}
-                  />
-                  <Button
-                    size="small"
-                    variant="contained"
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "turquoise",
-                      color: "black",
-                    }}
-                    href={product.productUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Product
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+      {activeFilterChips.length > 0 && (
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          flexWrap="wrap"
+          sx={{ mb: 3 }}
+        >
+          {activeFilterChips}
+        </Stack>
       )}
+
+      <Grid container spacing={2.5}>
+        {results.map((result, index) => (
+          <Grid
+            item
+            key={
+              result.itemId || result.productUrl || `${result.name}-${index}`
+            }
+            xs={12}
+            sm={viewMode === "list" ? 12 : 6}
+            md={viewMode === "list" ? 12 : 4}
+            lg={viewMode === "list" ? 12 : 3}
+          >
+            <SearchResultCard
+              result={result}
+              viewMode={viewMode}
+              onSaveItem={onSaveItem}
+              userId={userId}
+            />
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
-};
+}
 
 export default SearchResults;

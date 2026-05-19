@@ -9,6 +9,8 @@ import {
   Container,
   ToggleButtonGroup,
   ToggleButton,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import UserDescriptionInput from "../../Components/Search-Components/Searchbars/UserInputDescription";
@@ -45,6 +47,7 @@ const SearchPage = () => {
   const [filters, setFilters] = useState(createDefaultFilters());
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [onboardingGender, setOnboardingGender] = useState("");
+  const [showAllGenders, setShowAllGenders] = useState(false);
 
   const location = useLocation();
 
@@ -101,7 +104,11 @@ const SearchPage = () => {
   }, []);
 
   const runSearch = useCallback(
-    async (query, activeFilters = filters, activeGender = onboardingGender) => {
+    async (
+      query,
+      activeFilters = filters,
+      activeGender = showAllGenders ? "" : onboardingGender,
+    ) => {
       setIsloading(true);
 
       try {
@@ -118,7 +125,7 @@ const SearchPage = () => {
         throw error;
       }
     },
-    [filters, onboardingGender, handleSearchResults],
+    [filters, onboardingGender, showAllGenders, handleSearchResults],
   );
 
   const handleToggleFilter = (key, value) => {
@@ -164,6 +171,7 @@ const SearchPage = () => {
     setIsFilterDrawerOpen(false);
   };
 
+  // Restore query from URL on first load
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const query = params.get("query");
@@ -175,6 +183,7 @@ const SearchPage = () => {
     }
   }, [location.search, runSearch]);
 
+  // Load onboarding gender when auth state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setCurrentUser(user);
@@ -199,6 +208,17 @@ const SearchPage = () => {
 
     return () => unsubscribe();
   }, []);
+
+  // Rerun search when gender toggle or onboarding gender changes
+  useEffect(() => {
+    if (!searchInputValue.trim()) return;
+
+    runSearch(
+      searchInputValue,
+      filters,
+      showAllGenders ? "" : onboardingGender,
+    );
+  }, [showAllGenders, onboardingGender, searchInputValue, filters, runSearch]);
 
   return (
     <Box
@@ -255,6 +275,31 @@ const SearchPage = () => {
               activeFilterCount={getActiveFilterCount(filters)}
             />
 
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-start",
+                mt: 1,
+                mb: 2,
+              }}
+            >
+              <FormControlLabel
+                sx={{
+                  color: "white",
+                  ml: 0,
+                }}
+                control={
+                  <Switch
+                    checked={showAllGenders}
+                    onChange={(e) => setShowAllGenders(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Show all genders"
+              />
+            </Box>
+
             {isLoading && (
               <Box
                 sx={{
@@ -296,6 +341,14 @@ const SearchPage = () => {
 
                 <SearchResults
                   results={searchResults}
+                  isLoading={isLoading}
+                  hasSearched={searchInputValue.trim().length > 0}
+                  query={searchInputValue}
+                  suggestions={[
+                    "Try a broader search like 'black dress' or 'oversized blazer'",
+                    "Remove one or two filters",
+                    "Search by occasion, color, or item type",
+                  ]}
                   onSaveItem={handleSaveItem}
                   viewMode={viewMode}
                   userId={currentUser?.uid}
