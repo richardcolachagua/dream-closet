@@ -23,7 +23,7 @@ import {
   buildSearchStateQuery,
   DEFAULT_SORT,
   DEFAULT_PAGE,
-} from "../utils/searchStateHelpers";
+} from "../../Components/Search-Components/utils/searchStateHelpers";
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);

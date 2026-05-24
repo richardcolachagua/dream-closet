@@ -19,8 +19,8 @@ import SearchResults from "../../Components/Search-Components/SearchResults";
 import Header from "../../Components/Headers/Header";
 import FreeUserDescriptionInput from "../../Components/Search-Components/Searchbars/FreeUserInputDescription";
 import { getAnalytics, logEvent } from "firebase/analytics";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import { app } from "../../../backend/firebase";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "../../../backend/firebase";
 import { fetchCombinedResults } from "../../Components/Search-Components/utils/fetchCombinedResults";
 
 const FreeSearchPage = () => {
@@ -33,8 +33,6 @@ const FreeSearchPage = () => {
   const [showSignUpDialog, setShowSignUpDialog] = useState(false);
   const [remainingSearches, setRemainingSearches] = useState(3);
   const [resetTime, setResetTime] = useState(null);
-
-  const functions = getFunctions(app, "us-central1");
 
   const checkSearchLimit = async () => {
     try {
@@ -76,7 +74,14 @@ const FreeSearchPage = () => {
       return [];
     }
 
-    const results = await fetchCombinedResults(query);
+    const results = await fetchCombinedResults({
+      query,
+      filters: {},
+      onboardingGender: "",
+      sort: "relevance",
+      page: 1,
+      pageSize: 24,
+    });
     return results;
   };
 

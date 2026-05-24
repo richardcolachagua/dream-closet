@@ -1,5 +1,5 @@
 import { Box, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
-import SearchResultCard from "./SearchResultCard";
+import SearchResultCard from "./Cards/SearchResultCard";
 import SearchEmptyState from "./SearchEmptyState";
 
 const renderFilterChips = ({ filters, onRemoveFilter }) => {

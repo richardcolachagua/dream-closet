@@ -1,9 +1,3 @@
-import { getFunctions, httpsCallable } from "firebase/functions";
-import { app } from "../../../backend/firebase";
-
-const functions = getFunctions(app);
-const searchProductsCallable = httpsCallable(functions, "searchProducts");
-
 export const fetchCombinedResults = async ({
   query,
   filters = {},
@@ -13,17 +7,34 @@ export const fetchCombinedResults = async ({
   pageSize = 24,
 }) => {
   try {
-    const response = await searchProductsCallable({
-      query,
-      gender: onboardingGender,
-      filters,
-      sort,
-      page,
-      pageSize,
-    });
+    const response = await fetch(
+      "http://127.0.0.1:5001/dream-closet-4d254/us-central1/searchProducts",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            query,
+            gender: onboardingGender,
+            filters,
+            sort,
+            page,
+            pageSize,
+          },
+        }),
+      },
+    );
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw new Error(json?.error || "Unable to fetch search results.");
+    }
 
     return (
-      response?.data || {
+      json?.result || {
         results: [],
         total: 0,
         page,
@@ -35,7 +46,6 @@ export const fetchCombinedResults = async ({
     );
   } catch (error) {
     console.error("Error fetching combined search results:", error);
-
     throw new Error(
       error?.message || "Unable to fetch search results right now.",
     );
