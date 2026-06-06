@@ -16,10 +16,37 @@ const sharedLuxury = [
   "Versace",
   "Off-White",
   "Fear of God",
+  "Bottega Veneta",
+  "Burberry",
+  "Givenchy",
+  "Valentino",
+  "Fendi",
+  "Rick Owens",
+  "Maison Margiela",
+  "Alexander McQueen",
+  "Loewe",
 ];
 
-const femaleLuxury = ["Miu Miu", "Chanel", "Jacquemus", "Zimmermann"];
-const maleLuxury = ["Amiri", "Tom Ford", "Saint Laurent"];
+const femaleLuxury = [
+  "Miu Miu",
+  "Chanel",
+  "Jacquemus",
+  "Zimmermann",
+  "Self-Portrait",
+  "Cult Gaia",
+  "Dolce & Gabbana",
+  "Sandy Liang",
+];
+
+const maleLuxury = [
+  "Amiri",
+  "Tom Ford",
+  "Saint Laurent",
+  "Brunello Cucinelli",
+  "Zegna",
+  "Bode",
+  "Moncler",
+];
 
 const sharedStreetwear = [
   "Supreme",
@@ -28,10 +55,30 @@ const sharedStreetwear = [
   "Kith",
   "Carhartt WIP",
   "Essentials",
+  "Noah",
+  "Aimé Leon Dore",
+  "Rhude",
+  "Awake NY",
+  "Stone Island",
+  "Represent",
 ];
 
-const femaleStreetwear = ["I.Am.Gia", "House of CB"];
-const maleStreetwear = ["The Hundreds", "BAPE"];
+const femaleStreetwear = [
+  "I.Am.Gia",
+  "House of CB",
+  "Jaded London",
+  "Poster Girl",
+  "Junya Watanabe",
+];
+
+const maleStreetwear = [
+  "The Hundreds",
+  "BAPE",
+  "Corteiz",
+  "Pleasures",
+  "WTAPS",
+  "Human Made",
+];
 
 const sharedAthletic = [
   "Nike",
@@ -41,14 +88,54 @@ const sharedAthletic = [
   "Under Armour",
   "Converse",
   "Reebok",
+  "ASICS",
+  "Salomon",
+  "On",
+  "Hoka",
 ];
 
-const femaleAthletic = ["Lululemon", "Alo Yoga", "Gymshark"];
-const maleAthletic = ["Jordan Brand", "The North Face", "Patagonia"];
+const femaleAthletic = [
+  "Lululemon",
+  "Alo Yoga",
+  "Gymshark",
+  "Set Active",
+  "Outdoor Voices",
+];
 
-const sharedUpAndComing = ["Aimé Leon Dore", "Rhude", "Noah", "Daily Paper"];
-const femaleUpAndComing = ["ALO x collabs", "SKIMS"];
-const maleUpAndComing = ["Corteiz", "La Familia Forever"];
+const maleAthletic = [
+  "Jordan Brand",
+  "The North Face",
+  "Patagonia",
+  "Arc'teryx",
+  "District Vision",
+];
+
+const sharedUpAndComing = [
+  "Aimé Leon Dore",
+  "Rhude",
+  "Noah",
+  "Daily Paper",
+  "ERL",
+  "Martine Rose",
+  "Our Legacy",
+  "Marine Serre",
+];
+
+const femaleUpAndComing = [
+  "ALO x collabs",
+  "SKIMS",
+  "With Jéan",
+  "Mirror Palais",
+  "Rat & Boa",
+];
+
+const maleUpAndComing = [
+  "Corteiz",
+  "La Familia Forever",
+  "Kidsuper",
+  "Who Decides War",
+  "PDF",
+];
 
 export const buildBrandGroupsForGender = (gender) => {
   if (!gender) return [];
