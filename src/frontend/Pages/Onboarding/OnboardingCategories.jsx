@@ -1,15 +1,12 @@
-// src/frontend/Pages/Onboarding/OnboardingCategories.jsx
 import React, { useEffect, useState } from "react";
 import { CircularProgress, Alert, CssBaseline, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@mui/material/styles";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
 import { useAuth } from "../../../backend/AuthContext";
 import OnboardingLayout from "./OnboardingLayout";
 import CategoryMultiSelectStep from "./CategoryMultiSelectStep";
 
-// EXPORT these so ProfilePage can reuse them
 export const femaleCategories = [
   "Tops",
   "Blouses",
@@ -32,8 +29,8 @@ export const femaleCategories = [
 ];
 
 export const maleCategories = [
-  "T‑Shirts",
-  "Button‑Ups",
+  "T-Shirts",
+  "Button-Ups",
   "Polos",
   "Sweaters",
   "Hoodies",
@@ -52,11 +49,10 @@ export const maleCategories = [
 ];
 
 const OnboardingCategories = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { user: currentUser, loading: authLoading } = useAuth();
 
-  const [gender, setGender] = useState(null);
+  const [gender, setGender] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,14 +62,17 @@ const OnboardingCategories = () => {
     gender === "female"
       ? femaleCategories
       : gender === "male"
-      ? maleCategories
-      : [];
+        ? maleCategories
+        : [];
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadOnboarding = async () => {
       if (authLoading) return;
+
       if (!currentUser) {
-        navigate("/loginpage");
+        navigate("/loginpage", { replace: true });
         return;
       }
 
@@ -81,43 +80,60 @@ const OnboardingCategories = () => {
         const userRef = doc(db, "users", currentUser.uid);
         const snap = await getDoc(userRef);
 
+        if (!isMounted) return;
+
         if (!snap.exists()) {
           setError("Could not find your profile. Please sign up again.");
           return;
         }
 
         const data = snap.data();
-        const onboarding = data.onboarding || {};
+        const onboarding = data?.onboarding || {};
 
-        if (!onboarding.gender) {
-          navigate("/onboarding/gender");
+        if (onboarding?.completed) {
+          navigate("/searchpage", { replace: true });
+          return;
+        }
+
+        if (!onboarding?.gender) {
+          navigate("/onboarding/gender", { replace: true });
           return;
         }
 
         setGender(onboarding.gender);
-        setSelectedCategories(onboarding.categories || []);
+        setSelectedCategories(
+          Array.isArray(onboarding.categories) ? onboarding.categories : [],
+        );
       } catch (err) {
         console.error("Error loading onboarding categories:", err);
-        setError("Something went wrong loading your preferences.");
+        if (isMounted) {
+          setError("Something went wrong loading your preferences.");
+        }
       } finally {
-        setInitialLoading(false);
+        if (isMounted) {
+          setInitialLoading(false);
+        }
       }
     };
 
     loadOnboarding();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authLoading, currentUser, navigate]);
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
-        : [...prev, category]
+        : [...prev, category],
     );
   };
 
   const handleNext = async () => {
     if (!currentUser) {
-      navigate("/loginpage");
+      navigate("/loginpage", { replace: true });
       return;
     }
 
@@ -131,17 +147,22 @@ const OnboardingCategories = () => {
 
     try {
       const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      const existing = snap.exists() ? snap.data()?.onboarding || {} : {};
+
       await setDoc(
         userRef,
         {
           onboarding: {
+            completed: false,
             gender,
             categories: selectedCategories,
-            completed: false,
+            brands: Array.isArray(existing.brands) ? existing.brands : [],
           },
         },
-        { merge: true }
+        { merge: true },
       );
+
       navigate("/onboarding/brands");
     } catch (err) {
       console.error("Error saving categories:", err);
@@ -164,7 +185,7 @@ const OnboardingCategories = () => {
             bgcolor: "black",
           }}
         >
-          <CircularProgress />
+          <CircularProgress sx={{ color: "turquoise" }} />
         </Box>
       </>
     );
@@ -176,7 +197,7 @@ const OnboardingCategories = () => {
       <OnboardingLayout
         stepLabel="STEP 2 OF 3"
         title="What do you like to wear?"
-        subtitle="Choose the clothing categories you're most into. Dream closet will use this to prioritize results and recommendations."
+        subtitle="Choose the clothing categories you're most into. Dream Closet will use this to prioritize results and recommendations."
       >
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>

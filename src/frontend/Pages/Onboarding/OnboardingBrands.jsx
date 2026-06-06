@@ -1,4 +1,3 @@
-// src/frontend/Pages/Onboarding/OnboardingBrands.jsx
 import React, { useEffect, useState } from "react";
 import { CircularProgress, Alert, Box, CssBaseline } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -7,8 +6,6 @@ import { db } from "../../../backend/firebase";
 import { useAuth } from "../../../backend/AuthContext";
 import OnboardingLayout from "./OnboardingLayout";
 import BrandMultiSelectStep from "./BrandMultiSelectStep";
-
-// shared + gender-specific brand lists
 
 const sharedLuxury = [
   "Louis Vuitton",
@@ -53,7 +50,6 @@ const sharedUpAndComing = ["Aimé Leon Dore", "Rhude", "Noah", "Daily Paper"];
 const femaleUpAndComing = ["ALO x collabs", "SKIMS"];
 const maleUpAndComing = ["Corteiz", "La Familia Forever"];
 
-// EXPORT helper so ProfilePage can reuse brand group logic
 export const buildBrandGroupsForGender = (gender) => {
   if (!gender) return [];
 
@@ -100,7 +96,7 @@ const OnboardingBrands = () => {
   const navigate = useNavigate();
   const { user: currentUser, loading: authLoading } = useAuth();
 
-  const [gender, setGender] = useState(null);
+  const [gender, setGender] = useState("");
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -109,10 +105,13 @@ const OnboardingBrands = () => {
   const brandGroups = buildBrandGroupsForGender(gender);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadOnboarding = async () => {
       if (authLoading) return;
+
       if (!currentUser) {
-        navigate("/loginpage");
+        navigate("/loginpage", { replace: true });
         return;
       }
 
@@ -120,41 +119,66 @@ const OnboardingBrands = () => {
         const userRef = doc(db, "users", currentUser.uid);
         const snap = await getDoc(userRef);
 
+        if (!isMounted) return;
+
         if (!snap.exists()) {
           setError("Could not find your profile. Please sign up again.");
           return;
         }
 
         const data = snap.data();
-        const onboarding = data.onboarding || {};
+        const onboarding = data?.onboarding || {};
 
-        if (!onboarding.gender) {
-          navigate("/onboarding/gender");
+        if (onboarding?.completed) {
+          navigate("/searchpage", { replace: true });
+          return;
+        }
+
+        if (!onboarding?.gender) {
+          navigate("/onboarding/gender", { replace: true });
+          return;
+        }
+
+        if (
+          !Array.isArray(onboarding?.categories) ||
+          onboarding.categories.length === 0
+        ) {
+          navigate("/onboarding/categories", { replace: true });
           return;
         }
 
         setGender(onboarding.gender);
-        setSelectedBrands(onboarding.brands || []);
+        setSelectedBrands(
+          Array.isArray(onboarding.brands) ? onboarding.brands : [],
+        );
       } catch (err) {
         console.error("Error loading onboarding brands:", err);
-        setError("Something went wrong loading your preferences.");
+        if (isMounted) {
+          setError("Something went wrong loading your preferences.");
+        }
       } finally {
-        setInitialLoading(false);
+        if (isMounted) {
+          setInitialLoading(false);
+        }
       }
     };
 
     loadOnboarding();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authLoading, currentUser, navigate]);
 
   const toggleBrand = (brand) => {
     setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
+      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand],
     );
   };
 
   const handleFinish = async () => {
     if (!currentUser) {
-      navigate("/loginpage");
+      navigate("/loginpage", { replace: true });
       return;
     }
 
@@ -168,17 +192,24 @@ const OnboardingBrands = () => {
 
     try {
       const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      const existing = snap.exists() ? snap.data()?.onboarding || {} : {};
+
       await setDoc(
         userRef,
         {
           onboarding: {
-            gender,
-            brands: selectedBrands,
             completed: true,
+            gender,
+            categories: Array.isArray(existing.categories)
+              ? existing.categories
+              : [],
+            brands: selectedBrands,
           },
         },
-        { merge: true }
+        { merge: true },
       );
+
       navigate("/searchpage");
     } catch (err) {
       console.error("Error saving brands:", err);
@@ -201,7 +232,7 @@ const OnboardingBrands = () => {
             bgcolor: "black",
           }}
         >
-          <CircularProgress />
+          <CircularProgress sx={{ color: "turquoise" }} />
         </Box>
       </>
     );

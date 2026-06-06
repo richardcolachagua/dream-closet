@@ -2,18 +2,40 @@ import { Box, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import SearchResultCard from "./Cards/SearchResultCard";
 import SearchEmptyState from "./SearchEmptyState";
 
+const FILTER_LABELS = {
+  gender: "Gender",
+  category: "Category",
+  size: "Size",
+  color: "Color",
+  brand: "Brand",
+  store: "Store",
+  availability: "Availability",
+  priceMin: "Min price",
+  priceMax: "Max price",
+};
+
 const renderFilterChips = ({ filters, onRemoveFilter }) => {
   if (!filters) return [];
 
   const chips = [];
 
   Object.entries(filters).forEach(([key, value]) => {
+    const labelKey = FILTER_LABELS[key] || key;
+
     if (Array.isArray(value)) {
       value.forEach((item) => {
-        chips.push({ key, value: item, label: `${key}: ${item}` });
+        chips.push({
+          key,
+          value: item,
+          label: `${labelKey}: ${item}`,
+        });
       });
     } else if (value !== "" && value !== null && value !== undefined) {
-      chips.push({ key, value, label: `${key}: ${value}` });
+      chips.push({
+        key,
+        value,
+        label: `${labelKey}: ${value}`,
+      });
     }
   });
 

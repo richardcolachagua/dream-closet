@@ -2,9 +2,39 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useOnboardingStatus } from "./useOnboardingStatus";
 import { useAuth } from "./AuthContext";
-import { LoadingCircle } from "../frontend/Components/LoadingCircle";
+import { Box, CircularProgress } from "@mui/material";
 
 const ONBOARDING_PREFIX = "/onboarding";
+
+const LoadingCircle = () => (
+  <Box
+    sx={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      bgcolor: "black",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
+
+const getNextOnboardingPath = (onboarding) => {
+  if (!onboarding?.gender) {
+    return "/onboarding/gender";
+  }
+
+  if (!onboarding?.categories || onboarding.categories.length === 0) {
+    return "/onboarding/categories";
+  }
+
+  if (!onboarding?.brands || onboarding.brands.length === 0) {
+    return "/onboarding/brands";
+  }
+
+  return "/onboarding/brands";
+};
 
 export const OnboardingGuard = ({ children }) => {
   const { user, loading: authLoading } = useAuth();
@@ -15,27 +45,30 @@ export const OnboardingGuard = ({ children }) => {
     return <LoadingCircle />;
   }
 
-  // Not logged in: let your existing ProtectedRoute handle redirect to login
+  // ProtectedRoute should usually handle this first,
+  // but this keeps the component safe on its own too.
   if (!user) {
     return <>{children}</>;
   }
 
   const completed = Boolean(onboarding?.completed);
   const path = location.pathname;
+  const isOnboardingRoute = path.startsWith(ONBOARDING_PREFIX);
 
-  // If not completed and not already on onboarding, push into the correct step
-  if (!completed && !path.startsWith(ONBOARDING_PREFIX)) {
-    if (!onboarding?.gender) {
-      return <Navigate to="/onboarding/gender" replace />;
-    }
-    if (!onboarding?.categories || onboarding.categories.length === 0) {
-      return <Navigate to="/onboarding/categories" replace />;
-    }
-    return <Navigate to="/onboarding.brands" replace />;
+  // If onboarding is incomplete and user tries to access the main app,
+  // push them to the next required onboarding step.
+  if (!completed && !isOnboardingRoute) {
+    return (
+      <Navigate
+        to={getNextOnboardingPath(onboarding)}
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
   }
 
-  // If completed and user tries to visit onboarding manually, bounce them out
-  if (completed && path.startsWith(ONBOARDING_PREFIX)) {
+  // If onboarding is already complete, keep them out of onboarding pages.
+  if (completed && isOnboardingRoute) {
     return <Navigate to="/searchpage" replace />;
   }
 

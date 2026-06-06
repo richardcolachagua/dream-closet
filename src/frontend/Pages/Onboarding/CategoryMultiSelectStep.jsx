@@ -2,19 +2,25 @@ import React from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 
 const CategoryMultiSelectStep = ({
-  categories,
-  selectedCategories,
+  categories = [],
+  selectedCategories = [],
   onToggleCategory,
   onBack,
   onNext,
-  loading,
+  loading = false,
+  title = "What do you like to wear?",
+  description = "Choose the clothing categories you're most into. Dream Closet will use this to prioritize results and recommendations.",
+  nextLabel = "Next: Favorite Brands",
+  emptyMessage = "Choose a shopping preference first to unlock category recommendations.",
 }) => {
   const handleToggle = (category) => {
-    onToggleCategory && onToggleCategory(category);
+    if (onToggleCategory) {
+      onToggleCategory(category);
+    }
   };
 
-  const canContinue =
-    selectedCategories && selectedCategories.length > 0 && !loading;
+  const canContinue = selectedCategories.length > 0 && !loading;
+  const hasCategories = categories.length > 0;
 
   return (
     <>
@@ -24,11 +30,12 @@ const CategoryMultiSelectStep = ({
           textAlign: "center",
           mb: 3,
           fontWeight: "bold",
-          color: "white"
+          color: "white",
         }}
       >
-        What do you like to wear?
+        {title}
       </Typography>
+
       <Typography
         variant="body1"
         sx={{
@@ -37,85 +44,99 @@ const CategoryMultiSelectStep = ({
           color: "white",
         }}
       >
-        Choose the clothing categories you're most into. Dream Closet will use
-        this to prioritize results and recommendations.
+        {description}
       </Typography>
 
-      <Stack
-        direction="row"
-        flexWrap="wrap"
-        spacing={1}
-        useFlexGap
-        sx={{
-          justifyContent: "center",
-          mb: 4,
-        }}
-      >
-        {categories.map((category) => {
-          const selected = selectedCategories.includes(category);
+      {hasCategories ? (
+        <Stack
+          direction="row"
+          flexWrap="wrap"
+          spacing={1}
+          useFlexGap
+          sx={{
+            justifyContent: "center",
+            mb: 4,
+          }}
+        >
+          {categories.map((category) => {
+            const selected = selectedCategories.includes(category);
 
-          return (
-            <Chip
-              key={category}
-              label={category}
-              clickable
-              onClick={() => handleToggle(category)}
+            return (
+              <Chip
+                key={category}
+                label={category}
+                clickable
+                onClick={() => handleToggle(category)}
+                sx={{
+                  m: 0.5,
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: "999px",
+                  border: "1px solid turquoise",
+                  bgcolor: selected ? "turquoise" : "transparent",
+                  color: selected ? "black" : "grey.100",
+                  fontWeight: selected ? "bold" : "normal",
+                  "&:hover": {
+                    bgcolor: selected
+                      ? "turquoise"
+                      : "rgba(64, 224, 208, 0.12)",
+                  },
+                }}
+              />
+            );
+          })}
+        </Stack>
+      ) : (
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{ textAlign: "center", color: "rgba(255,255,255,0.72)" }}
+          >
+            {emptyMessage}
+          </Typography>
+        </Box>
+      )}
+
+      {(onBack || onNext) && (
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          {onBack && (
+            <Button
+              variant="text"
+              onClick={onBack}
               sx={{
-                m: 0.5,
-                px: 1.5,
-                py: 0.5,
+                color: "grey.300",
+                textTransform: "none",
+              }}
+            >
+              Back
+            </Button>
+          )}
+
+          {onNext && (
+            <Button
+              variant="contained"
+              onClick={onNext}
+              disabled={!canContinue}
+              sx={{
+                ml: "auto",
+                px: 4,
+                py: 1.2,
                 borderRadius: "999px",
-                border: "1px solid turquoise",
-                bgcolor: selected ? "turquoise" : "transparent",
-                color: selected ? "black" : "grey.100",
-                fontWeight: selected ? "bold" : "normal",
+                textTransform: "none",
+                fontSize: 16,
+                fontWeight: "bold",
+                bgcolor: "turquoise",
+                color: "black",
                 "&:hover": {
-                  bgcolor: selected ? "turquoise" : "rgba(64, 224, 208, 0.12",
+                  bgcolor: "#00b4aa",
                 },
               }}
-            />
-          );
-        })}
-      </Stack>
-
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        {onBack && (
-          <Button
-            variant="text"
-            onClick={onBack}
-            sx={{
-              color: "grey.300",
-              textTransform: "none",
-            }}
-          >
-            Back
-          </Button>
-        )}
-
-        {onNext && (
-          <Button
-            variant="contained"
-            onClick={onNext}
-            disabled={!canContinue}
-            sx={{
-              ml: "auto",
-              px: 4,
-              py: 1.2,
-              borderRadius: "999px",
-              textTransform: "none",
-              fontSize: 16,
-              fontWeight: "bold",
-              bgcolor: "turquoise",
-              color: "black",
-              "&:hover": {
-                bgcolor: "#00b4aa",
-              },
-            }}
-          >
-            {loading ? "Saving..." : "Next: Favorite Brands"}
-          </Button>
-        )}
-      </Box>
+            >
+              {loading ? "Saving..." : nextLabel}
+            </Button>
+          )}
+        </Box>
+      )}
     </>
   );
 };

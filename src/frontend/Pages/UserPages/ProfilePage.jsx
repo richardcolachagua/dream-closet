@@ -1,5 +1,4 @@
-// src/frontend/Pages/Profile/ProfilePage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../Components/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -22,6 +21,8 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  Alert,
+  Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import ProfilePageHeader from "../../Components/Headers/ProfilePageHeader.jsx";
@@ -29,8 +30,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db, app } from "../../../backend/firebase.js";
+import { useAuth } from "../../../backend/AuthContext";
 
-// IMPORT onboarding components + helpers
 import GenderSelectStep from "../../Pages/Onboarding/GenderSelectStep.jsx";
 import CategoryMultiSelectStep from "../../Pages/Onboarding/CategoryMultiSelectStep.jsx";
 import BrandMultiSelectStep from "../../Pages/Onboarding/BrandMultiSelectStep.jsx";
@@ -56,41 +57,64 @@ const validationSchema = Yup.object({
   ),
 });
 
+const DEFAULT_ONBOARDING = {
+  completed: false,
+  gender: "",
+  categories: [],
+  brands: [],
+};
+
+const defaultTheme = createTheme();
+
 const ProfilePage = () => {
-  const defaultTheme = createTheme();
   const auth = getAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [profileError, setProfileError] = useState("");
+
   const [currentUserInfo, setCurrentUserInfo] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    onboarding: {
-      gender: "",
-      categories: [],
-      brands: [],
-    },
+    onboarding: DEFAULT_ONBOARDING,
   });
 
-  // Local editable onboarding state
   const [editGender, setEditGender] = useState("");
   const [editCategories, setEditCategories] = useState([]);
   const [editBrands, setEditBrands] = useState([]);
   const [savingOnboarding, setSavingOnboarding] = useState(false);
 
+  const availableCategories = useMemo(() => {
+    if (editGender === "female") return femaleCategories;
+    if (editGender === "male") return maleCategories;
+    return [];
+  }, [editGender]);
+
+  const brandGroups = useMemo(
+    () => buildBrandGroupsForGender(editGender),
+    [editGender],
+  );
+
+  const allowedBrands = useMemo(
+    () => brandGroups.flatMap((group) => group.brands),
+    [brandGroups],
+  );
+
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
+      firstName: currentUserInfo.firstName || "",
+      lastName: currentUserInfo.lastName || "",
+      email: currentUserInfo.email || "",
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
     },
     validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        const user = auth.currentUser;
         if (!user) {
           toast.error("You must be logged in to update your profile");
           return;
@@ -99,19 +123,16 @@ const ProfilePage = () => {
         const updatedValues = {};
         let passwordUpdated = false;
 
-        if (
-          values.firstName &&
-          values.firstName !== currentUserInfo.firstName
-        ) {
-          updatedValues.firstName = values.firstName;
+        if (values.firstName !== currentUserInfo.firstName) {
+          updatedValues.firstName = values.firstName.trim();
         }
 
-        if (values.lastName && values.lastName !== currentUserInfo.lastName) {
-          updatedValues.lastName = values.lastName;
+        if (values.lastName !== currentUserInfo.lastName) {
+          updatedValues.lastName = values.lastName.trim();
         }
 
-        if (values.email && values.email !== currentUserInfo.email) {
-          updatedValues.email = values.email;
+        if (values.email !== currentUserInfo.email) {
+          updatedValues.email = values.email.trim();
         }
 
         if (values.newPassword) {
@@ -124,6 +145,7 @@ const ProfilePage = () => {
             user.email,
             values.currentPassword,
           );
+
           await reauthenticateWithCredential(user, credential);
           await updatePassword(user, values.newPassword);
           passwordUpdated = true;
@@ -133,27 +155,50 @@ const ProfilePage = () => {
           const functions = getFunctions(app);
           const updateProfile = httpsCallable(functions, "updateUserProfile");
           await updateProfile(updatedValues);
-          setCurrentUserInfo((prev) => ({ ...prev, ...updatedValues }));
+
+          setCurrentUserInfo((prev) => ({
+            ...prev,
+            ...updatedValues,
+          }));
         }
 
         if (passwordUpdated || Object.keys(updatedValues).length > 0) {
           toast.success("Profile updated successfully");
-          formik.resetForm();
+          resetForm({
+            values: {
+              firstName:
+                updatedValues.firstName ?? currentUserInfo.firstName ?? "",
+              lastName:
+                updatedValues.lastName ?? currentUserInfo.lastName ?? "",
+              email: updatedValues.email ?? currentUserInfo.email ?? "",
+              currentPassword: "",
+              newPassword: "",
+              confirmNewPassword: "",
+            },
+          });
         } else {
           toast.info("No changes detected");
         }
       } catch (error) {
         console.error("Error updating profile:", error);
         toast.error(error.message || "An error occurred. Please try again.");
+      } finally {
+        setSubmitting(false);
       }
     },
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserData = async () => {
-      const user = auth.currentUser;
+      if (authLoading) return;
+
       if (!user) {
-        console.warn("[ProfilePage] No authenticated user found.");
+        if (isMounted) {
+          setProfileError("No authenticated user found.");
+          setPageLoading(false);
+        }
         return;
       }
 
@@ -161,12 +206,19 @@ const ProfilePage = () => {
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
 
+        if (!isMounted) return;
+
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
-          const onboarding = userData.onboarding || {
-            gender: "",
-            categories: [],
-            brands: [],
+          const onboarding = {
+            completed: Boolean(userData?.onboarding?.completed),
+            gender: userData?.onboarding?.gender || "",
+            categories: Array.isArray(userData?.onboarding?.categories)
+              ? userData.onboarding.categories
+              : [],
+            brands: Array.isArray(userData?.onboarding?.brands)
+              ? userData.onboarding.brands
+              : [],
           };
 
           setCurrentUserInfo({
@@ -176,36 +228,72 @@ const ProfilePage = () => {
             onboarding,
           });
 
-          formik.setValues({
-            firstName: userData.firstName || "",
-            lastName: userData.lastName || "",
-            email: user.email || "",
-            currentPassword: "",
-            newPassword: "",
-            confirmNewPassword: "",
-          });
-
-          // seed editable onboarding state
-          setEditGender(onboarding.gender || "");
-          setEditCategories(onboarding.categories || []);
-          setEditBrands(onboarding.brands || []);
+          setEditGender(onboarding.gender);
+          setEditCategories(onboarding.categories);
+          setEditBrands(onboarding.brands);
         } else {
-          console.warn("[ProfilePage] No Firestore document found for user.");
+          setCurrentUserInfo({
+            firstName: "",
+            lastName: "",
+            email: user.email || "",
+            onboarding: DEFAULT_ONBOARDING,
+          });
+          setEditGender("");
+          setEditCategories([]);
+          setEditBrands([]);
         }
       } catch (error) {
         console.error("[ProfilePage] Error fetching user data:", error);
+        if (isMounted) {
+          setProfileError("Could not load your profile.");
+        }
+      } finally {
+        if (isMounted) {
+          setPageLoading(false);
+        }
       }
     };
 
     fetchUserData();
-  }, [auth]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleTogglePasswordVisiblity = () => {
+    return () => {
+      isMounted = false;
+    };
+  }, [user, authLoading]);
+
+  useEffect(() => {
+    setEditCategories((prev) =>
+      prev.filter((category) => availableCategories.includes(category)),
+    );
+  }, [availableCategories]);
+
+  useEffect(() => {
+    setEditBrands((prev) =>
+      prev.filter((brand) => allowedBrands.includes(brand)),
+    );
+  }, [allowedBrands]);
+
+  const handleTogglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
+  const handleToggleCategory = (category) => {
+    setEditCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category],
+    );
+  };
+
+  const handleToggleBrand = (brand) => {
+    setEditBrands((prev) =>
+      prev.includes(brand)
+        ? prev.filter((item) => item !== brand)
+        : [...prev, brand],
+    );
+  };
+
   const handleSaveOnboarding = async () => {
-    const user = auth.currentUser;
     if (!user) {
       toast.error("You must be logged in to update preferences");
       return;
@@ -216,32 +304,38 @@ const ProfilePage = () => {
       return;
     }
 
+    if (editCategories.length === 0) {
+      toast.error("Pick at least one category you like");
+      return;
+    }
+
+    if (editBrands.length === 0) {
+      toast.error("Pick at least one brand you like");
+      return;
+    }
+
     setSavingOnboarding(true);
+
     try {
       const ref = doc(db, "users", user.uid);
+      const nextOnboarding = {
+        gender: editGender,
+        categories: editCategories,
+        brands: editBrands,
+        completed: true,
+      };
+
       await setDoc(
         ref,
         {
-          onboarding: {
-            gender: editGender,
-            categories: editCategories,
-            brands: editBrands,
-            completed:
-              Boolean(editGender) &&
-              editCategories.length > 0 &&
-              editBrands.length > 0,
-          },
+          onboarding: nextOnboarding,
         },
         { merge: true },
       );
 
       setCurrentUserInfo((prev) => ({
         ...prev,
-        onboarding: {
-          gender: editGender,
-          categories: editCategories,
-          brands: editBrands,
-        },
+        onboarding: nextOnboarding,
       }));
 
       toast.success("Style preferences updated");
@@ -253,7 +347,21 @@ const ProfilePage = () => {
     }
   };
 
-  const brandGroups = buildBrandGroupsForGender(editGender);
+  if (authLoading || pageLoading) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "black",
+        }}
+      >
+        <CircularProgress sx={{ color: "turquoise" }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -271,6 +379,7 @@ const ProfilePage = () => {
       <ThemeProvider theme={defaultTheme}>
         <CssBaseline />
         <ProfilePageHeader />
+
         <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
           <Typography
             variant="h3"
@@ -278,205 +387,214 @@ const ProfilePage = () => {
             sx={{
               color: "turquoise",
               fontWeight: "bold",
-              paddingBottom: "5px",
+              pb: 0.5,
             }}
           >
-            Welcome, {currentUserInfo.firstName}
+            Welcome, {currentUserInfo.firstName || "there"}
           </Typography>
 
-          {/* Existing profile form */}
+          {profileError && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {profileError}
+            </Alert>
+          )}
+
           <Box
             component="form"
             onSubmit={formik.handleSubmit}
             noValidate
-            sx={{ mt: 2, bgcolor: "white", borderRadius: "20px" }}
+            sx={{
+              mt: 2,
+              p: 4,
+              bgcolor: "white",
+              borderRadius: "20px",
+            }}
           >
-            {/* ... keep all your existing Grid/TextField/password fields ... */}
+            <Typography
+              component="h1"
+              variant="h5"
+              sx={{
+                mb: 3,
+                fontWeight: "bold",
+                color: "black",
+              }}
+            >
+              Update Your Profile
+            </Typography>
+
             <Grid container spacing={2}>
-              <Box
-                sx={{
-                  marginTop: 6,
-                  marginLeft: 6,
-                  marginRight: 6,
-                  marginBottom: 6,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  bgcolor: "white",
-                }}
-              >
-                <Typography
-                  component="h1"
-                  variant="h5"
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="firstName"
+                  name="firstName"
+                  label="First Name"
+                  variant="outlined"
+                  value={formik.values.firstName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.firstName && Boolean(formik.errors.firstName)
+                  }
+                  helperText={
+                    formik.touched.firstName && formik.errors.firstName
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="lastName"
+                  name="lastName"
+                  label="Last Name"
+                  variant="outlined"
+                  value={formik.values.lastName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.lastName && Boolean(formik.errors.lastName)
+                  }
+                  helperText={formik.touched.lastName && formik.errors.lastName}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="email"
+                  name="email"
+                  label="Email"
+                  variant="outlined"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.email && Boolean(formik.errors.email)}
+                  helperText={formik.touched.email && formik.errors.email}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="currentPassword"
+                  name="currentPassword"
+                  label="Current Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formik.values.currentPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.currentPassword &&
+                    Boolean(formik.errors.currentPassword)
+                  }
+                  helperText={
+                    formik.touched.currentPassword &&
+                    formik.errors.currentPassword
+                  }
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="newPassword"
+                  name="newPassword"
+                  label="New Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formik.values.newPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.newPassword &&
+                    Boolean(formik.errors.newPassword)
+                  }
+                  helperText={
+                    formik.touched.newPassword && formik.errors.newPassword
+                  }
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  id="confirmNewPassword"
+                  name="confirmNewPassword"
+                  label="Confirm New Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formik.values.confirmNewPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.confirmNewPassword &&
+                    Boolean(formik.errors.confirmNewPassword)
+                  }
+                  helperText={
+                    formik.touched.confirmNewPassword &&
+                    formik.errors.confirmNewPassword
+                  }
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={formik.isSubmitting}
+                  fullWidth
                   sx={{
-                    mb: 3,
+                    backgroundColor: "turquoise",
+                    textTransform: "none",
+                    fontSize: "15px",
                     fontWeight: "bold",
-                    color: "black",
                   }}
                 >
-                  Update Your Profile
-                </Typography>
-                <form onSubmit={formik.handleSubmit}>
-                  <TextField
-                    fullWidth
-                    id="firstName"
-                    name="firstName"
-                    label="First Name"
-                    variant="outlined"
-                    value={formik.values.firstName}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.firstName &&
-                      Boolean(formik.errors.firstName)
-                    }
-                    helperText={
-                      formik.touched.firstName && formik.errors.firstName
-                    }
-                    sx={{ mb: 2 }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    id="lastName"
-                    name="lastName"
-                    label="Last Name"
-                    variant="outlined"
-                    value={formik.values.lastName}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.lastName && Boolean(formik.errors.lastName)
-                    }
-                    helperText={
-                      formik.touched.lastName && formik.errors.lastName
-                    }
-                    sx={{ mb: 2 }}
-                  />
-                  <TextField
-                    fullWidth
-                    id="email"
-                    name="email"
-                    label="Email"
-                    variant="outlined"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
-                    sx={{ mb: 2 }}
-                  />
-                  <TextField
-                    fullWidth
-                    id="currentPassword"
-                    name="currentPassword"
-                    label="Current Password"
-                    type={showPassword ? "text" : "password"}
-                    value={formik.values.currentPassword}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.currentPassword &&
-                      Boolean(formik.errors.currentPassword)
-                    }
-                    helperText={
-                      formik.touched.currentPassword &&
-                      formik.errors.currentPassword
-                    }
-                    sx={{ mb: 2 }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleTogglePasswordVisiblity}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <TextField
-                    fullWidth
-                    id="newPassword"
-                    name="newPassword"
-                    label="New Password"
-                    type={showPassword ? "text" : "password"}
-                    value={formik.values.newPassword}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.newPassword &&
-                      Boolean(formik.errors.newPassword)
-                    }
-                    helperText={
-                      formik.touched.newPassword && formik.errors.newPassword
-                    }
-                    sx={{ mb: 2 }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleTogglePasswordVisiblity}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <TextField
-                    fullWidth
-                    id="confirmNewPassword"
-                    name="confirmNewPassword"
-                    label="Confirm New Password"
-                    type={showPassword ? "text" : "password"}
-                    value={formik.values.confirmNewPassword}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.confirmNewPassword &&
-                      Boolean(formik.errors.confirmNewPassword)
-                    }
-                    helperText={
-                      formik.touched.confirmNewPassword &&
-                      formik.errors.confirmNewPassword
-                    }
-                    sx={{ mb: 2 }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={handleTogglePasswordVisiblity}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={formik.isSubmitting}
-                    fullWidth
-                    sx={{
-                      marginRight: "10px",
-                      backgroundColor: "turquoise",
-                      textTransform: "none",
-                      fontSize: "15px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {formik.isSubmitting ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      "Update Profile"
-                    )}
-                  </Button>
-                </form>
-              </Box>
+                  {formik.isSubmitting ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    "Update Profile"
+                  )}
+                </Button>
+              </Grid>
             </Grid>
           </Box>
 
-          {/* Style preferences card */}
           <Box
             sx={{
               mt: 6,
@@ -497,7 +615,16 @@ const ProfilePage = () => {
               Style Preferences
             </Typography>
 
-            {/* Gender */}
+            <Typography
+              variant="body2"
+              sx={{ color: "rgba(255,255,255,0.72)", mb: 3 }}
+            >
+              Update how Dream Closet tailors search and recommendations for
+              you.
+            </Typography>
+
+            <Divider sx={{ borderColor: "rgba(255,255,255,0.12)", mb: 3 }} />
+
             <Box sx={{ mb: 3 }}>
               <GenderSelectStep
                 selectedGender={editGender}
@@ -506,40 +633,20 @@ const ProfilePage = () => {
               />
             </Box>
 
-            {/* Categories */}
             <Box sx={{ mb: 3 }}>
               <CategoryMultiSelectStep
-                categories={
-                  editGender === "female"
-                    ? femaleCategories
-                    : editGender === "male"
-                      ? maleCategories
-                      : []
-                }
+                categories={availableCategories}
                 selectedCategories={editCategories}
-                onToggleCategory={(c) =>
-                  setEditCategories((prev) =>
-                    prev.includes(c)
-                      ? prev.filter((x) => x !== c)
-                      : [...prev, c],
-                  )
-                }
+                onToggleCategory={handleToggleCategory}
                 loading={false}
               />
             </Box>
 
-            {/* Brands */}
             <Box sx={{ mb: 3 }}>
               <BrandMultiSelectStep
                 brandGroups={brandGroups}
                 selectedBrands={editBrands}
-                onToggleBrand={(b) =>
-                  setEditBrands((prev) =>
-                    prev.includes(b)
-                      ? prev.filter((x) => x !== b)
-                      : [...prev, b],
-                  )
-                }
+                onToggleBrand={handleToggleBrand}
                 loading={savingOnboarding}
               />
             </Box>
@@ -547,10 +654,17 @@ const ProfilePage = () => {
             <Button
               variant="contained"
               onClick={handleSaveOnboarding}
-              disabled={!editGender || savingOnboarding}
+              disabled={
+                !editGender ||
+                editCategories.length === 0 ||
+                editBrands.length === 0 ||
+                savingOnboarding
+              }
               sx={{
                 bgcolor: "turquoise",
+                color: "black",
                 fontWeight: "bold",
+                textTransform: "none",
               }}
             >
               {savingOnboarding ? (

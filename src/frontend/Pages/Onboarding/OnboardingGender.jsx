@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -6,7 +6,6 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase";
@@ -14,62 +13,94 @@ import { useAuth } from "../../../backend/AuthContext";
 import OnboardingLayout from "./OnboardingLayout";
 import GenderSelectStep from "./GenderSelectStep";
 
+const DEFAULT_ONBOARDING = {
+  completed: false,
+  gender: "",
+  categories: [],
+  brands: [],
+};
+
 const OnboardingGender = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { user: currentUser, loading: authLoading } = useAuth();
 
   const [selectedGender, setSelectedGender] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchExistingProfile = async () => {
-      if (authLoading) return; // wait until auth finished
+      if (authLoading) return;
 
       if (!currentUser) {
-        navigate("/loginpage");
+        navigate("/loginpage", { replace: true });
         return;
       }
 
       try {
         const userRef = doc(db, "users", currentUser.uid);
         const snap = await getDoc(userRef);
+
+        if (!isMounted) return;
+
         if (snap.exists()) {
           const data = snap.data();
-          if (data.onboarding?.gender) {
-            setSelectedGender(data.onboarding.gender);
+          const onboarding = data?.onboarding || DEFAULT_ONBOARDING;
+
+          if (onboarding?.completed) {
+            navigate("/searchpage", { replace: true });
+            return;
+          }
+
+          if (onboarding?.gender) {
+            setSelectedGender(onboarding.gender);
           }
         }
       } catch (err) {
         console.error("Error loading onboarding data:", err);
-        setError(
-          "Something went wrong loading your profile. Please try again.",
-        );
+        if (isMounted) {
+          setError(
+            "Something went wrong loading your profile. Please try again.",
+          );
+        }
       } finally {
-        setInitialLoading(false);
+        if (isMounted) {
+          setInitialLoading(false);
+        }
       }
     };
 
     fetchExistingProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authLoading, currentUser, navigate]);
 
   const handleContinue = async () => {
     if (!selectedGender || !currentUser) return;
 
-    setLoading(true);
+    setSaving(true);
     setError("");
 
     try {
       const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      const existing = snap.exists() ? snap.data()?.onboarding || {} : {};
 
       await setDoc(
         userRef,
         {
           onboarding: {
-            gender: selectedGender,
             completed: false,
+            gender: selectedGender,
+            categories: Array.isArray(existing.categories)
+              ? existing.categories
+              : [],
+            brands: Array.isArray(existing.brands) ? existing.brands : [],
           },
         },
         { merge: true },
@@ -80,7 +111,7 @@ const OnboardingGender = () => {
       console.error("Error saving gender:", err);
       setError("Could not save your selection. Please try again.");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -141,7 +172,7 @@ const OnboardingGender = () => {
               onChangeGender={setSelectedGender}
               onBack={() => navigate("/homepage")}
               onNext={handleContinue}
-              loading={loading}
+              loading={saving}
             />
           </OnboardingLayout>
         </Container>
@@ -149,4 +180,5 @@ const OnboardingGender = () => {
     </>
   );
 };
+
 export default OnboardingGender;

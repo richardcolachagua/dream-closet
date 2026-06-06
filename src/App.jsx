@@ -3,8 +3,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./backend/AuthContext";
 import { ProtectedRoute } from "./backend/ProtectedRoute";
-import { auth } from "./backend/firebase";
 import { OnboardingGuard } from "./backend/OnboardingGuard";
+
 import HomePage from "./frontend/Pages/StaticPages/HomePage";
 import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
 import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
@@ -27,7 +27,15 @@ import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
 import OnboardingCategories from "./frontend/Pages/Onboarding/OnboardingCategories";
 import OnboardingBrands from "./frontend/Pages/Onboarding/OnboardingBrands";
 
-const currentUser = auth.currentUser;
+const ProtectedAppRoute = ({ children, roles = [] }) => (
+  <ProtectedRoute roles={roles}>
+    <OnboardingGuard>{children}</OnboardingGuard>
+  </ProtectedRoute>
+);
+
+const ProtectedOnboardingRoute = ({ children, roles = [] }) => (
+  <ProtectedRoute roles={roles}>{children}</ProtectedRoute>
+);
 
 const ROUTES = [
   { path: "/", element: <Navigate to="/homepage" replace /> },
@@ -48,78 +56,82 @@ const ROUTES = [
   {
     path: "/profilepage",
     element: (
-      <ProtectedRoute>
-        <OnboardingGuard>
-          <ProfilePage />
-        </OnboardingGuard>
-      </ProtectedRoute>
+      <ProtectedAppRoute>
+        <ProfilePage />
+      </ProtectedAppRoute>
     ),
   },
   {
     path: "/searchpage",
     element: (
-      <ProtectedRoute>
-        <OnboardingGuard>
-          <SearchPage />
-        </OnboardingGuard>
-      </ProtectedRoute>
+      <ProtectedAppRoute>
+        <SearchPage />
+      </ProtectedAppRoute>
     ),
   },
   {
     path: "/saveditemsandsearches",
     element: (
-      <ProtectedRoute>
-        <OnboardingGuard>
-          <SavedItemsAndSearches />
-        </OnboardingGuard>
-      </ProtectedRoute>
+      <ProtectedAppRoute>
+        <SavedItemsAndSearches />
+      </ProtectedAppRoute>
     ),
   },
 
   {
     path: "/onboarding/gender",
     element: (
-      <ProtectedRoute>
+      <ProtectedOnboardingRoute>
         <OnboardingGender />
-      </ProtectedRoute>
+      </ProtectedOnboardingRoute>
     ),
   },
   {
     path: "/onboarding/categories",
     element: (
-      <ProtectedRoute>
+      <ProtectedOnboardingRoute>
         <OnboardingCategories />
-      </ProtectedRoute>
+      </ProtectedOnboardingRoute>
     ),
   },
-
   {
     path: "/onboarding/brands",
     element: (
-      <ProtectedRoute>
+      <ProtectedOnboardingRoute>
         <OnboardingBrands />
-      </ProtectedRoute>
+      </ProtectedOnboardingRoute>
     ),
   },
 
-  { path: "*", element: <Navigate to="/homepage" replace /> },
+  { path: "/404", element: <NotFoundPage /> },
+  { path: "*", element: <Navigate to="/404" replace /> },
 ];
 
 function App() {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      }),
+  );
 
   return (
-    <SmoothScroll>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SmoothScroll>
           <Routes>
             {ROUTES.map(({ path, element }) => (
-              <Route key={path} path={path.toLowerCase()} element={element} />
+              <Route key={path} path={path} element={element} />
             ))}
           </Routes>
-        </AuthProvider>
-      </QueryClientProvider>
-    </SmoothScroll>
+        </SmoothScroll>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
