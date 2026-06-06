@@ -26,6 +26,7 @@ import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
 import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
 import OnboardingCategories from "./frontend/Pages/Onboarding/OnboardingCategories";
 import OnboardingBrands from "./frontend/Pages/Onboarding/OnboardingBrands";
+import { SubscriptionGuard } from "./backend/SubscriptionGuard";
 
 const ProtectedAppRoute = ({ children, roles = [] }) => (
   <ProtectedRoute roles={roles}>
@@ -65,7 +66,9 @@ const ROUTES = [
     path: "/searchpage",
     element: (
       <ProtectedAppRoute>
-        <SearchPage />
+        <SubscriptionGuard>
+          <SearchPage />
+        </SubscriptionGuard>
       </ProtectedAppRoute>
     ),
   },
