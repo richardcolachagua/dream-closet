@@ -9,13 +9,12 @@ import {
 
 const ConfirmDialog = ({ title, open, setOpen, onConfirm, children }) => (
   <Dialog open={open} onClose={() => setOpen(false)}>
-    <DialogTitle>{title} </DialogTitle>
+    <DialogTitle>{title}</DialogTitle>
     <DialogContent>{children}</DialogContent>
     <DialogActions>
       <Button
         onClick={() => {
           setOpen(false);
-          onConfirm();
         }}
         color="secondary"
       >
@@ -26,6 +25,7 @@ const ConfirmDialog = ({ title, open, setOpen, onConfirm, children }) => (
           setOpen(false);
           onConfirm();
         }}
+        color="primary"
       >
         Delete
       </Button>

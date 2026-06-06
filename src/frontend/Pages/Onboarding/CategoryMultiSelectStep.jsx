@@ -73,7 +73,7 @@ const CategoryMultiSelectStep = ({
                   py: 0.5,
                   borderRadius: "999px",
                   border: "1px solid turquoise",
-                  bgcolor: selected ? "turquoise" : "transparent",
+                  bgcolor: selected ? "turquoise" : "rgba(64, 224, 208, 0.12)",
                   color: selected ? "black" : "grey.100",
                   fontWeight: selected ? "bold" : "normal",
                   "&:hover": {

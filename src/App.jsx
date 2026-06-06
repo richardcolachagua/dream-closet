@@ -10,7 +10,7 @@ import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
 import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
 import SignUpPage from "./frontend/Pages/AuthPages/SignUpPage";
 import LogoutPage from "./frontend/Pages/AuthPages/LogoutPage";
-import NotFoundPage from "./frontend/Pages/StaticPages/PageNotFound";
+import NotFoundPage from "./frontend/Pages/StaticPages/NotFoundPage";
 import ProfilePage from "./frontend/Pages/UserPages/ProfilePage";
 import PrivacyPolicyPage from "./frontend/Pages/StaticPages/PrivacyPolicyPage";
 import SearchPage from "./frontend/Pages/SearchPages/SearchPage";

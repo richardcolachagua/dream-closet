@@ -6,7 +6,7 @@ import { LoadingCircle } from "../frontend/Components/LoadingCircle";
 export const ProtectedRoute = ({
   children,
   roles = [],
-  redirectPath = "/LoginPage",
+  redirectPath = "/loginpage",
   unauthorizedPath = "/unauthorized",
 }) => {
   const { user, role, loading } = useAuth();

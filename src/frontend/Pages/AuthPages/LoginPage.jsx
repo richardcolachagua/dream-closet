@@ -251,7 +251,7 @@ const LoginPage = () => {
               <Grid container justifyContent="flex-end">
                 <Grid item>
                   <Link
-                    to="/SignUpPage"
+                    to="/signuppage"
                     variant="body2"
                     style={{ textDecoration: "none" }}
                   >

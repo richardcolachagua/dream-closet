@@ -1,212 +1,110 @@
 import React from "react";
-import { Typography, Box, CssBaseline, Container } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Header from "../../Components/Headers/Header";
-import Footer from "../../Components/Footer";
+import { Box, Chip, Typography } from "@mui/material";
+import AnimatedPageShell from "../../Components/AnimatedPageShell";
+import LegalSection from "../../Components/LegalSection";
 
 const PrivacyPolicyPage = () => {
-  const defaultTheme = createTheme();
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        minHeight: "100vh",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
-        <Header />
-        <CssBaseline />
-        <Container
+    <AnimatedPageShell maxWidth="md">
+      <Box sx={{ mb: 4 }}>
+        <Chip
+          label="Privacy"
           sx={{
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            padding: "30px",
+            mb: 2,
+            color: "black",
+            bgcolor: "turquoise",
+            fontWeight: 700,
           }}
+        />
+        <Typography
+          variant="h3"
+          sx={{ color: "white", fontWeight: 800, mb: 1 }}
         >
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: "bold",
-              color: "turquoise",
-              fontFamily: "Times New Roman",
-            }}
-          >
-            Privacy Policy
-          </Typography>
-          <Box sx={{ marginTop: 2, padding: "10px" }}>
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              1. Information We Collect
-            </Typography>
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              At Dream Closet, we collect: Search queries and clothing
-              descriptions you enter IP addresses Device information (e.g.,
-              browser type, operating system) Browsing behavior on our site
-              Account information (if you choose to create an account)
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              2. How We Use Your Information
-            </Typography>
+          Privacy Policy
+        </Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.72)", mb: 1 }}>
+          Last updated: June 5, 2026
+        </Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.82)", maxWidth: 760 }}>
+          This Privacy Policy explains what information Dream Closet collects,
+          how it is used, when it may be shared, and what choices users have
+          regarding their information.
+        </Typography>
+      </Box>
 
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              We use your information to: Process and respond to your clothing
-              search requests Improve our search algorithm and enhance user
-              experience Analyze site usage and improve our services Personalize
-              your experience and provide tailored recommendations.
-            </Typography>
+      <LegalSection number="1" title="Information We Collect">
+        We may collect information you provide directly, such as account
+        details, onboarding preferences, saved items, saved searches, and
+        communications with us. We may also collect technical and usage data
+        such as device information, browser type, pages viewed, search activity,
+        and interaction events.
+      </LegalSection>
 
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              3. Data Storage and Security Your privacy is important to us.
-            </Typography>
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              We implement industry-standard security measures to protect your
-              data: All data is encrypted using SSL technology We regularly
-              update our security protocols Access to personal data is
-              restricted to authorized personnel only We retain your data for
-              [specify time period] or until you request its deletion.
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              4. Sharing Your Information We may share your information with:
-            </Typography>
+      <LegalSection number="2" title="How We Use Information">
+        We use information to operate and improve Dream Closet, personalize
+        search and recommendations, maintain account features, analyze usage,
+        secure the platform, and support users.
+      </LegalSection>
 
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              Websites that host the clothing images we display in search
-              results Analytics providers to help us improve our service We do
-              not sell your personal information to third parties.
-            </Typography>
+      <LegalSection number="3" title="Search and Personalization Data">
+        Search queries, filters, saved content, and onboarding selections may be
+        used to improve relevance, tune ranking systems, power saved
+        experiences, and make results more useful to you.
+      </LegalSection>
 
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              5. Cookies and Tracking We use cookies to enhance your browsing
-              experience:
-            </Typography>
+      <LegalSection number="4" title="Cookies and Similar Technologies">
+        We may use cookies and similar technologies for authentication,
+        security, analytics, preferences, and feature performance. Browser
+        settings may allow you to manage certain cookie behaviors.
+      </LegalSection>
 
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              Essential cookies: Required for site functionality Analytics
-              cookies: Help us understand how you use our site Preference
-              cookies: Remember your settings and choices You can manage cookie
-              preferences in your browser settings.
-            </Typography>
+      <LegalSection number="5" title="How Information Is Shared">
+        We do not sell personal information. We may share information with
+        service providers, infrastructure vendors, analytics tools, payment
+        processors, or legal authorities when necessary to operate the service,
+        comply with law, or protect rights and safety.
+      </LegalSection>
 
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              6. Your Rights You have the right to:
-            </Typography>
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              Access your personal information Request deletion of your data
-              Opt-out of marketing communications Lodge a complaint with a
-              supervisory authority To exercise these rights, please contact us
-              at [Your Contact Email].
-            </Typography>
+      <LegalSection number="6" title="Data Retention">
+        We retain information for as long as reasonably necessary to provide the
+        service, comply with legal obligations, resolve disputes, enforce
+        agreements, and maintain security and business records.
+      </LegalSection>
 
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              7. Children's Privacy
-            </Typography>
+      <LegalSection number="7" title="Your Choices and Rights">
+        Depending on your location, you may have rights to access, correct,
+        delete, or request a copy of your personal information, or object to
+        certain processing. Requests can be submitted through Dream Closet
+        support channels.
+      </LegalSection>
 
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              Our service is not directed to children under 13. We do not
-              knowingly collect personal information from children under 13.
-            </Typography>
+      <LegalSection number="8" title="Security">
+        We use reasonable administrative, technical, and organizational
+        safeguards to protect information. No method of transmission or storage
+        is completely secure, so absolute security cannot be guaranteed.
+      </LegalSection>
 
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              8. Changes to This Policy
-            </Typography>
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              We may update this policy periodically. We will notify you of any
-              significant changes via email or a prominent notice on our
-              website.
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              9. Contact Us
-            </Typography>
+      <LegalSection number="9" title="Children’s Privacy">
+        Dream Closet is not directed to children under 13, and we do not
+        knowingly collect personal information from children under 13.
+      </LegalSection>
 
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              If you have any questions about this privacy policy, please
-              contact us at: [Your Company Name] [Address] [Email] [Phone
-              Number]
-            </Typography>
+      <LegalSection number="10" title="International Transfers">
+        Your information may be processed in countries other than your own,
+        depending on where service providers and infrastructure are located.
+      </LegalSection>
 
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              10. Legal Compliance
-            </Typography>
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              This privacy policy complies with applicable data protection laws,
-              including GDPR and CCPA.
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              11. Data Retention
-            </Typography>
-            <Typography sx={{ color: "white", marginBottom: "30px" }}>
-              We retain your personal data for as long as necessary to provide
-              our services and comply with legal obligations. The criteria used
-              to determine our retention periods include: The length of time we
-              have an ongoing relationship with you Whether there is a legal
-              obligation to which we are subject Whether retention is advisable
-              in light of our legal position
-            </Typography>
-            <Typography
-              variant="h5"
-              sx={{ color: "white", marginBottom: "10px", fontWeight: "bold" }}
-            >
-              {" "}
-              12. Cross-Border Data Transfers
-            </Typography>
-            <Typography sx={{ color: "white" }}>
-              As we source images from websites globally, your data may be
-              transferred to, stored, or processed in countries other than the
-              one you reside in. We ensure that such transfers comply with
-              applicable data protection laws. By using our service, you consent
-              to this privacy policy and our data practices as described herein.
-            </Typography>
-          </Box>
-        </Container>
-        <Footer />
-      </ThemeProvider>
-    </Box>
+      <LegalSection number="11" title="Changes to This Policy">
+        We may update this Privacy Policy from time to time. When material
+        changes are made, we may revise the effective date and provide
+        additional notice where appropriate.
+      </LegalSection>
+
+      <LegalSection number="12" title="Contact">
+        For privacy-related questions or requests, use the contact or support
+        options provided through Dream Closet.
+      </LegalSection>
+    </AnimatedPageShell>
   );
 };
 

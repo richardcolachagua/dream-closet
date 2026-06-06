@@ -10,7 +10,6 @@ const Footer = () => {
         py: 2,
       }}
     >
-      \{" "}
       <Stack
         direction="row"
         spacing={5}
@@ -18,7 +17,7 @@ const Footer = () => {
           justifyContent: "center",
         }}
       >
-        <Link to="/TOSPage" style={{ textDecoration: "none" }}>
+        <Link to="/tospage" style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             color="white"
@@ -31,7 +30,7 @@ const Footer = () => {
             Terms of Use
           </Typography>
         </Link>
-        <Link to="/ContactPage" style={{ textDecoration: "none" }}>
+        <Link to="/contactpage" style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             color="white"
