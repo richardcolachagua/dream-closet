@@ -13,6 +13,7 @@ function UserDescriptionInput({
   onSearchSubmit,
   onOpenFilters,
   activeFilterCount = 0,
+  saveDisabled = false, // NEW: allow turning off save in free mode
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,6 +41,10 @@ function UserDescriptionInput({
   };
 
   const handleSaveSearch = () => {
+    if (saveDisabled || !onSaveSearch) {
+      return;
+    }
+
     if (!value || value.trim() === "") {
       onSearchError("Cannot save empty search");
       return;
@@ -117,13 +122,15 @@ function UserDescriptionInput({
           {isLoading ? "Searching..." : "Search"}
         </Button>
 
-        <SaveSearchButton
-          sx={{
-            width: { xs: "100%", sm: "auto" },
-          }}
-          onSave={handleSaveSearch}
-          disabled={isLoading}
-        />
+        {!saveDisabled && onSaveSearch && (
+          <SaveSearchButton
+            sx={{
+              width: { xs: "100%", sm: "auto" },
+            }}
+            onSave={handleSaveSearch}
+            disabled={isLoading}
+          />
+        )}
       </Box>
     </Box>
   );
