@@ -22,33 +22,36 @@ const SuccessfulPage = () => {
       <Stack
         direction="column"
         sx={{
-          alignContent: "center",
           justifyContent: "center",
           display: "flex",
+          maxWidth: 640,
         }}
       >
         <ArrowBackIcon
           fontSize="large"
           sx={{ color: "white", mb: 3, cursor: "pointer" }}
-          onClick={() => navigate(-1)}
-          aria-label="Go back to previous page"
+          onClick={() => navigate("/loginpage", { replace: true })}
+          aria-label="Go back to login page"
           role="button"
           tabIndex={0}
-          onKeyPress={(e) => {
-            if (e.key === "Enter" || e.key === " ") navigate(-1);
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              navigate("/loginpage", { replace: true });
+            }
           }}
         />
+
         <Typography
           variant="h3"
           sx={{
             fontWeight: "bold",
             color: "white",
             display: "flex",
-            alignContent: "center",
           }}
         >
-          Successful
+          Password updated
         </Typography>
+
         <Typography
           variant="h5"
           sx={{
@@ -56,16 +59,23 @@ const SuccessfulPage = () => {
             pt: 1,
             mb: 3,
             display: "flex",
-            alignContent: "center",
           }}
         >
-          Congratulations! Your password has been changed. Click below to login.
+          Your password has been changed successfully. Sign in with your new
+          password.
         </Typography>
-        <Stack direction="column" alignItems="center">
+
+        <Stack direction="column" alignItems="flex-start">
           <Button
             variant="contained"
-            sx={{ borderRadius: "10px", width: "200px" }}
-            onClick={() => navigate("/login")}
+            sx={{
+              borderRadius: "10px",
+              width: "220px",
+              minHeight: 48,
+              textTransform: "none",
+              fontWeight: 700,
+            }}
+            onClick={() => navigate("/loginpage", { replace: true })}
             aria-label="Return to Login page"
           >
             Return to Login

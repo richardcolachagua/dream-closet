@@ -23,20 +23,20 @@ export const useOnboardingStatus = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
+    let active = true;
 
     const run = async () => {
       if (authLoading) return;
 
       if (!user) {
-        if (isMounted) {
+        if (active) {
           setOnboarding(DEFAULT_ONBOARDING);
           setLoading(false);
         }
         return;
       }
 
-      if (isMounted) {
+      if (active) {
         setLoading(true);
       }
 
@@ -44,7 +44,7 @@ export const useOnboardingStatus = () => {
         const ref = doc(db, "users", user.uid);
         const snap = await getDoc(ref);
 
-        if (!isMounted) return;
+        if (!active) return;
 
         if (snap.exists()) {
           const data = snap.data();
@@ -52,14 +52,12 @@ export const useOnboardingStatus = () => {
         } else {
           setOnboarding(DEFAULT_ONBOARDING);
         }
-      } catch (e) {
-        console.error("[useOnboardingStatus] error:", e);
-
-        if (isMounted) {
+      } catch {
+        if (active) {
           setOnboarding(DEFAULT_ONBOARDING);
         }
       } finally {
-        if (isMounted) {
+        if (active) {
           setLoading(false);
         }
       }
@@ -68,7 +66,7 @@ export const useOnboardingStatus = () => {
     run();
 
     return () => {
-      isMounted = false;
+      active = false;
     };
   }, [user, authLoading]);
 

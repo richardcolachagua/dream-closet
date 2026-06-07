@@ -12,9 +12,6 @@ const PasswordReset = () => {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
         minHeight: "100vh",
       }}
     >
@@ -24,7 +21,6 @@ const PasswordReset = () => {
           paddingLeft: "40px",
           paddingTop: "40px",
           paddingBottom: "20px",
-          alignContent: "center",
           justifyContent: "center",
           display: "flex",
         }}
@@ -40,14 +36,14 @@ const PasswordReset = () => {
           aria-label="Go back to previous page"
           role="button"
           tabIndex={0}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") navigate(-1);
           }}
         />
+
         <Typography
           variant="h3"
           sx={{
-            alignContent: "center",
             display: "flex",
             fontWeight: "bold",
             color: "white",
@@ -56,31 +52,39 @@ const PasswordReset = () => {
         >
           Password Reset
         </Typography>
+
         <Typography
           variant="h6"
           sx={{
-            alignContent: "center",
             display: "flex",
             fontWeight: "bold",
             color: "white",
             paddingBottom: "15px",
+            maxWidth: 680,
           }}
         >
-          Your password has been successfully reset. Click confirm to set a new
-          password.
+          Your password reset request has been verified. Continue to set your
+          new password.
         </Typography>
       </Stack>
+
       <Stack
         direction="column"
         sx={{
           paddingLeft: "40px",
-          alignItems: "center",
+          alignItems: "flex-start",
         }}
       >
         <Button
           variant="contained"
-          sx={{ borderRadius: "10px", width: "200px" }}
-          onClick={() => navigate("/setanewpassword")}
+          sx={{
+            borderRadius: "10px",
+            width: "200px",
+            minHeight: 48,
+            textTransform: "none",
+            fontWeight: 700,
+          }}
+          onClick={() => navigate("/setpassword", { replace: true })}
           aria-label="Confirm password reset and set a new password"
         >
           Confirm

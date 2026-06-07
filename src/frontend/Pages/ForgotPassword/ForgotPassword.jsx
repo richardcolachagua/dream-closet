@@ -22,6 +22,10 @@ const validationSchema = Yup.object({
     .required("Email is required"),
 });
 
+const RESET_WINDOW_MS = 60 * 1000;
+const MAX_ATTEMPTS = 5;
+const HOUR_MS = 60 * 60 * 1000;
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
@@ -30,10 +34,9 @@ const ForgotPassword = () => {
   const [attemptCount, setAttemptCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Reset attempt count every hour
   useEffect(() => {
     if (attemptCount === 0) return;
-    const timer = setTimeout(() => setAttemptCount(0), 3600000);
+    const timer = setTimeout(() => setAttemptCount(0), HOUR_MS);
     return () => clearTimeout(timer);
   }, [attemptCount]);
 
@@ -44,8 +47,8 @@ const ForgotPassword = () => {
       setError("");
 
       const now = Date.now();
-      if (now - lastAttempt < 60000 || attemptCount >= 5) {
-        setError("Too many attempts. Please try again later.");
+      if (now - lastAttempt < RESET_WINDOW_MS || attemptCount >= MAX_ATTEMPTS) {
+        setError("Too many attempts. Please wait before trying again.");
         return;
       }
 
@@ -54,10 +57,10 @@ const ForgotPassword = () => {
       setAttemptCount((prev) => prev + 1);
 
       try {
-        await sendPasswordResetEmail(FirebaseAuth, values.email);
+        await sendPasswordResetEmail(FirebaseAuth, values.email.trim());
         setSuccess(true);
-      } catch (error) {
-        setError(error.message || "Failed to send reset email");
+      } catch {
+        setError("We couldn’t send a reset email right now. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -65,7 +68,7 @@ const ForgotPassword = () => {
   });
 
   if (success) {
-    return <CheckYourEmail email={formik.values.email} />;
+    return <CheckYourEmail email={formik.values.email.trim()} />;
   }
 
   return (
@@ -75,31 +78,28 @@ const ForgotPassword = () => {
         flexDirection: "column",
         backgroundColor: "black",
         minHeight: "100vh",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
       }}
     >
       <Stack
         direction="column"
         sx={{
           padding: "40px 0 30px 40px",
-          alignContent: "center",
           justifyContent: "center",
           display: "flex",
         }}
       >
         <ArrowBackIcon
           fontSize="large"
-          sx={{ color: "white", mb: 3 }}
+          sx={{ color: "white", mb: 3, cursor: "pointer" }}
           onClick={() => navigate(-1)}
           aria-label="Go back"
           role="button"
           tabIndex={0}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") navigate(-1);
           }}
         />
+
         <Box>
           <Typography
             variant="h3"
@@ -111,15 +111,9 @@ const ForgotPassword = () => {
           >
             Forgot Password
           </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              color: "white",
-              pt: 1,
-            }}
-          >
-            Please enter your email to reset your password. We'll send you a
-            link to reset your password.
+
+          <Typography variant="h5" sx={{ color: "white", pt: 1 }}>
+            Enter your email and we’ll send you a password reset link.
           </Typography>
         </Box>
       </Stack>
@@ -128,21 +122,16 @@ const ForgotPassword = () => {
         direction="column"
         sx={{
           paddingLeft: "40px",
-          alignContent: "center",
           justifyContent: "center",
           display: "flex",
+          maxWidth: 520,
         }}
       >
         <form onSubmit={formik.handleSubmit}>
-          <Typography
-            sx={{
-              fontWeight: "bold",
-              color: "white",
-              mb: "15px",
-            }}
-          >
+          <Typography sx={{ fontWeight: "bold", color: "white", mb: "15px" }}>
             Your Email
           </Typography>
+
           <TextField
             label="Enter your email"
             name="email"
@@ -150,21 +139,18 @@ const ForgotPassword = () => {
             value={formik.values.email}
             variant="filled"
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
             sx={{
-              width: "400px",
+              width: "100%",
               mb: 1,
               backgroundColor: "white",
             }}
             required
           />
-          <Stack
-            direction="column"
-            sx={{
-              alignItems: "flex-start",
-            }}
-          >
+
+          <Stack direction="column" sx={{ alignItems: "flex-start", mt: 2 }}>
             <Button
               type="submit"
               variant="contained"
@@ -172,30 +158,26 @@ const ForgotPassword = () => {
               sx={{
                 borderRadius: "10px",
                 width: "200px",
+                minHeight: 48,
+                textTransform: "none",
+                fontWeight: 700,
               }}
             >
-              {loading ? <CircularProgress size={24} /> : "Reset Password"}
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Reset Password"
+              )}
             </Button>
           </Stack>
         </form>
+
         {error && (
           <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
             {error}
           </Alert>
         )}
       </Stack>
-
-      {error && (
-        <Alert
-          severity="error"
-          sx={{
-            mt: 2,
-            width: "100%",
-          }}
-        >
-          {error}
-        </Alert>
-      )}
     </Box>
   );
 };

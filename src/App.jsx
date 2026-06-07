@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./backend/AuthContext";
 import { ProtectedRoute } from "./backend/ProtectedRoute";
 import { OnboardingGuard } from "./backend/OnboardingGuard";
+import { SubscriptionGuard } from "./backend/SubscriptionGuard";
 
 import HomePage from "./frontend/Pages/StaticPages/HomePage";
 import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
@@ -11,6 +12,7 @@ import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
 import SignUpPage from "./frontend/Pages/AuthPages/SignUpPage";
 import LogoutPage from "./frontend/Pages/AuthPages/LogoutPage";
 import NotFoundPage from "./frontend/Pages/StaticPages/NotFoundPage";
+import PricingPage from "./frontend/Pages/Pricing/PricingPage";
 import ProfilePage from "./frontend/Pages/UserPages/ProfilePage";
 import PrivacyPolicyPage from "./frontend/Pages/StaticPages/PrivacyPolicyPage";
 import SearchPage from "./frontend/Pages/SearchPages/SearchPage";
@@ -26,7 +28,6 @@ import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
 import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
 import OnboardingCategories from "./frontend/Pages/Onboarding/OnboardingCategories";
 import OnboardingBrands from "./frontend/Pages/Onboarding/OnboardingBrands";
-import { SubscriptionGuard } from "./backend/SubscriptionGuard";
 
 const ProtectedAppRoute = ({ children, roles = [] }) => (
   <ProtectedRoute roles={roles}>
@@ -38,17 +39,46 @@ const ProtectedOnboardingRoute = ({ children, roles = [] }) => (
   <ProtectedRoute roles={roles}>{children}</ProtectedRoute>
 );
 
+const PublicOnlyRoute = ({ children }) => (
+  <ProtectedRoute inverse redirectPath="/searchpage">
+    {children}
+  </ProtectedRoute>
+);
+
 const ROUTES = [
   { path: "/", element: <Navigate to="/homepage" replace /> },
   { path: "/homepage", element: <HomePage /> },
   { path: "/contactpage", element: <ContactPage /> },
-  { path: "/loginpage", element: <LoginPage /> },
-  { path: "/signuppage", element: <SignUpPage /> },
+  { path: "/pricing", element: <PricingPage /> },
+
+  {
+    path: "/loginpage",
+    element: (
+      <PublicOnlyRoute>
+        <LoginPage />
+      </PublicOnlyRoute>
+    ),
+  },
+  {
+    path: "/signuppage",
+    element: (
+      <PublicOnlyRoute>
+        <SignUpPage />
+      </PublicOnlyRoute>
+    ),
+  },
   { path: "/logoutpage", element: <LogoutPage /> },
   { path: "/freesearchpage", element: <FreeSearchPage /> },
   { path: "/privacypolicypage", element: <PrivacyPolicyPage /> },
   { path: "/tospage", element: <TOSPage /> },
-  { path: "/forgotpassword", element: <ForgotPassword /> },
+  {
+    path: "/forgotpassword",
+    element: (
+      <PublicOnlyRoute>
+        <ForgotPassword />
+      </PublicOnlyRoute>
+    ),
+  },
   { path: "/checkyouremail", element: <CheckYourEmail /> },
   { path: "/passwordreset", element: <PasswordReset /> },
   { path: "/setpassword", element: <SetANewPassword /> },

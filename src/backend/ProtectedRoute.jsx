@@ -1,13 +1,14 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "./AuthContext.js";
+import { useAuth } from "./AuthContext";
 import { LoadingCircle } from "../frontend/Components/LoadingCircle";
 
 export const ProtectedRoute = ({
   children,
   roles = [],
   redirectPath = "/loginpage",
-  unauthorizedPath = "/unauthorized",
+  unauthorizedPath = "/homepage",
+  inverse = false,
 }) => {
   const { user, role, loading } = useAuth();
   const location = useLocation();
@@ -16,13 +17,22 @@ export const ProtectedRoute = ({
     return <LoadingCircle />;
   }
 
+  if (inverse) {
+    return user ? <Navigate to={redirectPath} replace /> : <>{children}</>;
+  }
+
   if (!user) {
     return (
-      <Navigate to={redirectPath} replace state={{ from: location.pathname }} />
+      <Navigate
+        to={redirectPath}
+        replace
+        state={{
+          from: `${location.pathname}${location.search}${location.hash}`,
+        }}
+      />
     );
   }
 
-  // Role-based access control
   if (roles.length > 0 && (!role || !roles.includes(role))) {
     return <Navigate to={unauthorizedPath} replace />;
   }

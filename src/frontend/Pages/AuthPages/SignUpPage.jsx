@@ -1,39 +1,46 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Button,
   TextField,
   Box,
   Typography,
-  Link,
   Grid,
   Container,
   CssBaseline,
   Stack,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import {
+  browserSessionPersistence,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  setPersistence,
   signInWithPopup,
 } from "firebase/auth";
 import { auth, db } from "../../../backend/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import Header from "../../Components/Headers/Header";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../Components/Footer";
-
-
-// Simple sanitizer example function (for demo purposes)
-const sanitize = (str) => str.replace(/[<>]/g, "");
 
 const theme = createTheme();
 
+const normalizeName = (value = "") => value.replace(/\s+/g, " ").trim();
+
 const validationSchema = Yup.object().shape({
-  firstName: Yup.string().required("First Name is required"),
-  lastName: Yup.string().required("Last Name is required"),
+  firstName: Yup.string()
+    .trim()
+    .required("First Name is required")
+    .max(60, "Too long"),
+  lastName: Yup.string()
+    .trim()
+    .required("Last Name is required")
+    .max(60, "Too long"),
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
@@ -45,47 +52,121 @@ const validationSchema = Yup.object().shape({
     .matches(/[0-9]/, "Password must contain at least one number")
     .matches(
       /[@$!%*?&]/,
-      "Password must contain at least one special character"
+      "Password must contain at least one special character",
     ),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password"), null], "Passwords must match")
     .required("Confirm Password is required"),
 });
 
+const getFriendlySignupError = (code) => {
+  switch (code) {
+    case "auth/email-already-in-use":
+      return "An account with this email already exists. Please sign in instead.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/weak-password":
+      return "Please choose a stronger password.";
+    case "auth/popup-closed-by-user":
+      return "Google sign-up was cancelled.";
+    default:
+      return "We couldn’t create your account. Please try again.";
+  }
+};
+
+const buildUserPayload = ({ firstName, lastName, email }) => ({
+  firstName: normalizeName(firstName),
+  lastName: normalizeName(lastName),
+  email: (email || "").trim().toLowerCase(),
+  onboarding: {
+    gender: null,
+    categories: [],
+    brands: [],
+    completed: false,
+  },
+  updatedAt: serverTimestamp(),
+});
+
 const SignUpPage = () => {
-  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const [error, setError] = useState("");
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
+
+  const redirectTarget = useMemo(() => {
+    const from = location.state?.from;
+    return typeof from === "string" && from.startsWith("/onboarding")
+      ? from
+      : "/onboarding/gender";
+  }, [location.state]);
+
+  const persistAndRedirect = () => {
+    navigate(redirectTarget, { replace: true });
+  };
+
+  const upsertUserDocument = async ({ uid, firstName, lastName, email }) => {
+    const userRef = doc(db, "users", uid);
+    const existing = await getDoc(userRef);
+
+    const payload = buildUserPayload({ firstName, lastName, email });
+
+    if (!existing.exists()) {
+      await setDoc(userRef, {
+        ...payload,
+        createdAt: serverTimestamp(),
+      });
+      return;
+    }
+
+    const existingData = existing.data();
+    await setDoc(
+      userRef,
+      {
+        ...payload,
+        firstName: existingData?.firstName || payload.firstName,
+        lastName: existingData?.lastName || payload.lastName,
+        email: existingData?.email || payload.email,
+        onboarding: {
+          gender: existingData?.onboarding?.gender ?? null,
+          categories: existingData?.onboarding?.categories ?? [],
+          brands: existingData?.onboarding?.brands ?? [],
+          completed: existingData?.onboarding?.completed ?? false,
+        },
+      },
+      { merge: true },
+    );
+  };
 
   const handleGoogleSignUp = async () => {
     setError("");
+    setLoadingGoogle(true);
+
     try {
+      await setPersistence(auth, browserSessionPersistence);
+
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Safe extraction of first and last name
-      const fullName = user.displayName || "User";
-      const names = fullName.split(" ");
-      const firstName = sanitize(names[0] || "User");
-      const lastName = sanitize(names.slice(1).join(" ") || "");
+      const fullName = (user.displayName || "User").trim();
+      const names = fullName.split(/\s+/);
+      const firstName = names[0] || "User";
+      const lastName = names.slice(1).join(" ");
 
-      await setDoc(doc(db, "users", user.uid), {
+      await upsertUserDocument({
+        uid: user.uid,
         firstName,
         lastName,
-        email: sanitize(user.email),
-        onboarding: {
-          gender: null,
-          categories: [],
-          brands: [],
-          completed: false,
-        },
+        email: user.email || "",
       });
 
-      console.log("User signed up successfully with Google:", user);
-      navigate("/onboarding/gender");
-    } catch (error) {
-      console.error("Google sign-up failed:", error);
-      setError("Google sign-up failed. Please try again.");
+      persistAndRedirect();
+    } catch (signupError) {
+      setError(getFriendlySignupError(signupError?.code));
+    } finally {
+      setLoadingGoogle(false);
     }
   };
 
@@ -98,37 +179,30 @@ const SignUpPage = () => {
       confirmPassword: "",
     },
     validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, helpers) => {
       setError("");
+
       try {
+        await setPersistence(auth, browserSessionPersistence);
+
         const userCredential = await createUserWithEmailAndPassword(
           auth,
-          values.email,
-          values.password
+          values.email.trim().toLowerCase(),
+          values.password,
         );
-        const user = userCredential.user;
 
-        await setDoc(doc(db, "users", user.uid), {
-          firstName: sanitize(values.firstName),
-          lastName: sanitize(values.lastName),
-          email: sanitize(values.email),
-          onboarding: {
-            gender: null,
-            categories: [],
-            brands: [],
-            completed: false,
-          },
+        await upsertUserDocument({
+          uid: userCredential.user.uid,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
         });
 
-        console.log("user registered sucessfully:", user);
-        navigate("/onboarding/gender");
-      } catch (error) {
-        console.error("Signup error:", error);
-        if (error.code === "auth/email-already-in-use") {
-          setError("Email address already exists");
-        } else {
-          setError("An error occurred. Please try again.");
-        }
+        persistAndRedirect();
+      } catch (signupError) {
+        setError(getFriendlySignupError(signupError?.code));
+      } finally {
+        helpers.setSubmitting(false);
       }
     },
   });
@@ -152,7 +226,7 @@ const SignUpPage = () => {
           direction="column"
           alignItems="center"
           justifyContent="center"
-          style={{ minHeight: "100vh" }}
+          sx={{ minHeight: "100vh" }}
         >
           <Container
             component="main"
@@ -172,16 +246,21 @@ const SignUpPage = () => {
               <Typography
                 component="h1"
                 variant="h5"
-                sx={{
-                  fontWeight: "bold",
-                }}
+                sx={{ fontWeight: "bold" }}
               >
                 Sign Up
               </Typography>
+
+              {error && (
+                <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
               <Box
                 component="form"
                 onSubmit={formik.handleSubmit}
-                sx={{ mt: 3 }}
+                sx={{ mt: 3, width: "100%" }}
               >
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -194,6 +273,7 @@ const SignUpPage = () => {
                       autoComplete="given-name"
                       value={formik.values.firstName}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       error={
                         formik.touched.firstName &&
                         Boolean(formik.errors.firstName)
@@ -203,6 +283,7 @@ const SignUpPage = () => {
                       }
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       required
@@ -213,6 +294,7 @@ const SignUpPage = () => {
                       autoComplete="family-name"
                       value={formik.values.lastName}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       error={
                         formik.touched.lastName &&
                         Boolean(formik.errors.lastName)
@@ -222,6 +304,7 @@ const SignUpPage = () => {
                       }
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       required
@@ -232,12 +315,14 @@ const SignUpPage = () => {
                       autoComplete="email"
                       value={formik.values.email}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       error={
                         formik.touched.email && Boolean(formik.errors.email)
                       }
                       helperText={formik.touched.email && formik.errors.email}
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       required
@@ -249,6 +334,7 @@ const SignUpPage = () => {
                       autoComplete="new-password"
                       value={formik.values.password}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       error={
                         formik.touched.password &&
                         Boolean(formik.errors.password)
@@ -258,6 +344,7 @@ const SignUpPage = () => {
                       }
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       required
@@ -268,6 +355,7 @@ const SignUpPage = () => {
                       type="password"
                       value={formik.values.confirmPassword}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       error={
                         formik.touched.confirmPassword &&
                         Boolean(formik.errors.confirmPassword)
@@ -279,6 +367,7 @@ const SignUpPage = () => {
                     />
                   </Grid>
                 </Grid>
+
                 <Button
                   type="submit"
                   fullWidth
@@ -288,11 +377,19 @@ const SignUpPage = () => {
                     mb: 2,
                     backgroundColor: "black",
                     color: "white",
+                    minHeight: 48,
+                    fontWeight: 700,
+                    textTransform: "none",
                   }}
-                  disabled={formik.isSubmitting}
+                  disabled={formik.isSubmitting || loadingGoogle}
                 >
-                  Sign Up
+                  {formik.isSubmitting ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Sign Up"
+                  )}
                 </Button>
+
                 <Stack>
                   <Button
                     variant="contained"
@@ -302,34 +399,36 @@ const SignUpPage = () => {
                       mb: 2,
                       backgroundColor: "turquoise",
                       color: "black",
+                      minHeight: 48,
+                      fontWeight: 700,
+                      textTransform: "none",
                     }}
                     onClick={handleGoogleSignUp}
+                    disabled={formik.isSubmitting || loadingGoogle}
                   >
-                    SIGN UP WITH GOOGLE
+                    {loadingGoogle ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      "Sign Up With Google"
+                    )}
                   </Button>
-                  {error && (
-                    <Typography color="error" align="center">
-                      {error}
-                    </Typography>
-                  )}
                 </Stack>
               </Box>
+
               <Grid container justifyContent="flex-end">
                 <Grid item>
-                  <Link
-                    href="/loginpage"
-                    variant="body2"
-                    style={{ textDecoration: "none" }}
-                  >
-                    Already have an account? Sign in
+                  <Link to="/loginpage" style={{ textDecoration: "none" }}>
+                    <Typography variant="body2">
+                      Already have an account? Sign in
+                    </Typography>
                   </Link>
                 </Grid>
               </Grid>
             </Box>
           </Container>
         </Grid>
+        <Footer />
       </ThemeProvider>
-      <Footer />
     </Box>
   );
 };

@@ -45,8 +45,6 @@ export const OnboardingGuard = ({ children }) => {
     return <LoadingCircle />;
   }
 
-  // ProtectedRoute should usually handle this first,
-  // but this keeps the component safe on its own too.
   if (!user) {
     return <>{children}</>;
   }
@@ -54,20 +52,18 @@ export const OnboardingGuard = ({ children }) => {
   const completed = Boolean(onboarding?.completed);
   const path = location.pathname;
   const isOnboardingRoute = path.startsWith(ONBOARDING_PREFIX);
+  const fullPath = `${location.pathname}${location.search}${location.hash}`;
 
-  // If onboarding is incomplete and user tries to access the main app,
-  // push them to the next required onboarding step.
   if (!completed && !isOnboardingRoute) {
     return (
       <Navigate
         to={getNextOnboardingPath(onboarding)}
         replace
-        state={{ from: location.pathname }}
+        state={{ from: fullPath }}
       />
     );
   }
 
-  // If onboarding is already complete, keep them out of onboarding pages.
   if (completed && isOnboardingRoute) {
     return <Navigate to="/searchpage" replace />;
   }

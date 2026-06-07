@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth as FirebaseAuth } from "../../../backend/firebase";
 
-const CheckYourEmail = ({ email }) => {
+const CheckYourEmail = ({ email = "" }) => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -13,18 +13,12 @@ const CheckYourEmail = ({ email }) => {
   const handleResendEmail = async () => {
     setError("");
     setSuccess("");
-    try {
-      await sendPasswordResetEmail(FirebaseAuth, email);
-      setSuccess("Password reset email resent successfully!");
-    } catch (error) {
-      setError("An error occurred. Please try again");
-    }
-  };
 
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      handleResendEmail();
+    try {
+      await sendPasswordResetEmail(FirebaseAuth, email.trim());
+      setSuccess("Password reset email resent successfully.");
+    } catch {
+      setError("We couldn’t resend the email right now. Please try again.");
     }
   };
 
@@ -34,9 +28,6 @@ const CheckYourEmail = ({ email }) => {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
         minHeight: "100vh",
       }}
     >
@@ -46,27 +37,26 @@ const CheckYourEmail = ({ email }) => {
           paddingLeft: "40px",
           paddingTop: "40px",
           paddingBottom: "30px",
-          alignContent: "center",
           justifyContent: "center",
           display: "flex",
         }}
       >
         <ArrowBackIcon
           fontSize="large"
-          sx={{ color: "white", mb: "3" }}
+          sx={{ color: "white", mb: 3, cursor: "pointer" }}
           onClick={() => navigate(-1)}
           aria-label="Go back"
           role="button"
           tabIndex={0}
-          onKeyPress={(e) => {
+          onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") navigate(-1);
           }}
         />
+
         <Box>
           <Typography
             variant="h3"
             sx={{
-              alignContent: "center",
               display: "flex",
               fontWeight: "bold",
               color: "white",
@@ -74,51 +64,53 @@ const CheckYourEmail = ({ email }) => {
           >
             Check Your Email
           </Typography>
+
           <Typography
             variant="h5"
             sx={{
-              alignContent: "center",
               display: "flex",
               color: "white",
               pt: 1,
             }}
           >
-            We sent a reset link to {email}. Click the link to reset your
-            password.
+            We sent a reset link to {email}. Click the link in that email to
+            reset your password.
           </Typography>
         </Box>
-        <Stack direction="row" sx={{ mt: 2 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              color: "white",
-              marginRight: "5px",
-            }}
-          >
-            Haven't got the email yet?
+
+        <Stack direction="row" sx={{ mt: 2, flexWrap: "wrap", gap: 1 }}>
+          <Typography variant="h6" sx={{ color: "white" }}>
+            Haven&apos;t got the email yet?
           </Typography>
+
           <Link
-            variant="h5"
             sx={{
-              color: "white",
+              color: "turquoise",
               cursor: "pointer",
             }}
             onClick={handleResendEmail}
-            onKeyPress={handleKeyPress}
             tabIndex={0}
             role="button"
             aria-label="Resend password reset email"
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleResendEmail();
+              }
+            }}
           >
             Resend Email
           </Link>
         </Stack>
+
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert severity="error" sx={{ mt: 2, maxWidth: 520 }}>
             {error}
           </Alert>
         )}
+
         {success && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert severity="success" sx={{ mt: 2, maxWidth: 520 }}>
             {success}
           </Alert>
         )}

@@ -1,27 +1,49 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null); // ready for future admin/user roles
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser || null);
-      // TODO: derive/set role here if you store it in Firestore or custom claims
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser ?? null);
+      setRole(null);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  const value = { user, role, loading };
+  const value = useMemo(
+    () => ({
+      user,
+      role,
+      loading,
+      isAuthenticated: !!user,
+    }),
+    [user, role, loading],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
+};
