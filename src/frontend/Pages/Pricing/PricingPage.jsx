@@ -6,11 +6,13 @@ import {
   Container,
   Alert,
   Stack,
+  Chip,
 } from "@mui/material";
 import { httpsCallable } from "firebase/functions";
 import { functions, auth } from "../../../backend/firebase";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../Components/Headers/Header";
+import { ENABLE_BILLING } from "../../../config/billing";
 
 const PricingPage = () => {
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,10 @@ const PricingPage = () => {
 
   const handleSubscribe = async () => {
     setError("");
+
+    if (!ENABLE_BILLING) {
+      return;
+    }
 
     if (!auth.currentUser) {
       navigate("/signuppage", {
@@ -64,21 +70,38 @@ const PricingPage = () => {
       <Header />
 
       <Container maxWidth="sm" sx={{ pt: 10, textAlign: "center" }}>
-        <Typography
-          variant="h3"
-          sx={{ color: "white", fontWeight: "bold", mb: 2 }}
-        >
-          Dream Closet Pro
-        </Typography>
+        <Stack spacing={2} alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h3" sx={{ color: "white", fontWeight: "bold" }}>
+            Dream Closet Pro
+          </Typography>
 
-        <Typography sx={{ color: "rgba(255,255,255,0.7)", mb: 4 }}>
-          Unlimited searches, AI-powered style matching, and saved closet
-          collections.
-        </Typography>
+          {!ENABLE_BILLING && (
+            <Chip
+              label="Coming soon"
+              sx={{
+                backgroundColor: "rgba(64, 224, 208, 0.18)",
+                color: "turquoise",
+                fontWeight: "bold",
+              }}
+            />
+          )}
+
+          <Typography sx={{ color: "rgba(255,255,255,0.7)", maxWidth: 520 }}>
+            Unlimited searches, AI-powered style matching, and saved closet
+            collections.
+          </Typography>
+        </Stack>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3, textAlign: "left" }}>
             {error}
+          </Alert>
+        )}
+
+        {!ENABLE_BILLING && (
+          <Alert severity="info" sx={{ mb: 3, textAlign: "left" }}>
+            Billing is disabled during development. This page is staying in the
+            product as a placeholder until the core experience is ready.
           </Alert>
         )}
 
@@ -107,7 +130,7 @@ const PricingPage = () => {
               variant="contained"
               size="large"
               onClick={handleSubscribe}
-              disabled={loading}
+              disabled={loading || !ENABLE_BILLING}
               sx={{
                 mt: 1,
                 backgroundColor: "turquoise",
@@ -119,11 +142,21 @@ const PricingPage = () => {
                 minHeight: 48,
                 minWidth: 220,
                 "&:hover": {
-                  backgroundColor: "darkturquoise",
+                  backgroundColor: ENABLE_BILLING
+                    ? "darkturquoise"
+                    : "turquoise",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgba(64, 224, 208, 0.35)",
+                  color: "rgba(0,0,0,0.7)",
                 },
               }}
             >
-              {loading ? "Redirecting..." : "Subscribe Now"}
+              {ENABLE_BILLING
+                ? loading
+                  ? "Redirecting..."
+                  : "Subscribe Now"
+                : "Coming Soon"}
             </Button>
           </Stack>
         </Box>

@@ -8,13 +8,15 @@ import {
   MenuItem,
   Button,
   Container,
+  Stack,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../../Components/Buttons/LogoutButton/LogoutButton";
-import { navButtonSx } from "../Buttons/navButtonSx";
+import LogoutButton from "../Buttons/LogoutButton/LogoutButton";
+import { ROUTES } from "../../../routes/routePaths";
+import { navButtonSx } from "../Buttons/buttonStyles";
 
-function ProfileSearchPageHeader() {
+function ProfileHeader() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
 
   const handleOpenNavMenu = (event) => {
@@ -26,42 +28,40 @@ function ProfileSearchPageHeader() {
   };
 
   const navButtons = [
-    { label: "Saved Searches", to: "/SavedItemsAndSearches" },
-    { label: "Searches", to: "/Searchpage" },
+    { label: "Search", to: ROUTES.SEARCH },
+    { label: "Profile", to: ROUTES.PROFILE },
   ];
 
   return (
-    <AppBar position="relative" sx={{ backgroundColor: "black" }}>
+    <AppBar position="static" elevation={0} sx={{ backgroundColor: "black" }}>
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
           sx={{
+            minHeight: 80,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 2,
           }}
         >
-          <Box>
-            <RouterLink to="/homepage">
-              <Box
-                component="img"
-                alt="Dream Closet Logo"
-                src="/assets/Logo-svg.svg"
-                sx={{
-                  height: { xs: 40, sm: 48, md: 56 },
-                  width: "auto",
-                }}
-              />
-            </RouterLink>
-          </Box>
+          <RouterLink to={ROUTES.HOME} aria-label="Go to Dream Closet homepage">
+            <Box
+              component="img"
+              alt="Dream Closet Logo"
+              src="/assets/Logo-svg.svg"
+              sx={{
+                height: { xs: 40, sm: 48, md: 56 },
+                width: "auto",
+              }}
+            />
+          </RouterLink>
 
-          {/* Desktop Navigation - Right Side */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              gap: "10px",
-            }}
+          <Stack
+            direction="row"
+            spacing={1.25}
+            alignItems="center"
+            sx={{ display: { xs: "none", md: "flex" } }}
           >
             {navButtons.map((btn) => (
               <Button
@@ -69,29 +69,19 @@ function ProfileSearchPageHeader() {
                 component={RouterLink}
                 to={btn.to}
                 variant="contained"
-                sx={{
-                  backgroundColor: "turquoise",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                }}
+                sx={navButtonSx}
               >
                 {btn.label}
               </Button>
             ))}
             <LogoutButton />
-          </Box>
+          </Stack>
 
-          {/* Mobile Menu - Right Side */}
-          <Box
-            sx={{
-              display: { xs: "flex", md: "none" },
-              ml: "auto", // Pushes menu to far right
-            }}
-          >
+          <Box sx={{ display: { xs: "flex", md: "none" }, ml: "auto" }}>
             <IconButton
               size="large"
-              aria-label="mobile menu"
-              aria-controls="menu-appbar"
+              aria-label="Open navigation menu"
+              aria-controls="dream-closet-account-mobile-nav"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
               color="inherit"
@@ -99,15 +89,18 @@ function ProfileSearchPageHeader() {
               <MenuIcon />
             </IconButton>
             <Menu
-              id="menu-appbar"
+              id="dream-closet-account-mobile-nav"
               anchorEl={anchorElNav}
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              keepMounted
               transformOrigin={{ vertical: "top", horizontal: "right" }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{
-                "& .MuiPaper-root": { backgroundColor: "black" },
+                "& .MuiPaper-root": {
+                  backgroundColor: "#111111",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  mt: 1,
+                },
               }}
             >
               {navButtons.map((btn) => (
@@ -134,4 +127,4 @@ function ProfileSearchPageHeader() {
   );
 }
 
-export default ProfileSearchPageHeader;
+export default ProfileHeader;

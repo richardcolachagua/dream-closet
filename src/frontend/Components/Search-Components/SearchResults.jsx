@@ -14,7 +14,7 @@ const FILTER_LABELS = {
   priceMax: "Max price",
 };
 
-const renderFilterChips = ({ filters, onRemoveFilter }) => {
+const buildFilterChips = ({ filters, onRemoveFilter }) => {
   if (!filters) return [];
 
   const chips = [];
@@ -28,31 +28,25 @@ const renderFilterChips = ({ filters, onRemoveFilter }) => {
           key,
           value: item,
           label: `${labelKey}: ${item}`,
+          onDelete: onRemoveFilter
+            ? () => onRemoveFilter(key, item)
+            : undefined,
         });
       });
-    } else if (value !== "" && value !== null && value !== undefined) {
+      return;
+    }
+
+    if (value !== "" && value !== null && value !== undefined) {
       chips.push({
         key,
         value,
         label: `${labelKey}: ${value}`,
+        onDelete: onRemoveFilter ? () => onRemoveFilter(key, value) : undefined,
       });
     }
   });
 
-  return chips.map((chip) => (
-    <Chip
-      key={`${chip.key}-${chip.value}`}
-      label={chip.label}
-      onDelete={
-        onRemoveFilter ? () => onRemoveFilter(chip.key, chip.value) : undefined
-      }
-      sx={{
-        bgcolor: "rgba(255,255,255,0.05)",
-        color: "white",
-        border: "1px solid rgba(255,255,255,0.12)",
-      }}
-    />
-  ));
+  return chips;
 };
 
 function SearchResults({
@@ -68,8 +62,9 @@ function SearchResults({
   onRemoveFilter,
   onClearAllFilters,
 }) {
-  const activeFilterChips = renderFilterChips({ filters, onRemoveFilter });
+  const activeFilterChips = buildFilterChips({ filters, onRemoveFilter });
   const hasResults = results.length > 0;
+  const skeletonCount = viewMode === "list" ? 4 : 8;
 
   if (isLoading) {
     return (
@@ -82,43 +77,42 @@ function SearchResults({
         </Typography>
 
         <Grid container spacing={2.5}>
-          {Array.from({ length: viewMode === "list" ? 4 : 8 }).map(
-            (_, index) => (
-              <Grid
-                key={index}
-                item
-                xs={12}
-                sm={viewMode === "list" ? 12 : 6}
-                md={viewMode === "list" ? 12 : 4}
-                lg={viewMode === "list" ? 12 : 3}
+          {Array.from({ length: skeletonCount }).map((_, index) => (
+            <Grid
+              key={index}
+              item
+              xs={12}
+              sm={viewMode === "list" ? 12 : 6}
+              md={viewMode === "list" ? 12 : 4}
+              lg={viewMode === "list" ? 12 : 3}
+            >
+              <Box
+                sx={{
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  bgcolor: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
               >
-                <Box
-                  sx={{
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    bgcolor: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  <Skeleton
-                    variant="rectangular"
-                    height={280}
-                    animation="wave"
-                  />
-                  <Box sx={{ p: 2 }}>
-                    <Skeleton width="40%" height={28} animation="wave" />
-                    <Skeleton width="85%" height={32} animation="wave" />
-                    <Skeleton width="55%" height={24} animation="wave" />
-                    <Skeleton width="35%" height={30} animation="wave" />
-                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                      <Skeleton width={70} height={28} animation="wave" />
-                      <Skeleton width={90} height={28} animation="wave" />
-                    </Stack>
-                  </Box>
+                <Skeleton
+                  variant="rectangular"
+                  height={280}
+                  animation="wave"
+                  sx={{ bgcolor: "rgba(255,255,255,0.08)" }}
+                />
+                <Box sx={{ p: 2 }}>
+                  <Skeleton width="38%" height={28} animation="wave" />
+                  <Skeleton width="85%" height={32} animation="wave" />
+                  <Skeleton width="52%" height={24} animation="wave" />
+                  <Skeleton width="34%" height={30} animation="wave" />
+                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                    <Skeleton width={70} height={28} animation="wave" />
+                    <Skeleton width={90} height={28} animation="wave" />
+                  </Stack>
                 </Box>
-              </Grid>
-            ),
-          )}
+              </Box>
+            </Grid>
+          ))}
         </Grid>
       </Box>
     );
@@ -166,7 +160,24 @@ function SearchResults({
           flexWrap="wrap"
           sx={{ mb: 3 }}
         >
-          {activeFilterChips}
+          {activeFilterChips.map((chip) => (
+            <Chip
+              key={`${chip.key}-${chip.value}`}
+              label={chip.label}
+              onDelete={chip.onDelete}
+              sx={{
+                bgcolor: "rgba(255,255,255,0.05)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.12)",
+                "& .MuiChip-deleteIcon": {
+                  color: "rgba(255,255,255,0.62)",
+                  "&:hover": {
+                    color: "#59e6db",
+                  },
+                },
+              }}
+            />
+          ))}
         </Stack>
       )}
 

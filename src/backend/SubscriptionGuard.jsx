@@ -1,63 +1,52 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Box, CircularProgress } from "@mui/material";
+import { Navigate, useLocation } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
-
-const GuardLoader = () => (
-  <Box
-    sx={{
-      minHeight: "40vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <CircularProgress />
-  </Box>
-);
+import { ENABLE_BILLING } from "../config/billing";
+import AppLoadingScreen from "../Components/feedback/AppLoadingScreen";
+import { ROUTES, buildCurrentPath } from "../routes/routePaths";
 
 export const SubscriptionGuard = ({ children }) => {
-  const [checking, setChecking] = useState(true);
-  const [hasAccess, setHasAccess] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
+  const [checking, setChecking] = useState(true);
+  const [status, setStatus] = useState("checking");
 
   useEffect(() => {
     let active = true;
 
-    const check = async () => {
+    const checkSubscription = async () => {
+      if (!ENABLE_BILLING) {
+        if (active) {
+          setStatus("allowed");
+          setChecking(false);
+        }
+        return;
+      }
+
+      const user = auth.currentUser;
+
+      if (!user) {
+        if (active) {
+          setStatus("unauthenticated");
+          setChecking(false);
+        }
+        return;
+      }
+
       try {
-        const user = auth.currentUser;
-
-        if (!user) {
-          navigate("/loginpage", {
-            replace: true,
-            state: {
-              from: `${location.pathname}${location.search}${location.hash}`,
-            },
-          });
-          return;
-        }
-
-        const snap = await getDoc(doc(db, "users", user.uid));
-        const sub = snap.data()?.subscription;
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const subscription = userSnap.data()?.subscription;
 
         if (!active) return;
 
-        if (sub?.status === "active") {
-          setHasAccess(true);
+        if (subscription?.status === "active") {
+          setStatus("allowed");
         } else {
-          navigate("/pricing", {
-            replace: true,
-            state: {
-              from: `${location.pathname}${location.search}${location.hash}`,
-            },
-          });
+          setStatus("forbidden");
         }
-      } catch {
+      } catch (error) {
         if (!active) return;
-        navigate("/homepage", { replace: true });
+        setStatus("error");
       } finally {
         if (active) {
           setChecking(false);
@@ -65,13 +54,40 @@ export const SubscriptionGuard = ({ children }) => {
       }
     };
 
-    check();
+    checkSubscription();
 
     return () => {
       active = false;
     };
-  }, [location.hash, location.pathname, location.search, navigate]);
+  }, []);
 
-  if (checking) return <GuardLoader />;
-  return hasAccess ? children : null;
+  if (checking) {
+    return <AppLoadingScreen minHeight="40vh" />;
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <Navigate
+        to={ROUTES.LOGIN}
+        replace
+        state={{ from: buildCurrentPath(location) }}
+      />
+    );
+  }
+
+  if (status === "forbidden") {
+    return (
+      <Navigate
+        to={ROUTES.PRICING}
+        replace
+        state={{ from: buildCurrentPath(location) }}
+      />
+    );
+  }
+
+  if (status === "error") {
+    return <Navigate to={ROUTES.HOME} replace />;
+  }
+
+  return <>{children}</>;
 };

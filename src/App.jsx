@@ -92,16 +92,18 @@ const ROUTES = [
       </ProtectedAppRoute>
     ),
   },
+
   {
     path: "/searchpage",
     element: (
-      <ProtectedAppRoute>
-        <SubscriptionGuard>
+      <ProtectedRoute>
+        <OnboardingGuard>
           <SearchPage />
-        </SubscriptionGuard>
-      </ProtectedAppRoute>
+        </OnboardingGuard>
+      </ProtectedRoute>
     ),
   },
+
   {
     path: "/saveditemsandsearches",
     element: (

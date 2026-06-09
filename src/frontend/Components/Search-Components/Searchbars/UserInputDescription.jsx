@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { TextField, Button, Box } from "@mui/material";
+import { TextField, Button, Box, InputAdornment } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
+import SearchIcon from "@mui/icons-material/Search";
 import SaveSearchButton from "../Buttons/SaveSearchButton";
+import {
+  buttonHeights,
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../Buttons/buttonStyles";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -13,7 +19,7 @@ function UserDescriptionInput({
   onSearchSubmit,
   onOpenFilters,
   activeFilterCount = 0,
-  saveDisabled = false, // NEW: allow turning off save in free mode
+  saveDisabled = false,
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,14 +47,13 @@ function UserDescriptionInput({
   };
 
   const handleSaveSearch = () => {
-    if (saveDisabled || !onSaveSearch) {
-      return;
-    }
+    if (saveDisabled || !onSaveSearch) return;
 
     if (!value || value.trim() === "") {
       onSearchError("Cannot save empty search");
       return;
     }
+
     onSaveSearch(value);
   };
 
@@ -59,12 +64,11 @@ function UserDescriptionInput({
     <Box
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        alignItems: "center",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: "stretch",
         justifyContent: "center",
         mb: 3,
         width: "100%",
-        px: 2,
         gap: 1.5,
       }}
     >
@@ -76,11 +80,28 @@ function UserDescriptionInput({
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon sx={{ color: "rgba(0,0,0,0.45)" }} />
+            </InputAdornment>
+          ),
+          disableUnderline: true,
+        }}
         sx={{
-          width: "100%",
-          maxWidth: "500px",
-          backgroundColor: "white",
-          borderRadius: "10px",
+          flex: 1,
+          "& .MuiFilledInput-root": {
+            minHeight: buttonHeights.lg,
+            backgroundColor: "white",
+            borderRadius: "12px",
+            overflow: "hidden",
+          },
+          "& .MuiFilledInput-root:hover": {
+            backgroundColor: "white",
+          },
+          "& .MuiFilledInput-root.Mui-focused": {
+            backgroundColor: "white",
+          },
         }}
       />
 
@@ -89,7 +110,7 @@ function UserDescriptionInput({
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
           gap: 1,
-          width: { xs: "100%", sm: "auto" },
+          width: { xs: "100%", md: "auto" },
         }}
       >
         <Button
@@ -97,9 +118,8 @@ function UserDescriptionInput({
           startIcon={<TuneIcon />}
           onClick={onOpenFilters}
           sx={{
-            borderColor: "turquoise",
-            color: "turquoise",
-            fontWeight: "bold",
+            ...secondaryButtonSx,
+            minHeight: buttonHeights.lg,
             width: { xs: "100%", sm: "auto" },
           }}
         >
@@ -111,11 +131,8 @@ function UserDescriptionInput({
           onClick={handleSubmit}
           disabled={isLoading}
           sx={{
-            bgcolor: "turquoise",
-            "&:hover": { bgcolor: "darkturquoise" },
-            color: "black",
-            fontWeight: "bold",
-            fontSize: "14px",
+            ...primaryButtonSx,
+            minHeight: buttonHeights.lg,
             width: { xs: "100%", sm: "auto" },
           }}
         >
@@ -125,6 +142,7 @@ function UserDescriptionInput({
         {!saveDisabled && onSaveSearch && (
           <SaveSearchButton
             sx={{
+              minHeight: buttonHeights.lg,
               width: { xs: "100%", sm: "auto" },
             }}
             onSave={handleSaveSearch}

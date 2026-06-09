@@ -11,11 +11,16 @@ import {
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LaunchIcon from "@mui/icons-material/Launch";
+import {
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../../../Buttons/buttonStyles";
 
 const formatPrice = (result) => {
   if (result?.price && String(result.price).trim()) return result.price;
-  if (typeof result?.numericPrice === "number")
+  if (typeof result?.numericPrice === "number") {
     return `$${result.numericPrice.toFixed(2)}`;
+  }
   return "Price unavailable";
 };
 
@@ -26,7 +31,7 @@ const getSourceLabel = (source) => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const fallbackImage = "https://via.placeholder.com/640x800?text=No+Image";
+const fallbackImage = "/assets/product-fallback.png";
 
 function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
   const {
@@ -68,7 +73,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
         height: "100%",
         minHeight: isList ? "unset" : 460,
         borderRadius: 3,
-        backgroundColor: "#111",
+        backgroundColor: "#111111",
         color: "white",
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
@@ -101,8 +106,8 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
               label={getSourceLabel(source)}
               size="small"
               sx={{
-                bgcolor: "rgba(64,224,208,0.16)",
-                color: "turquoise",
+                bgcolor: "rgba(89,230,219,0.16)",
+                color: "#59e6db",
                 fontWeight: 700,
               }}
             />
@@ -121,7 +126,15 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
 
           <Typography
             variant="h6"
-            sx={{ fontWeight: 700, mb: 0.75, lineHeight: 1.25 }}
+            sx={{
+              fontWeight: 700,
+              mb: 0.75,
+              lineHeight: 1.25,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
           >
             {name || "Untitled item"}
           </Typography>
@@ -135,7 +148,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
 
           <Typography
             variant="h6"
-            sx={{ color: "turquoise", fontWeight: 800, mb: 1.5 }}
+            sx={{ color: "#59e6db", fontWeight: 800, mb: 1.5 }}
           >
             {formatPrice(result)}
           </Typography>
@@ -179,10 +192,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             onClick={handleOpenProduct}
             disabled={!productUrl}
             sx={{
-              bgcolor: "turquoise",
-              color: "black",
-              fontWeight: 700,
-              "&:hover": { bgcolor: "darkturquoise" },
+              ...primaryButtonSx,
               "&.Mui-disabled": {
                 bgcolor: "rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.4)",
@@ -197,12 +207,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             startIcon={<FavoriteBorderIcon />}
             onClick={handleSave}
             disabled={!userId || !onSaveItem}
-            sx={{
-              borderColor: "rgba(255,255,255,0.18)",
-              color: "white",
-              fontWeight: 700,
-              "&:hover": { borderColor: "turquoise", color: "turquoise" },
-            }}
+            sx={secondaryButtonSx}
           >
             Save
           </Button>
