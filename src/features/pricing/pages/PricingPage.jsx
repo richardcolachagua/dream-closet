@@ -1,21 +1,21 @@
 import React, { useMemo, useState } from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Container,
-  Alert,
-  Stack,
-  Chip,
-} from "@mui/material";
-import { httpsCallable } from "firebase/functions";
-import { functions, auth } from "../../../backend/firebase/firebase";
+import { Alert, Box, Container, Stack, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../shared/ui/navigation/PublicHeader";
-import { ENABLE_BILLING } from "../../../features/pricing/services/billingService";
+import PricingSection from "../components/PricingSection";
+import {
+  ENABLE_BILLING,
+  createCheckoutSession,
+} from "../services/billingService";
+import {
+  getCurrentPlanId,
+  PLAN_IDS,
+  PRICING_PLANS,
+} from "../../pricing/services/pricingPlans";
+import { auth } from "../../../backend/firebase/firebase";
 
 const PricingPage = () => {
-  const [loading, setLoading] = useState(false);
+  const [loadingPlanId, setLoadingPlanId] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,8 +27,15 @@ const PricingPage = () => {
       : "/searchpage";
   }, [location.state]);
 
-  const handleSubscribe = async () => {
+  const currentPlanId = getCurrentPlanId(auth.currentUser?.subscription);
+
+  const handleSelectTier = async (tier) => {
     setError("");
+
+    if (tier.id === PLAN_IDS.FREE) {
+      navigate(returnTo, { replace: true });
+      return;
+    }
 
     if (!ENABLE_BILLING) {
       return;
@@ -42,26 +49,15 @@ const PricingPage = () => {
       return;
     }
 
-    setLoading(true);
+    setLoadingPlanId(tier.id);
 
     try {
-      const createSession = httpsCallable(functions, "createCheckoutSession");
-      const result = await createSession({
-        returnUrl: `${window.location.origin}${returnTo}`,
-        cancelUrl: `${window.location.origin}/pricing`,
-      });
-
-      const checkoutUrl = result?.data?.url;
-
-      if (!checkoutUrl || typeof checkoutUrl !== "string") {
-        throw new Error("Missing checkout URL.");
-      }
-
+      const checkoutUrl = await createCheckoutSession({ returnPath: returnTo });
       window.location.assign(checkoutUrl);
     } catch {
       setError("We couldn’t start checkout right now. Please try again.");
     } finally {
-      setLoading(false);
+      setLoadingPlanId("");
     }
   };
 
@@ -69,97 +65,40 @@ const PricingPage = () => {
     <Box sx={{ minHeight: "100vh", backgroundColor: "black" }}>
       <Header />
 
-      <Container maxWidth="sm" sx={{ pt: 10, textAlign: "center" }}>
-        <Stack spacing={2} alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h3" sx={{ color: "white", fontWeight: "bold" }}>
-            Dream Closet Pro
+      <Container maxWidth="lg" sx={{ pt: { xs: 7, md: 10 }, pb: 8 }}>
+        <Stack
+          spacing={2}
+          alignItems="center"
+          sx={{ textAlign: "center", mb: 5 }}
+        >
+          <Typography variant="h3" sx={{ color: "white", fontWeight: 900 }}>
+            Choose your Dream Closet plan
           </Typography>
-
-          {!ENABLE_BILLING && (
-            <Chip
-              label="Coming soon"
-              sx={{
-                backgroundColor: "rgba(64, 224, 208, 0.18)",
-                color: "turquoise",
-                fontWeight: "bold",
-              }}
-            />
-          )}
-
-          <Typography sx={{ color: "rgba(255,255,255,0.7)", maxWidth: 520 }}>
-            Unlimited searches, AI-powered style matching, and saved closet
-            collections.
+          <Typography sx={{ color: "rgba(255,255,255,0.72)", maxWidth: 720 }}>
+            Start free, then upgrade to Pro when you want unlimited searches,
+            stronger personalization, and premium style discovery tools.
           </Typography>
         </Stack>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 3, textAlign: "left" }}>
+          <Alert severity="error" sx={{ mb: 3 }}>
             {error}
           </Alert>
         )}
 
         {!ENABLE_BILLING && (
-          <Alert severity="info" sx={{ mb: 3, textAlign: "left" }}>
-            Billing is disabled during development. This page is staying in the
-            product as a placeholder until the core experience is ready.
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Billing is currently disabled in this environment. The Pro plan is
+            still shown so the UI can be reviewed before launch.
           </Alert>
         )}
 
-        <Box
-          sx={{
-            border: "1px solid turquoise",
-            borderRadius: 3,
-            p: 4,
-            backgroundColor: "rgba(255,255,255,0.02)",
-          }}
-        >
-          <Stack spacing={2} alignItems="center">
-            <Typography
-              variant="h4"
-              sx={{ color: "turquoise", fontWeight: "bold" }}
-            >
-              $9.99 / month
-            </Typography>
-
-            <Typography sx={{ color: "rgba(255,255,255,0.75)", maxWidth: 420 }}>
-              Upgrade for full access to Dream Closet’s premium search and
-              personalization experience.
-            </Typography>
-
-            <Button
-              variant="contained"
-              size="large"
-              onClick={handleSubscribe}
-              disabled={loading || !ENABLE_BILLING}
-              sx={{
-                mt: 1,
-                backgroundColor: "turquoise",
-                color: "black",
-                borderRadius: "20px",
-                fontWeight: "bold",
-                textTransform: "none",
-                fontSize: "18px",
-                minHeight: 48,
-                minWidth: 220,
-                "&:hover": {
-                  backgroundColor: ENABLE_BILLING
-                    ? "darkturquoise"
-                    : "turquoise",
-                },
-                "&.Mui-disabled": {
-                  backgroundColor: "rgba(64, 224, 208, 0.35)",
-                  color: "rgba(0,0,0,0.7)",
-                },
-              }}
-            >
-              {ENABLE_BILLING
-                ? loading
-                  ? "Redirecting..."
-                  : "Subscribe Now"
-                : "Coming Soon"}
-            </Button>
-          </Stack>
-        </Box>
+        <PricingSection
+          tiers={PRICING_PLANS}
+          currentPlanId={currentPlanId}
+          loadingPlanId={loadingPlanId}
+          onSelectTier={handleSelectTier}
+        />
       </Container>
     </Box>
   );

@@ -17,13 +17,13 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { db, auth } from "../../../backend/firebase";
+import { db, auth } from "../../../backend/firebase/firebase";
 import SavedSearchCard from "./SavedSearchCard";
 import {
   buildSearchStateQuery,
   DEFAULT_SORT,
   DEFAULT_PAGE,
-} from "./searchStateHelpers";
+} from "../../../features/search/utils/searchStateHelpers";
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);

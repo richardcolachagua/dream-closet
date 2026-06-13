@@ -2,14 +2,133 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function hasOnlyKeys(allowed) {
+      return request.resource.data.keys().hasOnly(allowed);
+    }
+
+    function changedKeysOnly(allowed) {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(allowed);
+    }
+
+    function userOnboardingIsValid() {
+      return request.resource.data.onboarding is map
+        && request.resource.data.onboarding.gender is string
+        && request.resource.data.onboarding.categories is list
+        && request.resource.data.onboarding.brands is list
+        && request.resource.data.onboarding.completed is bool;
+    }
+
+    function userDocCreateIsValid(userId) {
+      return isOwner(userId)
+        && hasOnlyKeys([
+          "firstName",
+          "lastName",
+          "email",
+          "onboarding",
+          "createdAt"
+        ])
+        && request.resource.data.firstName is string
+        && request.resource.data.lastName is string
+        && request.resource.data.email is string
+        && userOnboardingIsValid();
+    }
+
+    function userDocUpdateIsValid(userId) {
+      return isOwner(userId)
+        && changedKeysOnly([
+          "firstName",
+          "lastName",
+          "email",
+          "onboarding"
+        ])
+        && request.resource.data.firstName is string
+        && request.resource.data.lastName is string
+        && request.resource.data.email is string
+        && userOnboardingIsValid();
+    }
+
+    function savedItemHasAllowedKeys(data) {
+      return data.keys().hasOnly([
+        "userId",
+        "title",
+        "imageUrl",
+        "price",
+        "productUrl",
+        "brand",
+        "source",
+        "savedAt"
+      ]);
+    }
+
+    function savedItemCreateIsValid() {
+      return isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userId is string
+        && savedItemHasAllowedKeys(request.resource.data);
+    }
+
+    function savedItemUpdateIsValid() {
+      return isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && savedItemHasAllowedKeys(request.resource.data);
+    }
+
+    function savedSearchHasAllowedKeys(data) {
+      return data.keys().hasOnly([
+        "userId",
+        "query",
+        "filters",
+        "sort",
+        "page",
+        "date"
+      ]);
+    }
+
+    function savedSearchCreateIsValid() {
+      return isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userId is string
+        && request.resource.data.query is string
+        && savedSearchHasAllowedKeys(request.resource.data);
+    }
+
+    function savedSearchUpdateIsValid() {
+      return isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.query is string
+        && savedSearchHasAllowedKeys(request.resource.data);
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+      allow create: if userDocCreateIsValid(userId);
+      allow update: if userDocUpdateIsValid(userId);
+      allow delete: if isOwner(userId);
     }
+
     match /saved-items/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if savedItemCreateIsValid();
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if savedItemUpdateIsValid();
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
+
     match /saved-searches/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if savedSearchCreateIsValid();
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if savedSearchUpdateIsValid();
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }
 }

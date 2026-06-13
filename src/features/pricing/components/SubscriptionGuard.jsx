@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./backend/firebase";
-import { ENABLE_BILLING } from "../config/billing";
-import AppLoadingScreen from "../Components/feedback/AppLoadingScreen";
-import { ROUTES, buildCurrentPath } from "../routes/routePaths";
+import { auth, db } from "../../../backend/firebase/firebase";
+import { ENABLE_BILLING } from "../../pricing/services/billingService";
+import { ROUTES, buildCurrentPath } from "../../../app/routes/routePaths";
+
+const LoadingFallback = () => null;
 
 export const SubscriptionGuard = ({ children }) => {
   const location = useLocation();
@@ -34,19 +35,20 @@ export const SubscriptionGuard = ({ children }) => {
       }
 
       try {
-        const userSnap = await getDoc(doc(db, "users", user.uid));
-        const subscription = userSnap.data()?.subscription;
+        const snap = await getDoc(doc(db, "users", user.uid));
+        const subscription = snap.data()?.subscription;
 
         if (!active) return;
 
-        if (subscription?.status === "active") {
+        if (["active", "trialing"].includes(subscription?.status)) {
           setStatus("allowed");
         } else {
           setStatus("forbidden");
         }
-      } catch (error) {
-        if (!active) return;
-        setStatus("error");
+      } catch {
+        if (active) {
+          setStatus("error");
+        }
       } finally {
         if (active) {
           setChecking(false);
@@ -62,7 +64,7 @@ export const SubscriptionGuard = ({ children }) => {
   }, []);
 
   if (checking) {
-    return <AppLoadingScreen minHeight="40vh" />;
+    return <LoadingFallback />;
   }
 
   if (status === "unauthenticated") {
@@ -89,5 +91,5 @@ export const SubscriptionGuard = ({ children }) => {
     return <Navigate to={ROUTES.HOME} replace />;
   }
 
-  return <>{children}</>;
+  return children;
 };
