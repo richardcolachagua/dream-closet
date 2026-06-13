@@ -1,7 +1,7 @@
 import { Box, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import SavedSearches from "../../saved/components/SavedItemsList";
-import SavedItems from "../../saved/components/SavedItemsList";
+import SavedSearchesList from "../../saved/components/SavedSearchesList";
+import SavedItemsList from "../../saved/components/SavedItemsList";
 import Footer from "../../../shared/ui/navigation/Footer";
 import ProfileHeader from "../../profile/components/ProfileHeader";
 import { useAuth } from "../../auth/AuthContext";
@@ -27,8 +27,8 @@ const SavedItemsAndSearches = () => {
       <ThemeProvider theme={defaultTheme}>
         <ProfileHeader />
         <CssBaseline />
-        <SavedSearches />
-        <SavedItems userId={userId} />
+        <SavedSearchesList userId={userId} />
+        <SavedItemsList userId={userId} />
         <Footer />
       </ThemeProvider>
     </Box>
