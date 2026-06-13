@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import AnimatedPageShell from "../../Components/AnimatedPageShell";
+import AnimatedPageShell from "../../shared/ui/layout/AnimatedPageShell";
 
 const MotionBox = motion(Box);
 

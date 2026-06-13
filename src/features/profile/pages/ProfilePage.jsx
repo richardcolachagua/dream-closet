@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import Footer from "../../Components/Footer.jsx";
+import Footer from "../../../shared/ui/navigation/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -25,21 +25,20 @@ import {
   Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import ProfilePageHeader from "../../Components/Headers/ProfilePageHeader.jsx";
+import ProfilePageHeader from "../../profile/components/ProfileHeader.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db, app } from "../../../backend/firebase.js";
-import { useAuth } from "../../../backend/AuthContext";
-
-import GenderSelectStep from "../../Pages/Onboarding/GenderSelectStep.jsx";
-import CategoryMultiSelectStep from "../../Pages/Onboarding/CategoryMultiSelectStep.jsx";
-import BrandMultiSelectStep from "../../Pages/Onboarding/BrandMultiSelectStep.jsx";
+import { db, app } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext.js";
+import GenderSelectStep from "../../onboarding/components/GenderStep.jsx";
+import CategoryMultiSelectStep from "../../onboarding/components/CategoryStep.jsx";
+import BrandMultiSelectStep from "../../onboarding/components/BrandStep.jsx";
 import {
   femaleCategories,
   maleCategories,
-} from "../../Pages/Onboarding/OnboardingCategories.jsx";
-import { buildBrandGroupsForGender } from "../../Pages/Onboarding/OnboardingBrands.jsx";
+} from "../../onboarding/pages/OnboardingCategoriesPage.jsx";
+import { buildBrandGroupsForGender } from "../../onboarding/pages/OnboardingBrandsPage.jsx";
 
 const validationSchema = Yup.object({
   firstName: Yup.string(),

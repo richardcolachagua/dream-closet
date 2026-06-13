@@ -7,12 +7,12 @@ import {
   CssBaseline,
   Button,
 } from "@mui/material";
-import Header from "../../Components/Headers/Header.jsx";
+import Header from "../../../shared/ui/navigation/PublicHeader.jsx";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import AnimatedSearchBar from "../../Components/AnimatedSearchBar.jsx";
-import LayoutContainer from "../../Components/Shared-Layout-Animation/LayoutContainer.jsx";
-import Footer from "../../Components/Footer.jsx";
-import ProfileFeatures from "../../Components/Profile-Features/Profile-Features.jsx";
+import AnimatedSearchBar from "../components/AnimatedSearchBar.jsx";
+import LayoutContainer from "../../../shared/ui/layout/LayoutContainer.jsx";
+import Footer from "../../../shared/ui/navigation/Footer.jsx";
+import ProfileFeatures from "../../profile/components/ProfileFeatures.jsx";
 import { Link as RouterLink } from "react-router-dom";
 import { keyframes } from "@mui/system";
 

@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
-import CheckYourEmail from "./CheckYourEmail";
-import { auth as FirebaseAuth } from "../../../backend/firebase";
+import CheckYourEmailNotice from "./CheckYourEmailNotice";
+import { auth as FirebaseAuth } from "../../backend/firebase/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -68,7 +68,7 @@ const ForgotPassword = () => {
   });
 
   if (success) {
-    return <CheckYourEmail email={formik.values.email.trim()} />;
+    return <CheckYourEmailNotice email={formik.values.email.trim()} />;
   }
 
   return (

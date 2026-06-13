@@ -3,7 +3,7 @@ import IconButton from "@mui/material/IconButton";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import Tooltip from "@mui/material/Tooltip";
-import { db } from "../../../../backend/firebase";
+import { db } from "../../../backend/firebase/firebase";
 import {
   addDoc,
   collection,
@@ -28,7 +28,7 @@ function SaveForLaterButton({ item, userId, sx }) {
       const q = query(
         collection(db, "saved-items"),
         where("itemId", "==", item.itemId),
-        where("userId", "==", userId)
+        where("userId", "==", userId),
       );
       const querySnapshot = await getDocs(q);
 
@@ -53,11 +53,11 @@ function SaveForLaterButton({ item, userId, sx }) {
         const q = query(
           collection(db, "saved-items"),
           where("itemId", "==", item.itemId),
-          where("userId", "==", userId)
+          where("userId", "==", userId),
         );
         const querySnapshot = await getDocs(q);
         querySnapshot.docs.forEach((doc) =>
-          console.log("Deleting doc:", doc.id, doc.data())
+          console.log("Deleting doc:", doc.id, doc.data()),
         );
         await Promise.all(querySnapshot.docs.map((doc) => deleteDoc(doc.ref)));
         setIsSaved(false);

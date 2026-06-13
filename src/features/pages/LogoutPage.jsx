@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Button,
   CircularProgress,
   Alert,
+  Stack,
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../../backend/firebase";
+import { auth } from "../../backend/firebase/firebase";
 
 const LogoutPage = () => {
   const navigate = useNavigate();
@@ -25,10 +25,19 @@ const LogoutPage = () => {
     const runLogout = async () => {
       try {
         await signOut(auth);
+
         if (!active) return;
+
         setState({ loading: false, error: "" });
+
+        setTimeout(() => {
+          if (active) {
+            navigate("/homepage", { replace: true });
+          }
+        }, 900);
       } catch {
         if (!active) return;
+
         setState({
           loading: false,
           error: "We couldn’t sign you out cleanly. Please try again.",
@@ -41,7 +50,7 @@ const LogoutPage = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <Box
@@ -57,31 +66,51 @@ const LogoutPage = () => {
       }}
     >
       <LogoutIcon
-        sx={{ fontSize: 80, color: "turquoise", mb: 3, opacity: 0.8 }}
+        sx={{ fontSize: 76, color: "turquoise", mb: 3, opacity: 0.85 }}
         aria-label="Logout Icon"
       />
 
       <Typography
         variant="h4"
         color="white"
-        sx={{ fontWeight: "bold", mb: 2, fontFamily: "Helvetica Neue" }}
+        sx={{
+          fontWeight: 700,
+          mb: 2,
+          fontFamily: "Helvetica Neue",
+        }}
       >
-        {state.loading
-          ? "Signing you out..."
-          : "You have successfully logged out"}
+        {state.loading ? "Signing you out..." : "You have been signed out"}
       </Typography>
 
       {state.loading && <CircularProgress sx={{ color: "turquoise", mb: 3 }} />}
 
-      {state.error && (
-        <Alert severity="error" sx={{ mb: 3, width: "100%", maxWidth: 420 }}>
-          {state.error}
-        </Alert>
+      {!state.loading && !state.error && (
+        <Typography
+          sx={{
+            color: "rgba(255,255,255,0.72)",
+            mb: 3,
+            maxWidth: 440,
+          }}
+        >
+          Redirecting you back home now.
+        </Typography>
       )}
 
-      {!state.loading && (
-        <Grid container spacing={2} maxWidth={420} justifyContent="center">
-          <Grid item xs={12} sm={6}>
+      {state.error && (
+        <Stack
+          spacing={2}
+          alignItems="center"
+          sx={{ width: "100%", maxWidth: 440 }}
+        >
+          <Alert severity="error" sx={{ width: "100%" }}>
+            {state.error}
+          </Alert>
+
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            sx={{ width: "100%" }}
+          >
             <Button
               fullWidth
               variant="outlined"
@@ -90,7 +119,7 @@ const LogoutPage = () => {
                 minHeight: 48,
                 color: "white",
                 borderColor: "rgba(255,255,255,0.35)",
-                fontWeight: "bold",
+                fontWeight: 700,
                 textTransform: "none",
                 "&:hover": {
                   borderColor: "turquoise",
@@ -100,9 +129,7 @@ const LogoutPage = () => {
             >
               Back Home
             </Button>
-          </Grid>
 
-          <Grid item xs={12} sm={6}>
             <Button
               fullWidth
               variant="contained"
@@ -111,15 +138,15 @@ const LogoutPage = () => {
                 minHeight: 48,
                 bgcolor: "turquoise",
                 color: "black",
-                fontWeight: "bold",
+                fontWeight: 700,
                 textTransform: "none",
-                "&:hover": { bgcolor: "darkturquoise" },
+                "&:hover": { bgcolor: "#35d8cb" },
               }}
             >
               Back to Login
             </Button>
-          </Grid>
-        </Grid>
+          </Stack>
+        </Stack>
       )}
     </Box>
   );

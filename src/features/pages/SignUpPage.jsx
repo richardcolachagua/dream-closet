@@ -22,11 +22,11 @@ import {
   setPersistence,
   signInWithPopup,
 } from "firebase/auth";
-import { auth, db } from "../../backend/firebase";
+import { auth, db } from "../../backend/firebase/firebase";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import Header from "../../Components/Headers/Header";
+import Header from "../../shared/ui/navigation/PublicHeader";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Footer from "../../Components/Footer";
+import Footer from "../../shared/ui/navigation/Footer";
 
 const theme = createTheme();
 

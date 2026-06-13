@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { intitalTabs as tabs } from "../../../features.ts";
+import { intitalTabs as tabs } from "../../types/featuresFlags.ts";
 import { motion, AnimatePresence } from "framer-motion";
-import "./styles.css";
+import "../../../styles/styles.css";
 import styles from "./Layout.module.css";
 
 export default function Layout() {

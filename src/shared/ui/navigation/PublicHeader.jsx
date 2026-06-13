@@ -1,22 +1,38 @@
-import React from "react";
 import { AppBar, Box, Toolbar, Button, Container, Stack } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { ROUTES } from "../../../routes/routePaths";
-import { primaryButtonSx, secondaryButtonSx } from "../../Buttons/buttonStyles";
+
+const actionButtonSx = {
+  minHeight: 44,
+  px: 2.25,
+  borderRadius: 2,
+  textTransform: "none",
+  fontSize: "0.95rem",
+  fontWeight: 700,
+  boxShadow: "none",
+};
 
 function Header() {
   return (
-    <AppBar position="static" elevation={0} sx={{ backgroundColor: "black" }}>
+    <AppBar
+      position="static"
+      elevation={0}
+      sx={{
+        backgroundColor: "black",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
           sx={{
             minHeight: 80,
+            display: "flex",
             justifyContent: "space-between",
+            alignItems: "center",
             gap: 2,
           }}
         >
-          <RouterLink to={ROUTES.HOME} aria-label="Go to Dream Closet homepage">
+          <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
             <Box
               component="img"
               alt="Dream Closet Logo"
@@ -32,18 +48,34 @@ function Header() {
           <Stack direction="row" spacing={1.25} alignItems="center">
             <Button
               component={RouterLink}
-              to={ROUTES.LOGIN}
+              to="/loginpage"
               variant="contained"
-              sx={primaryButtonSx}
+              sx={{
+                ...actionButtonSx,
+                backgroundColor: "turquoise",
+                color: "black",
+                "&:hover": {
+                  backgroundColor: "#35d8cb",
+                },
+              }}
             >
               Login
             </Button>
 
             <Button
               component={RouterLink}
-              to={ROUTES.SIGN_UP}
+              to="/signuppage"
               variant="outlined"
-              sx={secondaryButtonSx}
+              sx={{
+                ...actionButtonSx,
+                color: "white",
+                borderColor: "rgba(255,255,255,0.22)",
+                "&:hover": {
+                  borderColor: "turquoise",
+                  color: "turquoise",
+                  backgroundColor: "rgba(64,224,208,0.06)",
+                },
+              }}
             >
               Sign Up
             </Button>

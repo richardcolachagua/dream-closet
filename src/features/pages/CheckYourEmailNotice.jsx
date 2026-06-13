@@ -3,7 +3,7 @@ import { Typography, Box, Stack, Link, Alert } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth as FirebaseAuth } from "../../../backend/firebase";
+import { auth as FirebaseAuth } from "../../backend/firebase/firebase";
 
 const CheckYourEmail = ({ email = "" }) => {
   const navigate = useNavigate();

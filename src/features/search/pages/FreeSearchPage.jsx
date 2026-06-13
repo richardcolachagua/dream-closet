@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -19,18 +19,18 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { httpsCallable } from "firebase/functions";
 
-import Footer from "../../Components/Footer";
-import SearchResults from "../../Components/Search-Components/SearchResults";
-import Header from "../../Components/Headers/Header";
-import UserDescriptionInput from "../../Components/Search-Components/Searchbars/UserInputDescription";
-import SearchSortControls from "../../Components/Search-Components/SearchSortControls";
-import FilterDrawer from "../../Components/Search-Components/Filters/FilterDrawer";
+import Footer from "../../../shared/ui/navigation/Footer";
+import SearchResults from "../../search/components/SearchResults";
+import Header from "../../../shared/ui/navigation/PublicHeader";
+import UserDescriptionInput from "../../search/components/SearchInputBar";
+import SearchSortControls from "../../search/components/SearchSortBar";
+import FilterDrawer from "../filters/FilterDrawer";
 
 import {
   functions,
   analytics as analyticsExport,
-} from "../../../backend/firebase";
-import { fetchCombinedResults } from "../../Components/Search-Components/utils/fetchCombinedResults";
+} from "../../../backend/firebase/firebase";
+import { fetchCombinedResults } from "../../search/services/fetchSearchResults";
 import {
   createDefaultFilters,
   toggleFilterValue,
@@ -39,12 +39,12 @@ import {
   clearAllFilters,
   removeFilterValue,
   getActiveFilterCount,
-} from "../../Components/Search-Components/utils/filterHelpers";
+} from "../../search/utils/filterHelpers";
 import {
   DEFAULT_SORT,
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
-} from "../../Components/Search-Components/utils/searchStateHelpers";
+} from "../../search/utils/searchStateHelpers";
 
 // Use provided analytics instance if available, else getAnalytics
 const analytics = analyticsExport || getAnalytics();

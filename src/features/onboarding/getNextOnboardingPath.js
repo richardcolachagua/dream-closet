@@ -1,4 +1,4 @@
-import { ROUTES } from "./routePaths";
+import { ROUTES } from "../../app/routes/routePaths";
 
 export const getNextOnboardingPath = (onboarding) => {
   if (!onboarding?.gender) {

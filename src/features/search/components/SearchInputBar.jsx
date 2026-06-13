@@ -2,12 +2,7 @@ import { useState } from "react";
 import { TextField, Button, Box, InputAdornment } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
 import SearchIcon from "@mui/icons-material/Search";
-import SaveSearchButton from "../Buttons/SaveSearchButton";
-import {
-  buttonHeights,
-  primaryButtonSx,
-  secondaryButtonSx,
-} from "../Buttons/buttonStyles";
+import SaveSearchButton from "../../../shared/ui/buttons/SaveButton";
 
 function UserDescriptionInput({
   onSearchStart,
@@ -64,7 +59,7 @@ function UserDescriptionInput({
     <Box
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", md: "row" },
+        flexDirection: "column",
         alignItems: "stretch",
         justifyContent: "center",
         mb: 3,
@@ -80,6 +75,7 @@ function UserDescriptionInput({
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSubmit();
         }}
+        fullWidth
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -89,18 +85,17 @@ function UserDescriptionInput({
           disableUnderline: true,
         }}
         sx={{
-          flex: 1,
+          width: "100%",
           "& .MuiFilledInput-root": {
-            minHeight: buttonHeights.lg,
+            minHeight: 56,
+            borderRadius: 3,
             backgroundColor: "white",
-            borderRadius: "12px",
-            overflow: "hidden",
-          },
-          "& .MuiFilledInput-root:hover": {
-            backgroundColor: "white",
-          },
-          "& .MuiFilledInput-root.Mui-focused": {
-            backgroundColor: "white",
+            "&:hover": {
+              backgroundColor: "white",
+            },
+            "&.Mui-focused": {
+              backgroundColor: "white",
+            },
           },
         }}
       />
@@ -110,7 +105,7 @@ function UserDescriptionInput({
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
           gap: 1,
-          width: { xs: "100%", md: "auto" },
+          width: "100%",
         }}
       >
         <Button
@@ -118,9 +113,18 @@ function UserDescriptionInput({
           startIcon={<TuneIcon />}
           onClick={onOpenFilters}
           sx={{
-            ...secondaryButtonSx,
-            minHeight: buttonHeights.lg,
+            minHeight: 44,
+            px: 2,
+            borderRadius: 2,
+            borderColor: "turquoise",
+            color: "turquoise",
+            fontWeight: 700,
+            textTransform: "none",
             width: { xs: "100%", sm: "auto" },
+            "&:hover": {
+              borderColor: "#35d8cb",
+              backgroundColor: "rgba(64,224,208,0.05)",
+            },
           }}
         >
           {filterButtonLabel}
@@ -130,10 +134,19 @@ function UserDescriptionInput({
           variant="contained"
           onClick={handleSubmit}
           disabled={isLoading}
+          startIcon={<SearchIcon />}
           sx={{
-            ...primaryButtonSx,
-            minHeight: buttonHeights.lg,
+            minHeight: 44,
+            px: 2.5,
+            borderRadius: 2,
+            bgcolor: "turquoise",
+            color: "black",
+            fontWeight: 700,
+            fontSize: "0.95rem",
+            textTransform: "none",
+            boxShadow: "none",
             width: { xs: "100%", sm: "auto" },
+            "&:hover": { bgcolor: "#35d8cb" },
           }}
         >
           {isLoading ? "Searching..." : "Search"}
@@ -142,7 +155,7 @@ function UserDescriptionInput({
         {!saveDisabled && onSaveSearch && (
           <SaveSearchButton
             sx={{
-              minHeight: buttonHeights.lg,
+              minHeight: 44,
               width: { xs: "100%", sm: "auto" },
             }}
             onSave={handleSaveSearch}

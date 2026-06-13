@@ -8,10 +8,10 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../../../backend/firebase";
-import { useAuth } from "../../../backend/AuthContext";
-import OnboardingLayout from "./OnboardingLayout";
-import GenderSelectStep from "./GenderSelectStep";
+import { db } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext";
+import OnboardingLayout from "../components/OnboardingLayout";
+import GenderSelectStep from "../components/GenderStep";
 
 const DEFAULT_ONBOARDING = {
   completed: false,

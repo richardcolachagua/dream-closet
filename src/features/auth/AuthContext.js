@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth } from "../../backend/firebase/firebase";
 
 const AuthContext = createContext(null);
 
@@ -18,11 +18,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser ?? null);
+
+      // Keep this as null unless/until role loading is added.
       setRole(null);
+
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   const value = useMemo(
@@ -30,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       user,
       role,
       loading,
-      isAuthenticated: !!user,
+      isAuthenticated: Boolean(user),
     }),
     [user, role, loading],
   );

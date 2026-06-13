@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { CircularProgress, Alert, CssBaseline, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../../../backend/firebase";
-import { useAuth } from "../../../backend/AuthContext";
-import OnboardingLayout from "./OnboardingLayout";
-import CategoryMultiSelectStep from "./CategoryMultiSelectStep";
+import { db } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext";
+import OnboardingLayout from "../components/OnboardingLayout";
+import CategoryMultiSelectStep from "../components/CategoryStep";
 
 export const femaleCategories = [
   "Tops",

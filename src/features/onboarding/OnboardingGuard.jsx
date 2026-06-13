@@ -1,22 +1,22 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useOnboardingStatus } from "../useOnboardingStatus";
-import { useAuth } from "../AuthContext";
-import AppLoadingScreen from "../Components/feedback/AppLoadingScreen";
+import { useOnboardingStatus } from "../../features/onboarding/useOnboardingStatus";
+import { useAuth } from "../auth/AuthContext";
+import AppLoadingScreen from "../../features/home/components/AppLoadingScreen";
 import {
   ROUTES,
   buildCurrentPath,
   isOnboardingRoute,
-} from "../routes/routePaths";
+} from "../../app/routes/routePaths";
 import {
   getNextOnboardingPath,
   isOnboardingComplete,
-} from "./routes/getNextOnboardingPath";
+} from "../../features/onboarding/getNextOnboardingPath";
 
 export const OnboardingGuard = ({ children }) => {
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { onboarding, loading: onboardingLoading } = useOnboardingStatus();
-  const location = useLocation();
 
   if (authLoading || onboardingLoading) {
     return <AppLoadingScreen />;

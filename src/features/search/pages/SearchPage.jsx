@@ -18,13 +18,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
-import UserDescriptionInput from "../../Components/Search-Components/Searchbars/UserInputDescription";
-import SearchResults from "../../Components/Search-Components/SearchResults";
-import Footer from "../../Components/Footer";
-import SearchPageHeader from "../../Components/Headers/SearchPageHeader";
-import FilterDrawer from "../../Components/Search-Components/Filters/FilterDrawer";
-import SearchSortControls from "../../Components/Search-Components/SearchSortControls";
-import { fetchCombinedResults } from "../../Components/Search-Components/utils/fetchCombinedResults";
+import UserDescriptionInput from "../../search/components/SearchInputBar";
+import SearchResults from "../../search/components/SearchResults";
+import Footer from "../../../shared/ui/navigation/Footer";
+import SearchPageHeader from "../../../shared/ui/navigation/SavedSearchHeader";
+import FilterDrawer from "../filters/FilterDrawer";
+import SearchSortControls from "../../search/components/SearchSortBar";
+import { fetchCombinedResults } from "../../search/services/fetchSearchResults";
 import {
   createDefaultFilters,
   toggleFilterValue,
@@ -33,15 +33,15 @@ import {
   clearAllFilters,
   removeFilterValue,
   getActiveFilterCount,
-} from "../../Components/Search-Components/utils/filterHelpers";
+} from "../../search/utils/filterHelpers";
 import {
   parseSearchState,
   buildSearchStateQuery,
   DEFAULT_SORT,
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
-} from "../../Components/Search-Components/utils/searchStateHelpers";
-import { db, auth } from "../../../backend/firebase";
+} from "../../search/utils/searchStateHelpers";
+import { db, auth } from "../../../backend/firebase/firebase";
 
 const defaultTheme = createTheme();
 
@@ -383,7 +383,14 @@ const SearchPage = () => {
       sort: sortBy,
       page: DEFAULT_PAGE,
     });
-  }, [showAllGenders, onboardingGender]);
+  }, [
+    showAllGenders,
+    onboardingGender,
+    searchInputValue,
+    filters,
+    sortBy,
+    runSearch,
+  ]);
 
   return (
     <Box

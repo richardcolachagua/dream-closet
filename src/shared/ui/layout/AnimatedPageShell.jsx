@@ -2,8 +2,8 @@ import React from "react";
 import { Box, Container, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { motion } from "framer-motion";
-import Header from "../../frontend/Components/Headers/Header";
-import Footer from "../../frontend/Components/Footer";
+import Header from "../../ui/navigation/PublicHeader";
+import Footer from "../../ui/navigation/Footer";
 
 const defaultTheme = createTheme();
 

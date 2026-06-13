@@ -83,9 +83,9 @@ function SearchEmptyState({
         justifyContent="center"
         sx={{ mb: 3 }}
       >
-        {suggestions.map((suggestion) => (
+        {suggestions.map((suggestion, index) => (
           <Chip
-            key={suggestion}
+            key={`${suggestion}-${index}`}
             icon={<AutoAwesomeIcon />}
             label={suggestion}
             sx={{

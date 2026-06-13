@@ -9,10 +9,10 @@ import {
   Chip,
 } from "@mui/material";
 import { httpsCallable } from "firebase/functions";
-import { functions, auth } from "../../../backend/firebase";
+import { functions, auth } from "../../../backend/firebase/firebase";
 import { useLocation, useNavigate } from "react-router-dom";
-import Header from "../../Components/Headers/Header";
-import { ENABLE_BILLING } from "../../../config/billing";
+import Header from "../../../shared/ui/navigation/PublicHeader";
+import { ENABLE_BILLING } from "../../../features/pricing/services/billingService";
 
 const PricingPage = () => {
   const [loading, setLoading] = useState(false);

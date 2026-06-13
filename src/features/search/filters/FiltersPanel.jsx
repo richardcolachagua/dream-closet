@@ -12,7 +12,7 @@ import {
 import FilterSection from "./FilterSection";
 import PriceRangeFilter from "./PriceRangeFilter";
 import ColorFilterGroup from "./ColorFilterGroup";
-import { FILTER_OPTIONS } from "../../frontend/Components/Search-Components/utils/filterOptions";
+import { FILTER_OPTIONS } from "../../search/utils/filterOptions";
 
 const checkboxSx = {
   color: "turquoise",

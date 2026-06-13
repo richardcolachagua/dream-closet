@@ -1,8 +1,8 @@
 import React from "react";
 import { Typography, Box, CssBaseline, Container } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Header from "../../Components/Headers/Header";
-import Footer from "../../Components/Footer";
+import Header from "../../../shared/ui/navigation/PublicHeader";
+import Footer from "../../../shared/ui/navigation/Footer";
 
 const ContactPage = () => {
   const defaultTheme = createTheme();

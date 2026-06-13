@@ -1,4 +1,4 @@
-import { createDefaultFilters } from "./frontend/Components/Search-Components/utils/filterHelpers";
+import { createDefaultFilters } from "../../search/utils/filterHelpers";
 
 export const DEFAULT_SORT = "relevance";
 export const DEFAULT_PAGE = 1;

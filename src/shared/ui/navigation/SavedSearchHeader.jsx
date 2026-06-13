@@ -8,14 +8,25 @@ import {
   MenuItem,
   Button,
   Container,
+  useMediaQuery,
+  Stack,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../Buttons/LogoutButton/LogoutButton";
-import { navButtonSx } from "../../frontend/Components/Buttons/navButtonSx";
+import LogoutButton from "../buttons/LogoutButton.jsx";
+import { useTheme } from "@mui/material/styles";
+import { navButtonSx } from "../../ui/buttons/navButtonStyles.jsx";
 
-function ProfileHeader() {
+function SearchPageHeader() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!isMobile && anchorElNav) {
+      setAnchorElNav(null);
+    }
+  }, [isMobile, anchorElNav]);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -26,25 +37,32 @@ function ProfileHeader() {
   };
 
   const navButtons = [
-    { label: "Search Page", to: "/searchpage" },
     { label: "Profile", to: "/profilepage" },
+    { label: "Saved Searches", to: "/SavedItemsAndSearches" },
   ];
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "black" }}>
+    <AppBar
+      position="static"
+      elevation={0}
+      sx={{
+        backgroundColor: "black",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
           sx={{
+            minHeight: 80,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 2,
           }}
         >
-          {/* Logo - Left Side */}
-
-          <Box>
-            <RouterLink to="/homepage">
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
               <Box
                 component="img"
                 alt="Dream Closet Logo"
@@ -52,18 +70,67 @@ function ProfileHeader() {
                 sx={{
                   height: { xs: 40, sm: 48, md: 56 },
                   width: "auto",
+                  display: "block",
                 }}
               />
             </RouterLink>
+
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="open navigation menu"
+                aria-controls="mobile-nav-menu"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+
+              <Menu
+                id="mobile-nav-menu"
+                anchorEl={anchorElNav}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                keepMounted
+                sx={{
+                  "& .MuiPaper-root": {
+                    backgroundColor: "#0f0f0f",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    minWidth: 240,
+                    mt: 1,
+                  },
+                }}
+              >
+                {navButtons.map((btn) => (
+                  <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
+                    <Button
+                      component={RouterLink}
+                      to={btn.to}
+                      fullWidth
+                      variant="contained"
+                      sx={navButtonSx}
+                    >
+                      {btn.label}
+                    </Button>
+                  </MenuItem>
+                ))}
+
+                <MenuItem onClick={handleCloseNavMenu}>
+                  <LogoutButton fullWidth />
+                </MenuItem>
+              </Menu>
+            </Box>
           </Box>
 
-          {/* Desktop Navigation - Right Side */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              gap: "10px",
-            }}
+          <Stack
+            direction="row"
+            spacing={1.25}
+            alignItems="center"
+            sx={{ display: { xs: "none", md: "flex" } }}
           >
             {navButtons.map((btn) => (
               <Button
@@ -71,69 +138,17 @@ function ProfileHeader() {
                 component={RouterLink}
                 to={btn.to}
                 variant="contained"
-                sx={{
-                  backgroundColor: "turquoise",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                }}
+                sx={navButtonSx}
               >
                 {btn.label}
               </Button>
             ))}
             <LogoutButton />
-          </Box>
-
-          {/* Mobile Menu - Right Side */}
-          <Box
-            sx={{
-              display: { xs: "flex", md: "none" },
-              ml: "auto", // Pushes menu to far right
-            }}
-          >
-            <IconButton
-              size="large"
-              aria-label="mobile menu"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              keepMounted
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                "& .MuiPaper-root": { backgroundColor: "black" },
-              }}
-            >
-              {navButtons.map((btn) => (
-                <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
-                  <Button
-                    component={RouterLink}
-                    to={btn.to}
-                    fullWidth
-                    variant="contained"
-                    sx={navButtonSx}
-                  >
-                    {btn.label}
-                  </Button>
-                </MenuItem>
-              ))}
-              <MenuItem onClick={handleCloseNavMenu}>
-                <LogoutButton fullWidth />
-              </MenuItem>
-            </Menu>
-          </Box>
+          </Stack>
         </Toolbar>
       </Container>
     </AppBar>
   );
 }
 
-export default ProfileHeader;
+export default SearchPageHeader;

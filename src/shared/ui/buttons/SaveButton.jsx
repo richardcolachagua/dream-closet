@@ -1,22 +1,34 @@
 import { Button } from "@mui/material";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 
-function SaveSearchButton({ onSave, disabled }) {
-  const handleSaveSearch = () => {
-    onSave();
-  };
+function SaveSearchButton({ onSave, disabled = false, sx = {} }) {
   return (
     <Button
-      variant="contained"
+      variant="outlined"
+      startIcon={<BookmarkBorderIcon />}
+      onClick={onSave}
+      disabled={disabled}
       sx={{
-        bgcolor: "turquoise",
-        "&:hover": { bgcolor: "darkturquoise" },
-        color: "black",
-        fontWeight: "bold",
-        fontSize: "14px",
-        width: { xs: "100%", sm: "auto" },
+        minHeight: 44,
+        px: 2.25,
+        borderRadius: 2,
+        textTransform: "none",
+        fontSize: "0.95rem",
+        fontWeight: 700,
+        borderColor: "rgba(255,255,255,0.2)",
+        color: "white",
+        whiteSpace: "nowrap",
+        "&:hover": {
+          borderColor: "turquoise",
+          color: "turquoise",
+          backgroundColor: "rgba(64,224,208,0.06)",
+        },
+        "&.Mui-disabled": {
+          borderColor: "rgba(255,255,255,0.12)",
+          color: "rgba(255,255,255,0.35)",
+        },
+        ...sx,
       }}
-      onClick={handleSaveSearch}
-      disabled={Boolean(disabled)}
     >
       Save Search
     </Button>

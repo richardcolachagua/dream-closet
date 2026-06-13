@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Chip, Typography } from "@mui/material";
-import AnimatedPageShell from "../../Components/AnimatedPageShell";
-import LegalSection from "../../Components/LegalSection";
+import AnimatedPageShell from "../../../shared/ui/layout/AnimatedPageShell";
+import LegalSection from "../../legal/pages/LegalSection";
 
 const PrivacyPolicyPage = () => {
   return (

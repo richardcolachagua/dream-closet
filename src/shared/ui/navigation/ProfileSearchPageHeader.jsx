@@ -12,9 +12,8 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../Buttons/LogoutButton/LogoutButton";
-import { ROUTES } from "../../../routes/routePaths";
-import { navButtonSx } from "../Buttons/buttonStyles";
+import LogoutButton from "../../Components/Buttons/LogoutButton/LogoutButton";
+import { navButtonSx } from "../Buttons/navButtonSx";
 
 function ProfileSearchPageHeader() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -28,12 +27,19 @@ function ProfileSearchPageHeader() {
   };
 
   const navButtons = [
-    { label: "Saved", to: ROUTES.SAVED },
-    { label: "Search", to: ROUTES.SEARCH },
+    { label: "Saved Searches", to: "/SavedItemsAndSearches" },
+    { label: "Searches", to: "/searchpage" },
   ];
 
   return (
-    <AppBar position="static" elevation={0} sx={{ backgroundColor: "black" }}>
+    <AppBar
+      position="static"
+      elevation={0}
+      sx={{
+        backgroundColor: "black",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
@@ -45,7 +51,7 @@ function ProfileSearchPageHeader() {
             gap: 2,
           }}
         >
-          <RouterLink to={ROUTES.HOME} aria-label="Go to Dream Closet homepage">
+          <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
             <Box
               component="img"
               alt="Dream Closet Logo"
@@ -53,6 +59,7 @@ function ProfileSearchPageHeader() {
               sx={{
                 height: { xs: 40, sm: 48, md: 56 },
                 width: "auto",
+                display: "block",
               }}
             />
           </RouterLink>
@@ -80,25 +87,29 @@ function ProfileSearchPageHeader() {
           <Box sx={{ display: { xs: "flex", md: "none" }, ml: "auto" }}>
             <IconButton
               size="large"
-              aria-label="Open navigation menu"
-              aria-controls="dream-closet-profile-mobile-nav"
+              aria-label="open navigation menu"
+              aria-controls="profile-search-mobile-menu"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
               color="inherit"
             >
               <MenuIcon />
             </IconButton>
+
             <Menu
-              id="dream-closet-profile-mobile-nav"
+              id="profile-search-mobile-menu"
               anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
+              keepMounted
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
               sx={{
                 "& .MuiPaper-root": {
-                  backgroundColor: "#111111",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  backgroundColor: "#0f0f0f",
+                  color: "white",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  minWidth: 240,
                   mt: 1,
                 },
               }}
@@ -116,6 +127,7 @@ function ProfileSearchPageHeader() {
                   </Button>
                 </MenuItem>
               ))}
+
               <MenuItem onClick={handleCloseNavMenu}>
                 <LogoutButton fullWidth />
               </MenuItem>

@@ -1,33 +1,36 @@
 import React, { useState } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./backend/AuthContext";
-import { ProtectedRoute } from "./backend/ProtectedRoute";
-import { OnboardingGuard } from "./backend/OnboardingGuard";
-import { SubscriptionGuard } from "./backend/SubscriptionGuard";
 
-import HomePage from "./frontend/Pages/StaticPages/HomePage";
-import ContactPage from "./frontend/Pages/StaticPages/ContactPage";
-import LoginPage from "./frontend/Pages/AuthPages/LoginPage";
-import SignUpPage from "./frontend/Pages/AuthPages/SignUpPage";
-import LogoutPage from "./frontend/Pages/AuthPages/LogoutPage";
-import NotFoundPage from "./frontend/Pages/StaticPages/NotFoundPage";
-import PricingPage from "./frontend/Pages/Pricing/PricingPage";
-import ProfilePage from "./frontend/Pages/UserPages/ProfilePage";
-import PrivacyPolicyPage from "./frontend/Pages/StaticPages/PrivacyPolicyPage";
-import SearchPage from "./frontend/Pages/SearchPages/SearchPage";
-import TOSPage from "./frontend/Pages/StaticPages/TOS-Page";
-import FreeSearchPage from "./frontend/Pages/SearchPages/FreeSearchPage";
-import SavedItemsAndSearches from "./frontend/Pages/UserPages/SavedSearchItemPage";
-import ForgotPassword from "./frontend/Pages/ForgotPassword/ForgotPassword";
-import SmoothScroll from "./frontend/ScrollingAnimation/SmoothScroll";
-import CheckYourEmail from "./frontend/Pages/ForgotPassword/CheckYourEmail";
-import PasswordReset from "./frontend/Pages/ForgotPassword/PasswordReset";
-import SetANewPassword from "./frontend/Pages/ForgotPassword/SetANewPassword";
-import SuccessfulPage from "./frontend/Pages/ForgotPassword/SuccessfulPage";
-import OnboardingGender from "./frontend/Pages/Onboarding/OnboardingGender";
-import OnboardingCategories from "./frontend/Pages/Onboarding/OnboardingCategories";
-import OnboardingBrands from "./frontend/Pages/Onboarding/OnboardingBrands";
+import { AuthProvider } from "../features/auth/AuthContext";
+import { ProtectedRoute } from "../features/auth/ProtectedRoute";
+import { OnboardingGuard } from "../features/onboarding/OnboardingGuard";
+// import { SubscriptionGuard } from "./backend/SubscriptionGuard";
+
+import { ROUTES, DEFAULT_AUTHENTICATED_ROUTE } from "../app/routes/routePaths";
+
+import HomePage from "../features/home/pages/HomePage";
+import ContactPage from "../features/legal/pages/ContactPage";
+import LoginPage from "../features/pages/LoginPage";
+import SignUpPage from "../features/pages/SignUpPage";
+import LogoutPage from "../features/pages/LogoutPage";
+import NotFoundPage from "../app/routes/NotFoundPage";
+import PricingPage from "../features/pricing/pages/PricingPage";
+import ProfilePage from "../features/profile/pages/ProfilePage";
+import PrivacyPolicyPage from "../features/legal/pages/PrivacyPolicyPage";
+import SearchPage from "../features/search/pages/SearchPage";
+import TOSPage from "../features/legal/pages/TermsOfServicePage";
+import FreeSearchPage from "../features/search/pages/FreeSearchPage";
+import SavedItemsAndSearches from "../features/saved/pages/SavedSearchDetailPage";
+import ForgotPassword from "../features/pages/ForgotPassword";
+import SmoothScroll from "../shared/ui/feedback/SmoothScroll";
+import CheckYourEmail from "../features/pages/CheckYourEmailNotice";
+import PasswordReset from "../features/pages/PasswordResetPage";
+import SetANewPassword from "../features/pages/SetANewPasswordPage";
+import SuccessfulPage from "../features/pages/SuccessfulPage";
+import OnboardingGender from "../features/onboarding/pages/OnboardingGenderPage";
+import OnboardingCategories from "../features/onboarding/pages/OnboardingCategoriesPage";
+import OnboardingBrands from "../features/onboarding/pages/OnboardingBrandsPage";
 
 const ProtectedAppRoute = ({ children, roles = [] }) => (
   <ProtectedRoute roles={roles}>
@@ -40,19 +43,28 @@ const ProtectedOnboardingRoute = ({ children, roles = [] }) => (
 );
 
 const PublicOnlyRoute = ({ children }) => (
-  <ProtectedRoute inverse redirectPath="/searchpage">
+  <ProtectedRoute inverse redirectPath={DEFAULT_AUTHENTICATED_ROUTE}>
     {children}
   </ProtectedRoute>
 );
 
-const ROUTES = [
-  { path: "/", element: <Navigate to="/homepage" replace /> },
-  { path: "/homepage", element: <HomePage /> },
-  { path: "/contactpage", element: <ContactPage /> },
-  { path: "/pricing", element: <PricingPage /> },
+const appRoutes = [
+  { path: ROUTES.ROOT, element: <Navigate to={ROUTES.HOME} replace /> },
+
+  { path: ROUTES.HOME, element: <HomePage /> },
+  { path: ROUTES.CONTACT, element: <ContactPage /> },
+  { path: ROUTES.PRICING, element: <PricingPage /> },
+  { path: ROUTES.FREE_SEARCH, element: <FreeSearchPage /> },
+  { path: ROUTES.PRIVACY_POLICY, element: <PrivacyPolicyPage /> },
+  { path: ROUTES.TERMS, element: <TOSPage /> },
+  { path: ROUTES.CHECK_EMAIL, element: <CheckYourEmail /> },
+  { path: ROUTES.PASSWORD_RESET, element: <PasswordReset /> },
+  { path: ROUTES.SET_PASSWORD, element: <SetANewPassword /> },
+  { path: ROUTES.PASSWORD_SUCCESS, element: <SuccessfulPage /> },
+  { path: ROUTES.LOGOUT, element: <LogoutPage /> },
 
   {
-    path: "/loginpage",
+    path: ROUTES.LOGIN,
     element: (
       <PublicOnlyRoute>
         <LoginPage />
@@ -60,52 +72,40 @@ const ROUTES = [
     ),
   },
   {
-    path: "/signuppage",
+    path: ROUTES.SIGN_UP,
     element: (
       <PublicOnlyRoute>
         <SignUpPage />
       </PublicOnlyRoute>
     ),
   },
-  { path: "/logoutpage", element: <LogoutPage /> },
-  { path: "/freesearchpage", element: <FreeSearchPage /> },
-  { path: "/privacypolicypage", element: <PrivacyPolicyPage /> },
-  { path: "/tospage", element: <TOSPage /> },
   {
-    path: "/forgotpassword",
+    path: ROUTES.FORGOT_PASSWORD,
     element: (
       <PublicOnlyRoute>
         <ForgotPassword />
       </PublicOnlyRoute>
     ),
   },
-  { path: "/checkyouremail", element: <CheckYourEmail /> },
-  { path: "/passwordreset", element: <PasswordReset /> },
-  { path: "/setpassword", element: <SetANewPassword /> },
-  { path: "/successful", element: <SuccessfulPage /> },
 
   {
-    path: "/profilepage",
+    path: ROUTES.PROFILE,
     element: (
       <ProtectedAppRoute>
         <ProfilePage />
       </ProtectedAppRoute>
     ),
   },
-
   {
-    path: "/searchpage",
+    path: ROUTES.SEARCH,
     element: (
-      <ProtectedRoute>
-        <OnboardingGuard>
-          <SearchPage />
-        </OnboardingGuard>
-      </ProtectedRoute>
+      <ProtectedAppRoute>
+        <SearchPage />
+      </ProtectedAppRoute>
     ),
   },
-
   {
-    path: "/saveditemsandsearches",
+    path: ROUTES.SAVED,
     element: (
       <ProtectedAppRoute>
         <SavedItemsAndSearches />
@@ -114,7 +114,7 @@ const ROUTES = [
   },
 
   {
-    path: "/onboarding/gender",
+    path: ROUTES.ONBOARDING_GENDER,
     element: (
       <ProtectedOnboardingRoute>
         <OnboardingGender />
@@ -122,7 +122,7 @@ const ROUTES = [
     ),
   },
   {
-    path: "/onboarding/categories",
+    path: ROUTES.ONBOARDING_CATEGORIES,
     element: (
       <ProtectedOnboardingRoute>
         <OnboardingCategories />
@@ -130,7 +130,7 @@ const ROUTES = [
     ),
   },
   {
-    path: "/onboarding/brands",
+    path: ROUTES.ONBOARDING_BRANDS,
     element: (
       <ProtectedOnboardingRoute>
         <OnboardingBrands />
@@ -138,8 +138,8 @@ const ROUTES = [
     ),
   },
 
-  { path: "/404", element: <NotFoundPage /> },
-  { path: "*", element: <Navigate to="/404" replace /> },
+  { path: ROUTES.NOT_FOUND, element: <NotFoundPage /> },
+  { path: "*", element: <Navigate to={ROUTES.NOT_FOUND} replace /> },
 ];
 
 function App() {
@@ -160,8 +160,8 @@ function App() {
       <AuthProvider>
         <SmoothScroll>
           <Routes>
-            {ROUTES.map(({ path, element }) => (
-              <Route key={path} path={path} element={element} />
+            {appRoutes.map(({ id, path, element }) => (
+              <Route key={id} path={path} element={element} />
             ))}
           </Routes>
         </SmoothScroll>

@@ -1,10 +1,10 @@
 import { Box, CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import SavedSearches from "../../Components/Search-Components/SavedSearches";
-import SavedItems from "../../Components/Search-Components/SavedItems";
-import Footer from "../../Components/Footer";
-import ProfileHeader from "../../Components/Headers/SavedSearchHeader";
-import { useAuth } from "../../../backend/AuthContext";
+import SavedSearches from "../../saved/components/SavedItemsList";
+import SavedItems from "../../saved/components/SavedItemsList";
+import Footer from "../../../shared/ui/navigation/Footer";
+import ProfileHeader from "../../profile/components/ProfileHeader";
+import { useAuth } from "../../auth/AuthContext";
 
 const defaultTheme = createTheme();
 

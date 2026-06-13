@@ -16,17 +16,17 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import Header from "../../Components/Headers/Header";
+import Header from "../../shared/ui/navigation/PublicHeader.jsx";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Footer from "../../Components/Footer";
+import Footer from "../../shared/ui/navigation/Footer";
+import { auth } from "../../backend/firebase/firebase";
 import {
+  setPersistence,
+  browserSessionPersistence,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
-  setPersistence,
-  browserSessionPersistence,
 } from "firebase/auth";
-import { auth } from "../../backend/firebase";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const defaultTheme = createTheme();

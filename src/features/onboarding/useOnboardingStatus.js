@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "./backend/firebase";
-import { useAuth } from "./backend/AuthContext";
+import { db } from "../../backend/firebase/firebase";
+import { useAuth } from "../auth/AuthContext";
 
 const DEFAULT_ONBOARDING = {
   completed: false,

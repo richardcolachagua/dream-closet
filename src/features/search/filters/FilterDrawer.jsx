@@ -1,7 +1,6 @@
 import { Drawer, Box, IconButton, Typography, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchFiltersPanel from "./SearchFiltersPanel";
-import { primaryButtonSx, ghostButtonSx } from "../../Buttons/buttonStyles";
+import SearchFiltersPanel from "../../search/filters/FiltersPanel";
 
 function FilterDrawer({
   open,
@@ -24,9 +23,11 @@ function FilterDrawer({
           height: "100vh",
           display: "flex",
           flexDirection: "column",
-          bgcolor: "#111111",
+          bgcolor: "#0c0c0c",
           color: "white",
           borderLeft: "1px solid rgba(255,255,255,0.08)",
+          backgroundImage:
+            "linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0))",
         },
       }}
     >
@@ -36,7 +37,7 @@ function FilterDrawer({
           alignItems: "center",
           justifyContent: "space-between",
           px: 2,
-          py: 1.5,
+          py: 1.75,
           borderBottom: "1px solid rgba(255,255,255,0.12)",
         }}
       >
@@ -44,11 +45,7 @@ function FilterDrawer({
           Filter results
         </Typography>
 
-        <IconButton
-          onClick={onClose}
-          sx={{ color: "white" }}
-          aria-label="Close filters"
-        >
+        <IconButton onClick={onClose} sx={{ color: "white" }}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -62,7 +59,14 @@ function FilterDrawer({
           justifyContent: "flex-end",
         }}
       >
-        <Button onClick={onClearAll} sx={ghostButtonSx}>
+        <Button
+          onClick={onClearAll}
+          sx={{
+            color: "turquoise",
+            fontWeight: 700,
+            textTransform: "none",
+          }}
+        >
           Clear all
         </Button>
       </Box>
@@ -82,7 +86,6 @@ function FilterDrawer({
           onClearAll={onClearAll}
           onApply={onApply}
           showActions
-          applyButtonSx={primaryButtonSx}
         />
       </Box>
     </Drawer>

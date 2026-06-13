@@ -10,7 +10,7 @@ import {
   Chip,
   Modal,
 } from "@mui/material";
-import SaveForLaterButton from "../Buttons/SaveForLaterButton";
+import SaveForLaterButton from "../../saved/components/SaveForLaterButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { useState } from "react";

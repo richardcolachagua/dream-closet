@@ -11,10 +11,6 @@ import {
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LaunchIcon from "@mui/icons-material/Launch";
-import {
-  primaryButtonSx,
-  secondaryButtonSx,
-} from "../../../Buttons/buttonStyles";
 
 const formatPrice = (result) => {
   if (result?.price && String(result.price).trim()) return result.price;
@@ -31,7 +27,7 @@ const getSourceLabel = (source) => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const fallbackImage = "/assets/product-fallback.png";
+const fallbackImage = "/assets/fallback-product-image.png";
 
 function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
   const {
@@ -71,12 +67,12 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
         display: "flex",
         flexDirection: isList ? { xs: "column", md: "row" } : "column",
         height: "100%",
-        minHeight: isList ? "unset" : 460,
+        minHeight: isList ? "unset" : 470,
         borderRadius: 3,
-        backgroundColor: "#111111",
+        backgroundColor: "#111",
         color: "white",
         border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+        boxShadow: "0 10px 28px rgba(0,0,0,0.22)",
         overflow: "hidden",
       }}
     >
@@ -89,7 +85,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
         }}
         sx={{
           width: isList ? { xs: "100%", md: 240 } : "100%",
-          height: isList ? { xs: 280, md: "auto" } : 280,
+          height: isList ? { xs: 280, md: "auto" } : 290,
           objectFit: "cover",
           backgroundColor: "rgba(255,255,255,0.04)",
         }}
@@ -100,17 +96,20 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
           <Stack
             direction="row"
             spacing={1}
-            sx={{ mb: 1.5, flexWrap: "wrap", gap: 1 }}
+            useFlexGap
+            flexWrap="wrap"
+            sx={{ mb: 1.5 }}
           >
             <Chip
               label={getSourceLabel(source)}
               size="small"
               sx={{
-                bgcolor: "rgba(89,230,219,0.16)",
-                color: "#59e6db",
+                bgcolor: "rgba(64,224,208,0.16)",
+                color: "turquoise",
                 fontWeight: 700,
               }}
             />
+
             {availability && (
               <Chip
                 label={availability}
@@ -134,6 +133,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
+              minHeight: isList ? "unset" : "3.5rem",
             }}
           >
             {name || "Untitled item"}
@@ -148,7 +148,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
 
           <Typography
             variant="h6"
-            sx={{ color: "#59e6db", fontWeight: 800, mb: 1.5 }}
+            sx={{ color: "turquoise", fontWeight: 800, mb: 1.5 }}
           >
             {formatPrice(result)}
           </Typography>
@@ -161,9 +161,9 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
               flexWrap="wrap"
               sx={{ mb: 1.5 }}
             >
-              {detailChips.map((detail) => (
+              {detailChips.map((detail, index) => (
                 <Chip
-                  key={detail}
+                  key={`${detail}-${index}`}
                   label={detail}
                   size="small"
                   variant="outlined"
@@ -184,7 +184,13 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
         </CardContent>
 
         <CardActions
-          sx={{ px: 2.25, pb: 2.25, pt: 0, gap: 1, flexWrap: "wrap" }}
+          sx={{
+            px: 2.25,
+            pb: 2.25,
+            pt: 0,
+            gap: 1,
+            flexWrap: "wrap",
+          }}
         >
           <Button
             variant="contained"
@@ -192,7 +198,15 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             onClick={handleOpenProduct}
             disabled={!productUrl}
             sx={{
-              ...primaryButtonSx,
+              minHeight: 42,
+              px: 2,
+              borderRadius: 2,
+              bgcolor: "turquoise",
+              color: "black",
+              fontWeight: 700,
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { bgcolor: "#35d8cb" },
               "&.Mui-disabled": {
                 bgcolor: "rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.4)",
@@ -207,7 +221,20 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             startIcon={<FavoriteBorderIcon />}
             onClick={handleSave}
             disabled={!userId || !onSaveItem}
-            sx={secondaryButtonSx}
+            sx={{
+              minHeight: 42,
+              px: 2,
+              borderRadius: 2,
+              textTransform: "none",
+              borderColor: "rgba(255,255,255,0.18)",
+              color: "white",
+              fontWeight: 700,
+              "&:hover": {
+                borderColor: "turquoise",
+                color: "turquoise",
+                backgroundColor: "rgba(64,224,208,0.05)",
+              },
+            }}
           >
             Save
           </Button>
