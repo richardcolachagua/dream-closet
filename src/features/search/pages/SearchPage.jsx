@@ -58,6 +58,7 @@ const SearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const initializedFromUrl = useRef(false);
+  const suppressNextAutoSearch = useRef(false);
 
   const parsedState = useMemo(
     () => parseSearchState(location.search),
@@ -152,6 +153,7 @@ const SearchPage = () => {
         ...item,
         userId: currentUser.uid,
       });
+      setSuccessMessage("Item saved successfully!");
     } catch (saveError) {
       console.error("Error saving item", saveError);
       setError("Error saving item.");
@@ -185,6 +187,16 @@ const SearchPage = () => {
       append = false,
       shouldSyncUrl = true,
     }) => {
+      if (!query?.trim()) {
+        setSearchResults([]);
+        setSearchMeta(DEFAULT_SEARCH_META);
+        setIsLoading(false);
+        if (shouldSyncUrl) {
+          syncUrlState("", activeFilters, sort, DEFAULT_PAGE);
+        }
+        return DEFAULT_SEARCH_META;
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -215,7 +227,7 @@ const SearchPage = () => {
         }
 
         setIsLoading(false);
-        setError("Failed to fetch search results.");
+        setError(searchError?.message || "Failed to fetch search results.");
         throw searchError;
       }
     },
@@ -243,6 +255,7 @@ const SearchPage = () => {
 
   const handleClearAll = () => {
     const clearedFilters = clearAllFilters();
+    suppressNextAutoSearch.current = true;
     setFilters(clearedFilters);
     setCurrentPage(DEFAULT_PAGE);
 
@@ -259,44 +272,42 @@ const SearchPage = () => {
   };
 
   const handleRemoveFilter = (key, value) => {
-    setFilters((prev) => {
-      const updatedFilters = removeFilterValue(prev, key, value);
-
-      if (searchInputValue.trim()) {
-        runSearch({
-          query: searchInputValue,
-          activeFilters: updatedFilters,
-          sort: sortBy,
-          page: DEFAULT_PAGE,
-        });
-      } else {
-        syncUrlState(searchInputValue, updatedFilters, sortBy, DEFAULT_PAGE);
-      }
-
-      return updatedFilters;
-    });
-
+    const updatedFilters = removeFilterValue(filters, key, value);
+    suppressNextAutoSearch.current = true;
+    setFilters(updatedFilters);
     setCurrentPage(DEFAULT_PAGE);
+
+    if (searchInputValue.trim()) {
+      runSearch({
+        query: searchInputValue,
+        activeFilters: updatedFilters,
+        sort: sortBy,
+        page: DEFAULT_PAGE,
+      });
+    } else {
+      syncUrlState(searchInputValue, updatedFilters, sortBy, DEFAULT_PAGE);
+    }
   };
 
   const handleApplyFilters = async () => {
+    setIsFilterDrawerOpen(false);
+
     if (!searchInputValue.trim()) {
-      setIsFilterDrawerOpen(false);
       syncUrlState(searchInputValue, filters, sortBy, DEFAULT_PAGE);
       return;
     }
 
+    suppressNextAutoSearch.current = true;
     await runSearch({
       query: searchInputValue,
       activeFilters: filters,
       sort: sortBy,
       page: DEFAULT_PAGE,
     });
-
-    setIsFilterDrawerOpen(false);
   };
 
   const handleSortChange = async (nextSort) => {
+    suppressNextAutoSearch.current = true;
     setSortBy(nextSort);
     setCurrentPage(DEFAULT_PAGE);
 
@@ -376,6 +387,11 @@ const SearchPage = () => {
     if (!initializedFromUrl.current) return;
     if (!searchInputValue.trim()) return;
 
+    if (suppressNextAutoSearch.current) {
+      suppressNextAutoSearch.current = false;
+      return;
+    }
+
     runSearch({
       query: searchInputValue,
       activeFilters: filters,
@@ -383,14 +399,7 @@ const SearchPage = () => {
       sort: sortBy,
       page: DEFAULT_PAGE,
     });
-  }, [
-    showAllGenders,
-    onboardingGender,
-    searchInputValue,
-    filters,
-    sortBy,
-    runSearch,
-  ]);
+  }, [showAllGenders, onboardingGender, runSearch]);
 
   return (
     <Box
@@ -442,6 +451,7 @@ const SearchPage = () => {
                 handleSearchResults(response, false)
               }
               onSearchSubmit={(query) => {
+                suppressNextAutoSearch.current = true;
                 setSearchInputValue(query);
                 setCurrentPage(DEFAULT_PAGE);
 

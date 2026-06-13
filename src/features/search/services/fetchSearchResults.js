@@ -1,3 +1,35 @@
+const readEnv = (viteKey, craKey, fallback = "") => {
+  if (
+    typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    viteKey in import.meta.env
+  ) {
+    return import.meta.env[viteKey];
+  }
+
+  if (typeof process !== "undefined" && process.env && craKey in process.env) {
+    return process.env[craKey];
+  }
+
+  return fallback;
+};
+
+export const SEARCH_API_URL = readEnv(
+  "VITE_SEARCH_API_URL",
+  "REACT_APP_SEARCH_API_URL",
+  "http://127.0.0.1:5001/dream-closet-4d254/us-central1/searchProducts",
+);
+
+const buildDefaultResponse = ({ page, pageSize }) => ({
+  results: [],
+  total: 0,
+  page,
+  pageSize,
+  hasMore: false,
+  warnings: [],
+  sources: {},
+});
+
 export const fetchCombinedResults = async ({
   query,
   filters = {},
@@ -7,25 +39,22 @@ export const fetchCombinedResults = async ({
   pageSize = 24,
 }) => {
   try {
-    const response = await fetch(
-      "http://127.0.0.1:5001/dream-closet-4d254/us-central1/searchProducts",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          data: {
-            query,
-            gender: onboardingGender,
-            filters,
-            sort,
-            page,
-            pageSize,
-          },
-        }),
+    const response = await fetch(SEARCH_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        data: {
+          query,
+          gender: onboardingGender,
+          filters,
+          sort,
+          page,
+          pageSize,
+        },
+      }),
+    });
 
     const json = await response.json();
 
@@ -33,19 +62,16 @@ export const fetchCombinedResults = async ({
       throw new Error(json?.error || "Unable to fetch search results.");
     }
 
-    return (
-      json?.result || {
-        results: [],
-        total: 0,
-        page,
-        pageSize,
-        hasMore: false,
-        warnings: [],
-        sources: {},
-      }
-    );
+    return json?.result || buildDefaultResponse({ page, pageSize });
   } catch (error) {
     console.error("Error fetching combined search results:", error);
+
+    if (error instanceof TypeError) {
+      throw new Error(
+        "Search service is unavailable. Check your API URL or start the Firebase Functions emulator.",
+      );
+    }
+
     throw new Error(
       error?.message || "Unable to fetch search results right now.",
     );
