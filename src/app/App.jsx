@@ -1,68 +1,39 @@
-import React, { useState } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-import { AuthProvider } from "../features/auth/AuthContext";
-import { ProtectedRoute } from "../features/auth/ProtectedRoute";
-import { OnboardingGuard } from "../features/onboarding/OnboardingGuard";
-// import { SubscriptionGuard } from "./backend/SubscriptionGuard";
-
-import { ROUTES, DEFAULT_AUTHENTICATED_ROUTE } from "../app/routes/routePaths";
-
-import HomePage from "../features/home/pages/HomePage";
-import ContactPage from "../features/legal/pages/ContactPage";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../features/auth/AuthContext";
 import LoginPage from "../features/pages/LoginPage";
 import SignUpPage from "../features/pages/SignUpPage";
-import LogoutPage from "../features/pages/LogoutPage";
-import NotFoundPage from "../app/routes/NotFoundPage";
-import PricingPage from "../features/pricing/pages/PricingPage";
-import ProfilePage from "../features/profile/pages/ProfilePage";
-import PrivacyPolicyPage from "../features/legal/pages/PrivacyPolicyPage";
-import SearchPage from "../features/search/pages/SearchPage";
-import TOSPage from "../features/legal/pages/TermsOfServicePage";
-import FreeSearchPage from "../features/search/pages/FreeSearchPage";
-import SavedItemsAndSearches from "../features/saved/pages/SavedSearchDetailPage";
-import ForgotPassword from "../features/pages/ForgotPassword";
-import SmoothScroll from "../shared/ui/feedback/SmoothScroll";
-import CheckYourEmail from "../features/pages/CheckYourEmailNotice";
-import PasswordReset from "../features/pages/PasswordResetPage";
-import SetANewPassword from "../features/pages/SetANewPasswordPage";
+import ForgotPasswordPage from "../features/pages/ForgotPassword";
 import SuccessfulPage from "../features/pages/SuccessfulPage";
-import OnboardingGender from "../features/onboarding/pages/OnboardingGenderPage";
-import OnboardingCategories from "../features/onboarding/pages/OnboardingCategoriesPage";
-import OnboardingBrands from "../features/onboarding/pages/OnboardingBrandsPage";
+import HomePage from "../features/home/pages/HomePage";
+import SearchPage from "../features/search/pages/SearchPage";
+import SavedItemsAndSearches from "../features/saved/pages/SavedSearchDetailPage";
+import ProfilePage from "../features/profile/pages/ProfilePage";
+import FreeSearchPage from "../features/search/pages/FreeSearchPage";
+import PricingPage from "../features/pricing/pages/PricingPage";
+import { ProtectedRoute } from "../features/auth/ProtectedRoute";
+import { SubscriptionGuard } from "../features/pricing/components/SubscriptionGuard";
+import { OnboardingGuard } from "../features/onboarding/OnboardingGuard";
+import { ROUTES } from "./routes/routePaths";
 
-const ProtectedAppRoute = ({ children, roles = [] }) => (
-  <ProtectedRoute roles={roles}>
-    <OnboardingGuard>{children}</OnboardingGuard>
-  </ProtectedRoute>
-);
+function PublicOnlyRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
-const ProtectedOnboardingRoute = ({ children, roles = [] }) => (
-  <ProtectedRoute roles={roles}>{children}</ProtectedRoute>
-);
+  if (loading) return null;
 
-const PublicOnlyRoute = ({ children }) => (
-  <ProtectedRoute inverse redirectPath={DEFAULT_AUTHENTICATED_ROUTE}>
-    {children}
-  </ProtectedRoute>
-);
+  if (user) {
+    const destination = location.state?.from || ROUTES.SEARCH;
+    return <Navigate to={destination} replace />;
+  }
 
-const appRoutes = [
-  { path: ROUTES.ROOT, element: <Navigate to={ROUTES.HOME} replace /> },
+  return children;
+}
 
-  { path: ROUTES.HOME, element: <HomePage /> },
-  { path: ROUTES.CONTACT, element: <ContactPage /> },
-  { path: ROUTES.PRICING, element: <PricingPage /> },
-  { path: ROUTES.FREE_SEARCH, element: <FreeSearchPage /> },
-  { path: ROUTES.PRIVACY_POLICY, element: <PrivacyPolicyPage /> },
-  { path: ROUTES.TERMS, element: <TOSPage /> },
-  { path: ROUTES.CHECK_EMAIL, element: <CheckYourEmail /> },
-  { path: ROUTES.PASSWORD_RESET, element: <PasswordReset /> },
-  { path: ROUTES.SET_PASSWORD, element: <SetANewPassword /> },
-  { path: ROUTES.PASSWORD_SUCCESS, element: <SuccessfulPage /> },
-  { path: ROUTES.LOGOUT, element: <LogoutPage /> },
-
+const routeConfigs = [
+  {
+    path: ROUTES.HOME,
+    element: <HomePage />,
+  },
   {
     path: ROUTES.LOGIN,
     element: (
@@ -72,7 +43,7 @@ const appRoutes = [
     ),
   },
   {
-    path: ROUTES.SIGN_UP,
+    path: ROUTES.SIGNUP,
     element: (
       <PublicOnlyRoute>
         <SignUpPage />
@@ -81,92 +52,72 @@ const appRoutes = [
   },
   {
     path: ROUTES.FORGOT_PASSWORD,
-    element: (
-      <PublicOnlyRoute>
-        <ForgotPassword />
-      </PublicOnlyRoute>
-    ),
+    element: <ForgotPasswordPage />,
   },
-
   {
-    path: ROUTES.PROFILE,
-    element: (
-      <ProtectedAppRoute>
-        <ProfilePage />
-      </ProtectedAppRoute>
-    ),
+    path: ROUTES.SUCCESSFUL,
+    element: <SuccessfulPage />,
+  },
+  {
+    path: ROUTES.FREE_SEARCH,
+    element: <FreeSearchPage />,
+  },
+  {
+    path: ROUTES.PRICING,
+    element: <PricingPage />,
   },
   {
     path: ROUTES.SEARCH,
     element: (
-      <ProtectedAppRoute>
-        <SearchPage />
-      </ProtectedAppRoute>
+      <ProtectedRoute>
+        <OnboardingGuard>
+          <SearchPage />
+        </OnboardingGuard>
+      </ProtectedRoute>
     ),
   },
   {
-    path: ROUTES.SAVED,
+    path: ROUTES.PROFILE,
     element: (
-      <ProtectedAppRoute>
-        <SavedItemsAndSearches />
-      </ProtectedAppRoute>
-    ),
-  },
-
-  {
-    path: ROUTES.ONBOARDING_GENDER,
-    element: (
-      <ProtectedOnboardingRoute>
-        <OnboardingGender />
-      </ProtectedOnboardingRoute>
+      <ProtectedRoute>
+        <OnboardingGuard>
+          <ProfilePage />
+        </OnboardingGuard>
+      </ProtectedRoute>
     ),
   },
   {
-    path: ROUTES.ONBOARDING_CATEGORIES,
+    path: ROUTES.SAVED_SEARCH_DETAIL,
     element: (
-      <ProtectedOnboardingRoute>
-        <OnboardingCategories />
-      </ProtectedOnboardingRoute>
+      <ProtectedRoute>
+        <OnboardingGuard>
+          <SavedItemsAndSearches />
+        </OnboardingGuard>
+      </ProtectedRoute>
     ),
   },
   {
-    path: ROUTES.ONBOARDING_BRANDS,
+    path: ROUTES.PREMIUM_SEARCH,
     element: (
-      <ProtectedOnboardingRoute>
-        <OnboardingBrands />
-      </ProtectedOnboardingRoute>
+      <ProtectedRoute>
+        <OnboardingGuard>
+          <SubscriptionGuard>
+            <SearchPage />
+          </SubscriptionGuard>
+        </OnboardingGuard>
+      </ProtectedRoute>
     ),
   },
-
-  { path: ROUTES.NOT_FOUND, element: <NotFoundPage /> },
-  { path: "*", element: <Navigate to={ROUTES.NOT_FOUND} replace /> },
 ];
 
 function App() {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            refetchOnWindowFocus: false,
-            retry: 1,
-          },
-        },
-      }),
-  );
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SmoothScroll>
-          <Routes>
-            {appRoutes.map(({ id, path, element }) => (
-              <Route key={id} path={path} element={element} />
-            ))}
-          </Routes>
-        </SmoothScroll>
-      </AuthProvider>
-    </QueryClientProvider>
+    <Routes>
+      {routeConfigs.map((route) => (
+        <Route key={route.path} path={route.path} element={route.element} />
+      ))}
+      <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+    </Routes>
   );
 }
 

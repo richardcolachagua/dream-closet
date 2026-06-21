@@ -65,9 +65,16 @@ const LoginPage = () => {
 
   const redirectTarget = useMemo(() => {
     const from = location.state?.from;
-    return typeof from === "string" && from.startsWith("/")
-      ? from
-      : "/searchpage";
+    const nextRoute =
+      typeof from === "string" && from.startsWith("/") ? from : "/searchpage";
+
+    console.log("[LoginPage] redirectTarget computed", {
+      from,
+      nextRoute,
+      locationState: location.state,
+    });
+
+    return nextRoute;
   }, [location.state]);
 
   const [error, setError] = useState("");
@@ -84,24 +91,36 @@ const LoginPage = () => {
   const registerFailure = () => {
     setAttemptState((prev) => {
       const nextCount = prev.count + 1;
-      if (nextCount >= MAX_ATTEMPTS) {
-        return {
-          count: nextCount,
-          lockedUntil: Date.now() + LOCKOUT_MS,
-        };
-      }
-      return {
-        count: nextCount,
-        lockedUntil: prev.lockedUntil,
-      };
+      const nextState =
+        nextCount >= MAX_ATTEMPTS
+          ? {
+              count: nextCount,
+              lockedUntil: Date.now() + LOCKOUT_MS,
+            }
+          : {
+              count: nextCount,
+              lockedUntil: prev.lockedUntil,
+            };
+
+      console.log("[LoginPage] registerFailure", {
+        previousState: prev,
+        nextState,
+      });
+
+      return nextState;
     });
   };
 
   const resetAttemptState = () => {
+    console.log("[LoginPage] resetAttemptState");
     setAttemptState({ count: 0, lockedUntil: null });
   };
 
   const completeLoginRedirect = () => {
+    console.log("[LoginPage] completeLoginRedirect", {
+      redirectTarget,
+      currentUser: auth.currentUser,
+    });
     navigate(redirectTarget, { replace: true });
   };
 
@@ -114,6 +133,12 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       setError("");
 
+      console.log("[LoginPage] email login submit", {
+        email: values.email,
+        isLocked,
+        attemptState,
+      });
+
       if (isLocked) {
         setError("Too many attempts. Please wait 15 minutes and try again.");
         return;
@@ -123,14 +148,23 @@ const LoginPage = () => {
 
       try {
         await setPersistence(auth, browserSessionPersistence);
-        await signInWithEmailAndPassword(
+        console.log("[LoginPage] persistence set to browserSessionPersistence");
+
+        const userCredential = await signInWithEmailAndPassword(
           auth,
           values.email.trim(),
           values.password,
         );
+
+        console.log("[LoginPage] email login success", {
+          user: userCredential?.user,
+          currentUser: auth.currentUser,
+        });
+
         resetAttemptState();
         completeLoginRedirect();
       } catch (authError) {
+        console.error("[LoginPage] email login error", authError);
         registerFailure();
         setError(getFriendlyAuthError(authError?.code));
       } finally {
@@ -142,6 +176,11 @@ const LoginPage = () => {
   const handleGoogleSignIn = async () => {
     setError("");
 
+    console.log("[LoginPage] google login start", {
+      isLocked,
+      attemptState,
+    });
+
     if (isLocked) {
       setError("Too many attempts. Please wait 15 minutes and try again.");
       return;
@@ -151,12 +190,22 @@ const LoginPage = () => {
 
     try {
       await setPersistence(auth, browserSessionPersistence);
+      console.log("[LoginPage] persistence set before Google sign-in");
+
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      await signInWithPopup(auth, provider);
+
+      const result = await signInWithPopup(auth, provider);
+
+      console.log("[LoginPage] google login success", {
+        user: result?.user,
+        currentUser: auth.currentUser,
+      });
+
       resetAttemptState();
       completeLoginRedirect();
     } catch (authError) {
+      console.error("[LoginPage] google login error", authError);
       if (authError?.code !== "auth/popup-closed-by-user") {
         registerFailure();
       }

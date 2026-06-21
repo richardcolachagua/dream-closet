@@ -14,11 +14,21 @@ const readEnv = (viteKey, craKey, fallback = "") => {
   return fallback;
 };
 
-export const SEARCH_API_URL = readEnv(
+const API_BASE_URL = readEnv("VITE_API_URL", "REACT_APP_API_URL", "").replace(
+  /\/$/,
+  "",
+);
+
+const SEARCH_API_URL_FROM_ENV = readEnv(
   "VITE_SEARCH_API_URL",
   "REACT_APP_SEARCH_API_URL",
-  "http://127.0.0.1:5001/dream-closet-4d254/us-central1/searchProducts",
-);
+  "",
+).trim();
+
+export const SEARCH_API_URL =
+  SEARCH_API_URL_FROM_ENV ||
+  (API_BASE_URL ? `${API_BASE_URL}/searchProducts` : "") ||
+  "http://127.0.0.1:5001/dream-closet-4d254/us-central1/searchProducts";
 
 const buildDefaultResponse = ({ page, pageSize }) => ({
   results: [],
@@ -39,6 +49,8 @@ export const fetchCombinedResults = async ({
   pageSize = 24,
 }) => {
   try {
+    console.log("Dream Closet search endpoint:", SEARCH_API_URL);
+
     const response = await fetch(SEARCH_API_URL, {
       method: "POST",
       headers: {
@@ -68,7 +80,7 @@ export const fetchCombinedResults = async ({
 
     if (error instanceof TypeError) {
       throw new Error(
-        "Search service is unavailable. Check your API URL or start the Firebase Functions emulator.",
+        `Search service is unavailable at ${SEARCH_API_URL}. Check your API URL or start the Firebase Functions emulator.`,
       );
     }
 
