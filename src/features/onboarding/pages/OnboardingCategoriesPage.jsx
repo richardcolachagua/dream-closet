@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CircularProgress, Alert, CssBaseline, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
@@ -201,6 +201,7 @@ const OnboardingCategories = () => {
             categories: selectedCategories,
             brands: Array.isArray(existing.brands) ? existing.brands : [],
           },
+          updatedAt: serverTimestamp(),
         },
         { merge: true },
       );

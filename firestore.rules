@@ -11,123 +11,153 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function hasOnlyKeys(allowed) {
-      return request.resource.data.keys().hasOnly(allowed);
+    function hasOnlyKeys(data, allowed) {
+      return data.keys().hasOnly(allowed);
     }
 
-    function changedKeysOnly(allowed) {
-      return request.resource.data.diff(resource.data).changedKeys().hasOnly(allowed);
+    function onboardingIsValid(data) {
+      return data is map
+        && hasOnlyKeys(data, ["gender", "categories", "brands", "completed"])
+        && (
+          !('gender' in data)
+          || data.gender == null
+          || data.gender is string
+        )
+        && data.categories is list
+        && data.brands is list
+        && data.completed is bool;
     }
 
-    function userOnboardingIsValid() {
-      return request.resource.data.onboarding is map
-        && request.resource.data.onboarding.gender is string
-        && request.resource.data.onboarding.categories is list
-        && request.resource.data.onboarding.brands is list
-        && request.resource.data.onboarding.completed is bool;
+    function preferencesIsValid(data) {
+      return data is map
+        && hasOnlyKeys(data, ["emailNotifications"])
+        && data.emailNotifications is bool;
     }
 
-    function userDocCreateIsValid(userId) {
+    function userCreateIsValid(userId) {
       return isOwner(userId)
-        && hasOnlyKeys([
+        && hasOnlyKeys(request.resource.data, [
           "firstName",
           "lastName",
           "email",
           "onboarding",
-          "createdAt"
+          "preferences",
+          "createdAt",
+          "updatedAt"
         ])
         && request.resource.data.firstName is string
         && request.resource.data.lastName is string
         && request.resource.data.email is string
-        && userOnboardingIsValid();
+        && onboardingIsValid(request.resource.data.onboarding)
+        && (
+          !('preferences' in request.resource.data)
+          || preferencesIsValid(request.resource.data.preferences)
+        )
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
     }
 
-    function userDocUpdateIsValid(userId) {
+    function userUpdateIsValid(userId) {
       return isOwner(userId)
-        && changedKeysOnly([
-          "firstName",
-          "lastName",
-          "email",
-          "onboarding"
-        ])
         && request.resource.data.firstName is string
         && request.resource.data.lastName is string
         && request.resource.data.email is string
-        && userOnboardingIsValid();
+        && onboardingIsValid(request.resource.data.onboarding)
+        && (
+          !('preferences' in request.resource.data)
+          || preferencesIsValid(request.resource.data.preferences)
+        )
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt is timestamp
+        && (
+          !('subscription' in request.resource.data)
+          || !('subscription' in resource.data)
+          || request.resource.data.subscription == resource.data.subscription
+        );
     }
 
-    function savedItemHasAllowedKeys(data) {
-      return data.keys().hasOnly([
+    function savedItemIsValid() {
+      return hasOnlyKeys(request.resource.data, [
         "userId",
-        "title",
+        "itemId",
+        "name",
         "imageUrl",
         "price",
+        "numericPrice",
         "productUrl",
         "brand",
         "source",
-        "savedAt"
-      ]);
+        "description",
+        "createdAt"
+      ])
+      && request.resource.data.userId is string
+      && request.resource.data.itemId is string
+      && request.resource.data.name is string
+      && request.resource.data.imageUrl is string
+      && request.resource.data.price is string
+      && (
+        !('numericPrice' in request.resource.data)
+        || request.resource.data.numericPrice == null
+        || request.resource.data.numericPrice is int
+        || request.resource.data.numericPrice is float
+      )
+      && request.resource.data.productUrl is string
+      && request.resource.data.brand is string
+      && request.resource.data.source is string
+      && request.resource.data.description is string
+      && request.resource.data.createdAt is timestamp;
     }
 
-    function savedItemCreateIsValid() {
-      return isSignedIn()
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.userId is string
-        && savedItemHasAllowedKeys(request.resource.data);
-    }
-
-    function savedItemUpdateIsValid() {
-      return isSignedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId
-        && savedItemHasAllowedKeys(request.resource.data);
-    }
-
-    function savedSearchHasAllowedKeys(data) {
-      return data.keys().hasOnly([
+    function savedSearchIsValid() {
+      return hasOnlyKeys(request.resource.data, [
         "userId",
         "query",
         "filters",
         "sort",
         "page",
-        "date"
-      ]);
-    }
-
-    function savedSearchCreateIsValid() {
-      return isSignedIn()
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.userId is string
-        && request.resource.data.query is string
-        && savedSearchHasAllowedKeys(request.resource.data);
-    }
-
-    function savedSearchUpdateIsValid() {
-      return isSignedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.query is string
-        && savedSearchHasAllowedKeys(request.resource.data);
+        "createdAt"
+      ])
+      && request.resource.data.userId is string
+      && request.resource.data.query is string
+      && request.resource.data.filters is map
+      && request.resource.data.sort is string
+      && request.resource.data.page is int
+      && request.resource.data.createdAt is timestamp;
     }
 
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if userDocCreateIsValid(userId);
-      allow update: if userDocUpdateIsValid(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if userCreateIsValid(userId);
+      allow update: if userUpdateIsValid(userId);
       allow delete: if isOwner(userId);
     }
 
     match /saved-items/{docId} {
-      allow create: if savedItemCreateIsValid();
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow update: if savedItemUpdateIsValid();
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && savedItemIsValid();
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && savedItemIsValid();
       allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
 
     match /saved-searches/{docId} {
-      allow create: if savedSearchCreateIsValid();
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow update: if savedSearchUpdateIsValid();
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && savedSearchIsValid();
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && savedSearchIsValid();
       allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }

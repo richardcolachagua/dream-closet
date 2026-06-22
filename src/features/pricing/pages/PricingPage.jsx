@@ -65,16 +65,32 @@ const PricingPage = () => {
     <Box sx={{ minHeight: "100vh", backgroundColor: "black" }}>
       <Header />
 
-      <Container maxWidth="lg" sx={{ pt: { xs: 7, md: 10 }, pb: 8 }}>
+      <Container
+        maxWidth="lg"
+        sx={{ pt: { xs: 5, md: 7 }, pb: { xs: 6, md: 8 } }}
+      >
         <Stack
-          spacing={2}
+          spacing={1.5}
           alignItems="center"
-          sx={{ textAlign: "center", mb: 5 }}
+          sx={{ textAlign: "center", mb: 4 }}
         >
-          <Typography variant="h3" sx={{ color: "white", fontWeight: 900 }}>
+          <Typography
+            sx={{
+              color: "white",
+              fontWeight: 900,
+              fontSize: { xs: "2.4rem", md: "3.5rem" },
+              lineHeight: 1.05,
+            }}
+          >
             Choose your Dream Closet plan
           </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.72)", maxWidth: 720 }}>
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.72)",
+              maxWidth: 760,
+              fontSize: { xs: "1rem", md: "1.1rem" },
+            }}
+          >
             Start free, then upgrade to Pro when you want unlimited searches,
             stronger personalization, and premium style discovery tools.
           </Typography>

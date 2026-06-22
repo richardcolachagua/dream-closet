@@ -15,6 +15,7 @@ import {
   deleteDoc,
   doc,
   collection,
+  where,
 } from "firebase/firestore";
 import { Link as RouterLink } from "react-router-dom";
 import { db } from "../../../backend/firebase/firebase";
@@ -35,8 +36,12 @@ function SavedItems({ userId }) {
     setError("");
 
     try {
-      const savedItemsRef = collection(db, "users", uid, "savedItems");
-      const q = query(savedItemsRef, orderBy("createdAt", "desc"));
+      const q = query(
+        collection(db, "saved-items"),
+        where("userId", "==", uid),
+        orderBy("createdAt", "desc"),
+      );
+
       const snapshot = await getDocs(q);
 
       const items = snapshot.docs.map((docSnap) => ({
@@ -55,7 +60,16 @@ function SavedItems({ userId }) {
 
   const handleDeleteItem = async (itemId) => {
     try {
-      await deleteDoc(doc(db, "users", userId, "savedItems", itemId));
+      await deleteDoc(doc(db, "saved-items", itemId));
+      setSavedItems((items) => items.filter((item) => item.id !== itemId));
+    } catch (err) {
+      console.error("Error deleting item:", err);
+      setError("Could not remove saved item.");
+    }
+
+    try {
+      const { doc, deleteDoc } = await import("firebase/firestore");
+      await deleteDoc(doc(db, "saved-items", itemId));
       setSavedItems((items) => items.filter((item) => item.id !== itemId));
     } catch (err) {
       console.error("Error deleting item:", err);

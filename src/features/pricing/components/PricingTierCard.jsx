@@ -26,116 +26,151 @@ function PricingTierCard({
     <Box
       sx={{
         width: "100%",
-        minHeight: "100%",
         borderRadius: 4,
         border: highlighted
-          ? "1px solid turquoise"
+          ? "1px solid rgba(64,224,208,0.55)"
           : "1px solid rgba(255,255,255,0.12)",
         background: highlighted
-          ? "linear-gradient(180deg, rgba(64,224,208,0.08) 0%, rgba(255,255,255,0.03) 100%)"
+          ? "linear-gradient(180deg, rgba(64,224,208,0.05) 0%, rgba(255,255,255,0.02) 100%)"
           : "rgba(255,255,255,0.02)",
-        p: { xs: 3, md: 4 },
+        p: { xs: 2.5, md: 3 },
         display: "flex",
         flexDirection: "column",
-        boxShadow: highlighted
-          ? "0 0 0 1px rgba(64,224,208,0.12), 0 18px 40px rgba(0,0,0,0.28)"
-          : "none",
+        boxShadow: highlighted ? "0 10px 24px rgba(0,0,0,0.18)" : "none",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        spacing={1.5}
-      >
-        <Box>
-          <Typography variant="h5" sx={{ color: "white", fontWeight: 800 }}>
-            {name}
-          </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.72)", mt: 1 }}>
-            {description}
-          </Typography>
-        </Box>
+      <Stack spacing={2.25}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "flex-start" }}
+          spacing={1.25}
+        >
+          <Box sx={{ minWidth: 0, pr: { sm: 1 } }}>
+            <Typography
+              sx={{
+                color: "white",
+                fontWeight: 800,
+                fontSize: { xs: "2rem", md: "2.15rem" },
+                lineHeight: 1.05,
+              }}
+            >
+              {name}
+            </Typography>
+            <Typography
+              sx={{
+                color: "rgba(255,255,255,0.72)",
+                mt: 0.75,
+                fontSize: { xs: "1rem", md: "1.05rem" },
+                lineHeight: 1.5,
+              }}
+            >
+              {description}
+            </Typography>
+          </Box>
 
-        {(badge || isCurrent) && (
-          <Chip
-            label={isCurrent ? "Current plan" : badge}
-            sx={{
-              backgroundColor: highlighted
-                ? "rgba(64,224,208,0.2)"
-                : "rgba(255,255,255,0.08)",
-              color: highlighted ? "turquoise" : "white",
-              fontWeight: 700,
-            }}
-          />
-        )}
-      </Stack>
+          {(badge || isCurrent) && (
+            <Chip
+              label={isCurrent ? "Current plan" : badge}
+              size="small"
+              sx={{
+                mt: { xs: 0.5, sm: 0 },
+                ml: { sm: 1 },
+                backgroundColor: highlighted
+                  ? "rgba(64,224,208,0.18)"
+                  : "rgba(255,255,255,0.08)",
+                color: highlighted ? "turquoise" : "white",
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            />
+          )}
+        </Stack>
 
-      <Box sx={{ mt: 3, mb: 3 }}>
         <Typography
-          variant="h3"
-          sx={{ color: highlighted ? "turquoise" : "white", fontWeight: 900 }}
+          sx={{
+            color: highlighted ? "turquoise" : "white",
+            fontWeight: 900,
+            fontSize: { xs: "2.15rem", md: "2.85rem" },
+            lineHeight: 1,
+          }}
         >
           {priceLabel}
         </Typography>
-      </Box>
 
-      <Stack spacing={1.5} sx={{ flex: 1 }}>
-        {features.map((feature) => (
-          <Stack
-            key={feature}
-            direction="row"
-            spacing={1.25}
-            alignItems="flex-start"
+        <Stack spacing={1.2}>
+          {features.map((feature) => (
+            <Stack
+              key={feature}
+              direction="row"
+              spacing={1.1}
+              alignItems="flex-start"
+            >
+              <CheckCircleIcon
+                sx={{
+                  color: "turquoise",
+                  mt: "2px",
+                  fontSize: 18,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography
+                sx={{ color: "rgba(255,255,255,0.86)", lineHeight: 1.45 }}
+              >
+                {feature}
+              </Typography>
+            </Stack>
+          ))}
+        </Stack>
+
+        {footnote && (
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.56)",
+              fontSize: "0.92rem",
+              lineHeight: 1.45,
+              pt: 0.5,
+            }}
           >
-            <CheckCircleIcon
-              sx={{ color: "turquoise", mt: "2px", fontSize: 20 }}
-            />
-            <Typography sx={{ color: "rgba(255,255,255,0.86)" }}>
-              {feature}
-            </Typography>
-          </Stack>
-        ))}
-      </Stack>
+            {footnote}
+          </Typography>
+        )}
 
-      {footnote && (
-        <Typography
-          sx={{ color: "rgba(255,255,255,0.56)", fontSize: "0.9rem", mt: 3 }}
+        <Button
+          variant={highlighted ? "contained" : "outlined"}
+          fullWidth
+          disabled={disabled || isCurrent || loading}
+          onClick={() => onSelect?.(tier)}
+          sx={{
+            mt: 1,
+            minHeight: 48,
+            borderRadius: "14px",
+            textTransform: "none",
+            fontWeight: 800,
+            fontSize: "1rem",
+            bgcolor: highlighted ? "turquoise" : "transparent",
+            color: highlighted ? "black" : "white",
+            borderColor: highlighted ? "transparent" : "rgba(255,255,255,0.18)",
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: highlighted ? "#35d8cb" : "rgba(255,255,255,0.06)",
+              borderColor: highlighted ? "transparent" : "turquoise",
+              boxShadow: "none",
+            },
+            "&.Mui-disabled": {
+              bgcolor: highlighted
+                ? "rgba(64,224,208,0.35)"
+                : "rgba(255,255,255,0.06)",
+              color: highlighted ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.4)",
+              borderColor: "rgba(255,255,255,0.12)",
+            },
+          }}
         >
-          {footnote}
-        </Typography>
-      )}
-
-      <Button
-        variant={highlighted ? "contained" : "outlined"}
-        fullWidth
-        disabled={disabled || isCurrent || loading}
-        onClick={() => onSelect?.(tier)}
-        sx={{
-          mt: 3,
-          minHeight: 50,
-          borderRadius: "16px",
-          textTransform: "none",
-          fontWeight: 800,
-          fontSize: "1rem",
-          bgcolor: highlighted ? "turquoise" : "transparent",
-          color: highlighted ? "black" : "white",
-          borderColor: highlighted ? "transparent" : "rgba(255,255,255,0.18)",
-          "&:hover": {
-            bgcolor: highlighted ? "#35d8cb" : "rgba(255,255,255,0.06)",
-            borderColor: highlighted ? "transparent" : "turquoise",
-          },
-          "&.Mui-disabled": {
-            bgcolor: highlighted
-              ? "rgba(64,224,208,0.35)"
-              : "rgba(255,255,255,0.06)",
-            color: highlighted ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.4)",
-            borderColor: "rgba(255,255,255,0.12)",
-          },
-        }}
-      >
-        {loading ? "Loading..." : resolvedCta}
-      </Button>
+          {loading ? "Loading..." : resolvedCta}
+        </Button>
+      </Stack>
     </Box>
   );
 }

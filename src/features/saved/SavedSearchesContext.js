@@ -7,6 +7,7 @@ import {
   doc,
   query,
   where,
+  orderBy,
 } from "firebase/firestore";
 
 const SavedSearchesContext = createContext();
@@ -19,15 +20,20 @@ export function SavedSearchesProvider({ children }) {
 
   const fetchSavedSearches = useCallback(async (userId) => {
     setLoading(true);
-    const userQuery = query(
-      collection(db, "saved-searches"),
-      where("userId", "==", userId)
-    );
-    const snapshot = await getDocs(userQuery);
-    setSavedSearches(
-      snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    );
-    setLoading(false);
+
+    try {
+      const userQuery = query(
+        collection(db, "saved-searches"),
+        where("userId", "==", userId),
+        orderBy("createdAt", "desc"),
+      );
+      const snapshot = await getDocs(userQuery);
+      setSavedSearches(
+        snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const deleteSavedSearch = useCallback(async (id) => {

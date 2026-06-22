@@ -15,9 +15,16 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import { buildSavedItemPayload } from "../utils/buildSavedItemPayload";
 import UserDescriptionInput from "../../search/components/SearchInputBar";
 import SearchResults from "../../search/components/SearchResults";
 import Footer from "../../../shared/ui/navigation/Footer";
@@ -128,12 +135,12 @@ const SearchPage = () => {
 
     try {
       await addDoc(collection(db, "saved-searches"), {
+        userId: currentUser.uid,
         query: searchQuery,
         filters,
         sort: sortBy,
         page: currentPage,
-        userId: currentUser.uid,
-        date: new Date().toISOString(),
+        createdAt: serverTimestamp(),
       });
       setSuccessMessage("Search saved successfully!");
     } catch (saveError) {
@@ -149,10 +156,24 @@ const SearchPage = () => {
     }
 
     try {
-      await addDoc(collection(db, "saved-items"), {
-        ...item,
-        userId: currentUser.uid,
-      });
+      await addDoc(
+        collection(db, "saved-items"),
+        buildSavedItemPayload(item, currentUser.uid),
+        {
+          userId: currentUser.uid,
+          itemId: String(item.itemId || ""),
+          name: item.name || item.title || "",
+          imageUrl: item.imageUrl || "",
+          price: item.price || "Price unavailable",
+          numericPrice:
+            typeof item.numericPrice === "number" ? item.numericPrice : null,
+          productUrl: item.productUrl || "",
+          brand: item.brand || "",
+          source: item.source || "",
+          description: item.description || "",
+          createdAt: serverTimestamp(),
+        },
+      );
       setSuccessMessage("Item saved successfully!");
     } catch (saveError) {
       console.error("Error saving item", saveError);

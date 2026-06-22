@@ -84,6 +84,9 @@ const buildUserPayload = ({ firstName, lastName, email }) => ({
     brands: [],
     completed: false,
   },
+  preferences: {
+    emailNotifications: true,
+  },
   updatedAt: serverTimestamp(),
 });
 

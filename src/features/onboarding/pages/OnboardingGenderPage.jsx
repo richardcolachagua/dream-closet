@@ -7,7 +7,7 @@ import {
   Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
@@ -102,6 +102,7 @@ const OnboardingGender = () => {
               : [],
             brands: Array.isArray(existing.brands) ? existing.brands : [],
           },
+          updatedAt: serverTimestamp(),
         },
         { merge: true },
       );
