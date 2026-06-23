@@ -1,37 +1,35 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  Box,
-  Typography,
-  CssBaseline,
-  CircularProgress,
-  Snackbar,
   Alert,
-  Container,
-  ToggleButtonGroup,
-  ToggleButton,
-  FormControlLabel,
-  Switch,
+  Box,
   Button,
+  Chip,
+  Container,
+  CssBaseline,
+  Snackbar,
+  Stack,
+  Switch,
+  Typography,
+  FormControlLabel,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import TuneIcon from "@mui/icons-material/Tune";
+import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import ViewModuleIcon from "@mui/icons-material/ViewModule";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import { buildSavedItemPayload } from "../utils/buildSavedItemPayload";
-import UserDescriptionInput from "../../search/components/SearchInputBar";
-import SearchResults from "../../search/components/SearchResults";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import UserDescriptionInput from "../components/SearchInputBar";
+import SearchResults from "../components/SearchResults";
+import SearchSortBar from "../components/SearchSortBar";
 import Footer from "../../../shared/ui/navigation/Footer";
-import SearchPageHeader from "../../../shared/ui/navigation/SavedSearchHeader";
+import ProfileSearchPageHeader from "../../../shared/ui/navigation/ProfileSearchPageHeader";
 import FilterDrawer from "../filters/FilterDrawer";
-import SearchSortControls from "../../search/components/SearchSortBar";
-import { fetchCombinedResults } from "../../search/services/fetchSearchResults";
+import { fetchCombinedResults } from "../services/fetchSearchResults";
 import {
   createDefaultFilters,
   toggleFilterValue,
@@ -40,15 +38,21 @@ import {
   clearAllFilters,
   removeFilterValue,
   getActiveFilterCount,
-} from "../../search/utils/filterHelpers";
+} from "../utils/filterHelpers";
 import {
   parseSearchState,
   buildSearchStateQuery,
-  DEFAULT_SORT,
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
-} from "../../search/utils/searchStateHelpers";
-import { db, auth } from "../../../backend/firebase/firebase";
+  DEFAULT_SORT,
+} from "../utils/searchStateHelpers";
+import { auth, db } from "../../../backend/firebase/firebase";
+import { colors, layout } from "../../../shared/ui/theme/designTokens";
+import {
+  primaryButtonSx,
+  secondaryButtonSx,
+  heroPanelSx,
+} from "../../../shared/ui/theme/componentStyles";
 
 const defaultTheme = createTheme();
 
@@ -58,10 +62,10 @@ const DEFAULT_SEARCH_META = {
   pageSize: DEFAULT_PAGE_SIZE,
   hasMore: false,
   warnings: [],
-  sources: {},
+  sources: [],
 };
 
-const SearchPage = () => {
+function SearchPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const initializedFromUrl = useRef(false);
@@ -111,76 +115,6 @@ const SearchPage = () => {
     [navigate, location.pathname],
   );
 
-  const handleViewChange = (event, newView) => {
-    if (newView !== null) {
-      setViewMode(newView);
-    }
-  };
-
-  const handleSearchStart = () => {
-    setIsLoading(true);
-    setError(null);
-  };
-
-  const handleSearchError = (errorMessage) => {
-    setError(errorMessage);
-    setIsLoading(false);
-  };
-
-  const handleSaveSearch = async (searchQuery) => {
-    if (!currentUser) {
-      setError("You must be logged in to save searches.");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "saved-searches"), {
-        userId: currentUser.uid,
-        query: searchQuery,
-        filters,
-        sort: sortBy,
-        page: currentPage,
-        createdAt: serverTimestamp(),
-      });
-      setSuccessMessage("Search saved successfully!");
-    } catch (saveError) {
-      setError("Error saving search.");
-      console.error("Error saving search", saveError);
-    }
-  };
-
-  const handleSaveItem = async (item) => {
-    if (!currentUser) {
-      setError("You must be logged in to save items.");
-      return;
-    }
-
-    try {
-      await addDoc(
-        collection(db, "saved-items"),
-        buildSavedItemPayload(item, currentUser.uid),
-        {
-          userId: currentUser.uid,
-          itemId: String(item.itemId || ""),
-          name: item.name || item.title || "",
-          imageUrl: item.imageUrl || "",
-          price: item.price || "Price unavailable",
-          numericPrice:
-            typeof item.numericPrice === "number" ? item.numericPrice : null,
-          productUrl: item.productUrl || "",
-          brand: item.brand || "",
-          source: item.source || "",
-          description: item.description || "",
-          createdAt: serverTimestamp(),
-        },
-      );
-      setSuccessMessage("Item saved successfully!");
-    } catch (saveError) {
-      console.error("Error saving item", saveError);
-      setError("Error saving item.");
-    }
-  };
-
   const handleSearchResults = useCallback((response, append = false) => {
     const results = Array.isArray(response)
       ? response
@@ -193,7 +127,7 @@ const SearchPage = () => {
       pageSize: response?.pageSize ?? DEFAULT_PAGE_SIZE,
       hasMore: response?.hasMore ?? false,
       warnings: response?.warnings ?? [],
-      sources: response?.sources ?? {},
+      sources: response?.sources ?? [],
     });
     setIsLoading(false);
   }, []);
@@ -202,7 +136,7 @@ const SearchPage = () => {
     async ({
       query,
       activeFilters = filters,
-      activeGender = showAllGenders ? "" : onboardingGender,
+      activeGender = showAllGenders ? undefined : onboardingGender,
       sort = sortBy,
       page = DEFAULT_PAGE,
       append = false,
@@ -212,9 +146,11 @@ const SearchPage = () => {
         setSearchResults([]);
         setSearchMeta(DEFAULT_SEARCH_META);
         setIsLoading(false);
+
         if (shouldSyncUrl) {
           syncUrlState("", activeFilters, sort, DEFAULT_PAGE);
         }
+
         return DEFAULT_SEARCH_META;
       }
 
@@ -261,6 +197,48 @@ const SearchPage = () => {
       syncUrlState,
     ],
   );
+
+  const handleSaveSearch = async (searchQuery) => {
+    if (!currentUser) {
+      setError("You must be logged in to save searches.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "saved-searches"), {
+        query: searchQuery,
+        filters,
+        sort: sortBy,
+        page: currentPage,
+        userId: currentUser.uid,
+        date: new Date().toISOString(),
+      });
+
+      setSuccessMessage("Search saved successfully.");
+    } catch (saveError) {
+      console.error("Error saving search", saveError);
+      setError("Error saving search.");
+    }
+  };
+
+  const handleSaveItem = async (item) => {
+    if (!currentUser) {
+      setError("You must be logged in to save items.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "saved-items"), {
+        ...item,
+        userId: currentUser.uid,
+      });
+
+      setSuccessMessage("Item saved successfully.");
+    } catch (saveError) {
+      console.error("Error saving item", saveError);
+      setError("Error saving item.");
+    }
+  };
 
   const handleToggleFilter = (key, value) => {
     setFilters((prev) => toggleFilterValue(prev, key, value));
@@ -319,6 +297,7 @@ const SearchPage = () => {
     }
 
     suppressNextAutoSearch.current = true;
+
     await runSearch({
       query: searchInputValue,
       activeFilters: filters,
@@ -361,9 +340,9 @@ const SearchPage = () => {
 
   useEffect(() => {
     if (initializedFromUrl.current) return;
-    initializedFromUrl.current = true;
 
-    setSearchInputValue(parsedState.query || "");
+    initializedFromUrl.current = true;
+    setSearchInputValue(parsedState.query);
     setFilters(parsedState.filters || createDefaultFilters());
     setSortBy(parsedState.sort || DEFAULT_SORT);
     setCurrentPage(parsedState.page || DEFAULT_PAGE);
@@ -401,7 +380,7 @@ const SearchPage = () => {
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -416,254 +395,267 @@ const SearchPage = () => {
     runSearch({
       query: searchInputValue,
       activeFilters: filters,
-      activeGender: showAllGenders ? "" : onboardingGender,
+      activeGender: showAllGenders ? undefined : onboardingGender,
       sort: sortBy,
       page: DEFAULT_PAGE,
     });
-  }, [showAllGenders, onboardingGender, runSearch]);
+  }, [
+    showAllGenders,
+    onboardingGender,
+    runSearch,
+    searchInputValue,
+    filters,
+    sortBy,
+  ]);
+
+  const activeFilterCount = getActiveFilterCount(filters);
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        overflowX: "hidden",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
-        <SearchPageHeader />
-        <CssBaseline />
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: colors.background,
+          color: colors.textPrimary,
+          overflowX: "hidden",
+          backgroundImage:
+            "radial-gradient(circle at top, rgba(89,230,219,0.06), transparent 30%)",
+        }}
+      >
+        <ProfileSearchPageHeader />
 
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <Container
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              px: 2,
-              py: 4,
-            }}
-          >
-            <Typography
-              variant="h5"
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-                textAlign: "center",
-                mb: 2,
-              }}
-            >
-              What clothes are we looking for today?
-            </Typography>
-
-            <UserDescriptionInput
-              value={searchInputValue}
-              onChange={(e) => setSearchInputValue(e.target.value)}
-              onSearchStart={handleSearchStart}
-              onSaveSearch={handleSaveSearch}
-              onSearchError={handleSearchError}
-              onSearchResults={(response) =>
-                handleSearchResults(response, false)
-              }
-              onSearchSubmit={(query) => {
-                suppressNextAutoSearch.current = true;
-                setSearchInputValue(query);
-                setCurrentPage(DEFAULT_PAGE);
-
-                return runSearch({
-                  query,
-                  activeFilters: filters,
-                  sort: sortBy,
-                  page: DEFAULT_PAGE,
-                });
-              }}
-              onOpenFilters={() => setIsFilterDrawerOpen(true)}
-              activeFilterCount={getActiveFilterCount(filters)}
-            />
-
-            <Box
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: { xs: "flex-start", md: "center" },
-                flexDirection: { xs: "column", md: "row" },
-                gap: 1,
-                mt: 1,
-                mb: 2,
-              }}
-            >
-              <FormControlLabel
-                sx={{ color: "white", ml: 0 }}
-                control={
-                  <Switch
-                    checked={showAllGenders}
-                    onChange={(e) => setShowAllGenders(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Show all genders"
-              />
-
-              {searchMeta.warnings.length > 0 && (
-                <Typography
-                  variant="body2"
-                  sx={{ color: "rgba(255,255,255,0.72)", textAlign: "right" }}
-                >
-                  {searchMeta.warnings.join(" • ")}
-                </Typography>
-              )}
-            </Box>
-
-            {isLoading && searchResults.length === 0 && (
-              <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-                <CircularProgress />
-              </Box>
-            )}
-
-            {!isLoading || searchResults.length > 0 ? (
-              <>
-                {searchInputValue.trim().length > 0 && (
-                  <SearchSortControls
-                    value={sortBy}
-                    onChange={handleSortChange}
-                    total={searchMeta.total}
-                  />
-                )}
-
-                {searchResults.length > 0 && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: { xs: "flex-start", md: "center" },
-                      flexDirection: { xs: "column", md: "row" },
-                      gap: 1,
-                      width: "100%",
-                      mb: 2,
-                    }}
-                  >
+        <Box component="main" sx={{ flex: 1 }}>
+          <Container maxWidth={layout.pageMax} sx={{ py: { xs: 4, md: 6 } }}>
+            <Stack spacing={3}>
+              <Box
+                sx={{
+                  ...heroPanelSx,
+                  px: { xs: 2.25, md: 3.5 },
+                  py: { xs: 2.5, md: 3.5 },
+                }}
+              >
+                <Stack spacing={2.25}>
+                  <Box>
                     <Typography
-                      variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.72)" }}
-                    >
-                      Showing {searchResults.length} of {searchMeta.total}{" "}
-                      results
-                    </Typography>
-
-                    <ToggleButtonGroup
-                      value={viewMode}
-                      exclusive
-                      onChange={handleViewChange}
-                      aria-label="view-mode"
-                    >
-                      <ToggleButton value="list" aria-label="list view">
-                        <ViewListIcon sx={{ color: "white" }} />
-                      </ToggleButton>
-                      <ToggleButton value="grid" aria-label="grid view">
-                        <ViewModuleIcon sx={{ color: "white" }} />
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                )}
-
-                <SearchResults
-                  results={searchResults}
-                  isLoading={isLoading && searchResults.length === 0}
-                  hasSearched={searchInputValue.trim().length > 0}
-                  query={searchInputValue}
-                  suggestions={[
-                    "Try a broader search like 'black dress' or 'oversized blazer'",
-                    "Remove one or two filters",
-                    "Search by occasion, color, or item type",
-                  ]}
-                  onSaveItem={handleSaveItem}
-                  viewMode={viewMode}
-                  userId={currentUser?.uid}
-                  filters={filters}
-                  onRemoveFilter={handleRemoveFilter}
-                  onClearAllFilters={handleClearAll}
-                />
-
-                {searchMeta.hasMore && searchResults.length > 0 && (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      mt: 3,
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      onClick={handleLoadMore}
-                      disabled={isLoading}
                       sx={{
-                        bgcolor: "turquoise",
-                        color: "black",
-                        fontWeight: "bold",
-                        textTransform: "none",
-                        "&:hover": { bgcolor: "darkturquoise" },
+                        color: colors.textPrimary,
+                        fontWeight: 850,
+                        fontSize: { xs: "1.7rem", md: "2.45rem" },
+                        lineHeight: 1.08,
+                        mb: 1,
                       }}
                     >
-                      {isLoading ? "Loading more..." : "Load more"}
-                    </Button>
+                      What clothes are we looking for today?
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        color: colors.textSecondary,
+                        maxWidth: 760,
+                        lineHeight: 1.75,
+                      }}
+                    >
+                      Search in plain language, refine the results, and save
+                      promising pieces as you go.
+                    </Typography>
                   </Box>
-                )}
-              </>
-            ) : null}
 
-            <FilterDrawer
-              open={isFilterDrawerOpen}
-              onClose={() => setIsFilterDrawerOpen(false)}
-              filters={filters}
-              onToggleFilter={handleToggleFilter}
-              onPriceChange={handlePriceChange}
-              onClearGroup={handleClearGroup}
-              onClearAll={handleClearAll}
-              onApply={handleApplyFilters}
-            />
+                  <UserDescriptionInput
+                    value={searchInputValue}
+                    onChange={(event) =>
+                      setSearchInputValue(event.target.value)
+                    }
+                    onSearchStart={() => {
+                      setIsLoading(true);
+                      setError(null);
+                    }}
+                    onSaveSearch={handleSaveSearch}
+                    onSearchError={(errorMessage) => {
+                      setError(errorMessage);
+                      setIsLoading(false);
+                    }}
+                    onSearchResults={(response) =>
+                      handleSearchResults(response, false)
+                    }
+                    onSearchSubmit={(query) => {
+                      suppressNextAutoSearch.current = true;
+                      setSearchInputValue(query);
+                      setCurrentPage(DEFAULT_PAGE);
 
-            <Snackbar
-              open={!!successMessage}
-              autoHideDuration={6000}
-              onClose={() => setSuccessMessage(null)}
-            >
-              <Alert
-                onClose={() => setSuccessMessage(null)}
-                severity="success"
-                sx={{ width: "100%" }}
-              >
-                {successMessage}
-              </Alert>
-            </Snackbar>
+                      return runSearch({
+                        query,
+                        activeFilters: filters,
+                        sort: sortBy,
+                        page: DEFAULT_PAGE,
+                      });
+                    }}
+                    onOpenFilters={() => setIsFilterDrawerOpen(true)}
+                    activeFilterCount={activeFilterCount}
+                  />
 
-            <Snackbar
-              open={!!error}
-              autoHideDuration={6000}
-              onClose={() => setError(null)}
-            >
-              <Alert
-                onClose={() => setError(null)}
-                severity="error"
-                sx={{ width: "100%" }}
-              >
-                {error}
-              </Alert>
-            </Snackbar>
+                  <Stack
+                    direction={{ xs: "column", lg: "row" }}
+                    spacing={1.5}
+                    alignItems={{ xs: "flex-start", lg: "center" }}
+                    justifyContent="space-between"
+                  >
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      useFlexGap
+                      flexWrap="wrap"
+                    >
+                      <Chip
+                        icon={<TuneIcon />}
+                        label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
+                        sx={{
+                          color: colors.textPrimary,
+                          bgcolor: colors.surface2,
+                          border: `1px solid ${colors.border}`,
+                        }}
+                      />
+                      <Chip
+                        icon={<AddIcon />}
+                        label={
+                          showAllGenders
+                            ? "All genders enabled"
+                            : "Using onboarding gender"
+                        }
+                        sx={{
+                          color: showAllGenders
+                            ? colors.accent
+                            : colors.textSecondary,
+                          bgcolor: showAllGenders
+                            ? colors.accentSoft
+                            : colors.surface2,
+                          border: `1px solid ${showAllGenders ? colors.accentBorder : colors.border}`,
+                        }}
+                      />
+                    </Stack>
+
+                    <FormControlLabel
+                      sx={{ color: colors.textPrimary, ml: 0 }}
+                      control={
+                        <Switch
+                          checked={showAllGenders}
+                          onChange={(event) =>
+                            setShowAllGenders(event.target.checked)
+                          }
+                          color="primary"
+                        />
+                      }
+                      label="Show all genders"
+                    />
+                  </Stack>
+
+                  {searchMeta.warnings.length > 0 ? (
+                    <Typography
+                      sx={{ color: colors.textMuted, fontSize: "0.92rem" }}
+                    >
+                      {searchMeta.warnings.join(" ")}
+                    </Typography>
+                  ) : null}
+                </Stack>
+              </Box>
+
+              {searchResults.length > 0 || isLoading ? (
+                <SearchSortBar
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  total={searchMeta.total}
+                  visibleCount={searchResults.length}
+                  viewMode={viewMode}
+                  onViewChange={setViewMode}
+                />
+              ) : null}
+
+              <SearchResults
+                results={searchResults}
+                isLoading={isLoading}
+                hasSearched={searchInputValue.trim().length > 0}
+                query={searchInputValue}
+                suggestions={[
+                  "Try a broader search like black dress or oversized blazer",
+                  "Remove one or two filters",
+                  "Search by occasion, color, or item type",
+                ]}
+                onSaveItem={handleSaveItem}
+                viewMode={viewMode}
+                userId={currentUser?.uid}
+                filters={filters}
+                onRemoveFilter={handleRemoveFilter}
+                onClearAllFilters={handleClearAll}
+              />
+
+              {searchMeta.hasMore && searchResults.length > 0 ? (
+                <Box
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    mt: 1,
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    onClick={handleLoadMore}
+                    disabled={isLoading}
+                    sx={primaryButtonSx}
+                  >
+                    {isLoading ? "Loading more..." : "Load more"}
+                  </Button>
+                </Box>
+              ) : null}
+            </Stack>
           </Container>
         </Box>
 
+        <FilterDrawer
+          open={isFilterDrawerOpen}
+          onClose={() => setIsFilterDrawerOpen(false)}
+          filters={filters}
+          onToggleFilter={handleToggleFilter}
+          onPriceChange={handlePriceChange}
+          onClearGroup={handleClearGroup}
+          onClearAll={handleClearAll}
+          onApply={handleApplyFilters}
+        />
+
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={5000}
+          onClose={() => setSuccessMessage(null)}
+        >
+          <Alert
+            onClose={() => setSuccessMessage(null)}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
+        >
+          <Alert
+            onClose={() => setError(null)}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {error}
+          </Alert>
+        </Snackbar>
+
         <Footer />
-      </ThemeProvider>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
-};
+}
 
 export default SearchPage;

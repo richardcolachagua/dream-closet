@@ -1,65 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
-  Container,
-  Typography,
-  Stack,
   Box,
-  CssBaseline,
   Button,
+  Container,
+  CssBaseline,
+  Stack,
+  Typography,
 } from "@mui/material";
-import Header from "../../../shared/ui/navigation/PublicHeader.jsx";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import AnimatedSearchBar from "../components/AnimatedSearchBar.jsx";
-import LayoutContainer from "../../../shared/ui/layout/LayoutContainer.jsx";
-import Footer from "../../../shared/ui/navigation/Footer.jsx";
-import ProfileFeatures from "../../profile/components/ProfileFeatures.jsx";
 import { Link as RouterLink } from "react-router-dom";
-import { keyframes } from "@mui/system";
+import Header from "../../../shared/ui/navigation/PublicHeader.jsx";
+import Footer from "../../../shared/ui/navigation/Footer.jsx";
+import SearchHeroDemo from "../components/SearchHeroDemo.jsx";
+import ValuePropsSection from "../components/ValuePropsSection.jsx";
+import HowItWorksSection from "../components/HowItWorksSection.jsx";
+import RetailerTrustSection from "../components/RetailerTrustSection.jsx";
+import PersonalizationSection from "../components/PersonalizationSection.jsx";
+import {
+  colors,
+  layout,
+  spacing,
+  typography,
+} from "../../../shared/ui/theme/designTokens";
+import {
+  primaryButtonSx,
+  secondaryButtonSx,
+  sectionEyebrowSx,
+  heroPanelSx,
+} from "../../../shared/ui/theme/componentStyles";
 
-const fadeFromAbove = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+const defaultTheme = createTheme();
 
-const fadeUp = keyframes`
-0% {opacity: 0; transform: translateY(20px); }
-100% {opacity: 1; transform: translateY(0); }
-`;
-
-const HomePage = () => {
-  const defaultTheme = createTheme();
-
-  // state to trigger animation on mount
-  const [show, setShow] = useState(false);
-
-  // Typing effect states
-  const fullText = "The New Way To Search For Your Next Outfit";
-  const [typedText, setTypedText] = useState("");
-
-  useEffect(() => {
-    // Trigger animation once on mount
-    setShow(true);
-  }, []);
-
-  useEffect(() => {
-    // Typewriter effect for subheading
-    let index = 0;
-    const interval = setInterval(() => {
-      setTypedText(fullText.slice(0, index + 1));
-      index++;
-      if (index === fullText.length) {
-        clearInterval(interval);
-      }
-    }, 50); // Speed here -> 50ms per letter
-    return () => clearInterval(interval);
-  }, []);
-
+function HomePage() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
@@ -68,186 +40,99 @@ const HomePage = () => {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "black",
+          bgcolor: colors.background,
+          color: colors.textPrimary,
+          backgroundImage:
+            "radial-gradient(circle at top, rgba(89,230,219,0.08), transparent 30%)",
         }}
       >
         <Header />
-        {/* Main content area grows to fill space, pushing footer down */}
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <Container
-            maxWidth="lg"
-            sx={{
-              flexShrink: 0,
-              display: "flex",
-              flexDirection: "column",
-              py: 4,
-            }}
-          >
-            <Typography
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                color: "white",
-                fontFamily: "sans-serif",
-                fontSize: { xs: "2vw", sm: "4vw", md: "6vw", lg: "8vw" },
-                animation: show
-                  ? `${fadeFromAbove} 0.5s ease-out forwards`
-                  : "none",
-              }}
-            >
-              Dream Closet
-            </Typography>
-            <Typography
-              variant="h6"
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                color: "white",
-                fontFamily: "helvetica",
-                fontSize: { xs: "15px", sm: "25px", md: "30px", lg: "35px" },
-                mt: 2,
-                whiteSpace: "pre-wrap",
-              }}
-            >
-              {typedText}
-              <Box
-                component="span"
-                sx={{
-                  display: "inline-block",
-                  width: "1ch",
-                  bgcolor: "white",
-                  animation: "blink 1s step-start infinite",
-                  "@keyframes blink": {
-                    "50%": { opacity: 0 },
-                  },
-                }}
-              />
-            </Typography>
-          </Container>
 
-          {/* FULL-WIDTH BLACK BACKGROUND SECTION */}
-          <Box
-            sx={{
-              width: "100%",
-              py: 6,
-              position: "relative",
-              overflow: "hidden",
-              flexShrink: 0,
-            }}
-          >
-            <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
-              <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={4}
-                alignItems="center"
-                justifyContent="center"
-                flexWrap="wrap"
+        <Box component="main" sx={{ flex: 1 }}>
+          <Container maxWidth={layout.pageMax} sx={{ py: spacing.section }}>
+            <Stack spacing={4}>
+              <Box
+                sx={{
+                  ...heroPanelSx,
+                  px: { xs: 2.5, md: 5 },
+                  py: { xs: 4, md: 6 },
+                }}
               >
-                <Box
-                  sx={{
-                    flex: 1,
-                    maxWidth: "600px",
-                    animation: `${fadeUp} 0.8s ease-out both`,
-                  }}
-                >
+                <Stack spacing={3} alignItems="center" textAlign="center">
+                  <Box sx={sectionEyebrowSx}>Fashion search, rethought</Box>
+
                   <Typography
-                    variant="h4"
-                    align="center"
                     sx={{
-                      fontWeight: "bold",
-                      color: "turquoise",
-                      fontFamily: "helvetica",
-                      fontSize: {
-                        xs: "15px",
-                        sm: "25px",
-                        md: "35px",
-                        lg: "45px",
-                      },
-                      background:
-                        "linear-gradient(90deg, turquoise, violet, turquoise)",
-                      backgroundSize: "200% auto",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      animation: "gradientMove 3s linear infinite",
-                      "@keyframes gradientMove": {
-                        to: { backgroundPosition: "200% center" },
-                      },
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      fontSize: typography.heroTitle,
+                      maxWidth: 980,
                     }}
                   >
-                    Dream Closet is a clothing search engine that allows you to
-                    search for exactly what you are looking for. Looking for a
-                    specific set of heels? Dream Closet can find it. Looking for
-                    a blue and white spotted button down shirt for the summer?
-                    Dream Closet can help you find it. Sign up today to get
-                    started.
+                    Find the clothes you actually mean to search for
                   </Typography>
-                </Box>
-                <Box
-                  component="img"
-                  src="/assets/AI-driven_clothing_search.png"
-                  alt="ai-driven-clothing"
-                  sx={{
-                    width: "100%",
-                    maxWidth: "400px",
-                    objectFit: "contain",
-                    mx: "auto",
-                  }}
-                />
-              </Stack>
-            </Container>
-          </Box>
 
-          <Container
-            maxWidth="lg"
-            sx={{ flex: 1, display: "flex", flexDirection: "column", py: 4 }}
-          >
-            <Box>
-              <AnimatedSearchBar />
-              <LayoutContainer />
-            </Box>
-            <Typography
-              variant="h3"
-              align="center"
-              sx={{
-                fontFamily: "helvetica",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: { xs: "1rem", sm: "2rem", md: "3rem" },
-                my: 4,
-              }}
-            >
-              The more you use Dream Closet, the more it recognizes your taste
-              in clothing.
-            </Typography>
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
-              <Button
-                variant="contained"
-                size="large"
-                component={RouterLink}
-                to="/freesearchpage"
-                sx={{
-                  borderRadius: "20px",
-                  textTransform: "none",
-                  fontSize: "25px",
-                  fontWeight: "bold",
-                  backgroundColor: "turquoise",
-                  color: "black",
-                }}
-              >
-                Try a Search Here
-              </Button>
-            </Box>
+                  <Typography
+                    sx={{
+                      color: colors.textSecondary,
+                      fontSize: typography.heroBody,
+                      maxWidth: layout.textMaxWidth,
+                      lineHeight: 1.75,
+                    }}
+                  >
+                    Dream Closet helps you search for clothing in natural
+                    language, discover options across more retail sources, and
+                    build a smarter shopping experience around your taste.
+                  </Typography>
+
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+                    <Button
+                      component={RouterLink}
+                      to="/freesearchpage"
+                      variant="contained"
+                      sx={primaryButtonSx}
+                    >
+                      Try a free search
+                    </Button>
+                    <Button
+                      component={RouterLink}
+                      to="/signuppage"
+                      variant="outlined"
+                      sx={secondaryButtonSx}
+                    >
+                      Create your account
+                    </Button>
+                  </Stack>
+
+                  <Box sx={{ width: "100%", maxWidth: 760, pt: 1 }}>
+                    <SearchHeroDemo />
+                  </Box>
+                </Stack>
+              </Box>
+
+              <Box sx={{ py: spacing.sectionTight }}>
+                <ValuePropsSection />
+              </Box>
+
+              <Box sx={{ py: spacing.sectionTight }}>
+                <HowItWorksSection />
+              </Box>
+
+              <Box sx={{ py: spacing.sectionTight }}>
+                <RetailerTrustSection />
+              </Box>
+
+              <Box sx={{ py: spacing.sectionTight }}>
+                <PersonalizationSection />
+              </Box>
+            </Stack>
           </Container>
-
-          <ProfileFeatures />
         </Box>
+
         <Footer />
       </Box>
     </ThemeProvider>
   );
-};
+}
 
 export default HomePage;

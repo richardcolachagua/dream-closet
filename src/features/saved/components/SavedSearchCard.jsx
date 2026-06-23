@@ -1,40 +1,23 @@
+import React, { useMemo } from "react";
 import {
-  Card,
-  CardContent,
-  Typography,
   Box,
-  IconButton,
-  Tooltip,
   Checkbox,
   Chip,
+  IconButton,
   Stack,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import SearchIcon from "@mui/icons-material/Search";
-
-const cardHover = {
-  boxShadow: "0 2px 12px rgba(0,0,0,0.15), 0 8px 30px rgba(30,180,220,0.10)",
-  backgroundColor: "#181818",
-  color: "white",
-  borderRadius: "18px",
-  minWidth: 270,
-  mx: "auto",
-  overflow: "hidden",
-  cursor: "pointer",
-  transition: "box-shadow 0.22s, transform 0.18s, border 0.22s, color 0.22s",
-  border: "2px solid transparent",
-  "&:hover": {
-    boxShadow: "0 12px 36px #30e3ca44, 0 2px 18px #2626f533",
-    border: "2px solid #30e3ca",
-    color: "#30e3ca",
-    transform: "scale(1.035) translateY(-6px)",
-  },
-};
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import { colors } from "../../../shared/ui/theme/designTokens";
+import { interactiveCardSx } from "../../../shared/ui/theme/componentStyles";
 
 const SORT_LABELS = {
   relevance: "Relevance",
-  price_asc: "Price: Low to High",
-  price_desc: "Price: High to Low",
+  priceasc: "Price low to high",
+  pricedesc: "Price high to low",
   newest: "Newest",
 };
 
@@ -51,8 +34,8 @@ const FILTER_LABELS = {
 };
 
 const formatFilterLabel = (key, value) => {
-  if (key === "priceMin") return `Min $${value}`;
-  if (key === "priceMax") return `Max $${value}`;
+  if (key === "priceMin") return `Min ${value}`;
+  if (key === "priceMax") return `Max ${value}`;
   return `${FILTER_LABELS[key] || key}: ${value}`;
 };
 
@@ -67,18 +50,18 @@ const getFilterChips = (filters = {}) => {
           label: formatFilterLabel(key, item),
         });
       });
-    } else if (value !== "" && value !== null && value !== undefined) {
-      chips.push({
-        key,
-        label: formatFilterLabel(key, value),
-      });
+      return;
+    }
+
+    if (value !== "" && value !== null && value !== undefined) {
+      chips.push({ key, label: formatFilterLabel(key, value) });
     }
   });
 
   return chips;
 };
 
-const SavedSearchCard = ({
+function SavedSearchCard({
   query,
   date,
   filters = {},
@@ -88,110 +71,120 @@ const SavedSearchCard = ({
   onClick,
   selected,
   onSelect,
-}) => {
-  const filterChips = getFilterChips(filters);
+}) {
+  const filterChips = useMemo(() => getFilterChips(filters), [filters]);
   const visibleChips = filterChips.slice(0, 3);
-  const remainingChipCount = filterChips.length - visibleChips.length;
+  const remainingChipCount = Math.max(
+    filterChips.length - visibleChips.length,
+    0,
+  );
 
   return (
-    <Card
-      sx={{
-        ...cardHover,
-        position: "relative",
-        border: selected ? "2.5px solid #ffd700" : cardHover.border,
-        background: selected ? "#212125" : cardHover.backgroundColor,
-      }}
+    <Box
       onClick={onClick}
       tabIndex={0}
+      role="button"
       aria-label={`Saved search ${query}`}
-      elevation={3}
+      sx={{
+        ...interactiveCardSx,
+        height: "100%",
+        cursor: "pointer",
+        border: selected
+          ? `1px solid ${colors.accent}`
+          : interactiveCardSx.border,
+        boxShadow: selected
+          ? "0 0 0 1px rgba(89,230,219,0.26), 0 14px 32px rgba(0,0,0,0.22)"
+          : interactiveCardSx.boxShadow,
+      }}
     >
-      <CardContent sx={{ pb: 1, pt: 2, px: 2.5 }}>
-        <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
-          <SearchIcon
-            sx={{ color: "#30e3ca", mr: 1, fontSize: 27, mt: 0.25 }}
-          />
+      <Stack spacing={2}>
+        <Stack direction="row" alignItems="flex-start" spacing={1.5}>
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: 2.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: colors.accentSoft,
+              color: colors.accent,
+              flexShrink: 0,
+            }}
+          >
+            <SearchIcon />
+          </Box>
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
-              variant="h6"
               sx={{
-                color: "#fff",
-                fontWeight: 600,
-                lineHeight: 1.25,
+                color: colors.textPrimary,
+                fontWeight: 800,
+                fontSize: "1.04rem",
+                lineHeight: 1.4,
                 wordBreak: "break-word",
               }}
             >
               {query}
             </Typography>
 
-            <Typography variant="body2" sx={{ color: "#bbb", mt: 0.75 }}>
-              {date ? `Saved: ${date}` : "Not yet run"}
+            <Typography
+              sx={{ color: colors.textMuted, mt: 0.65, fontSize: "0.92rem" }}
+            >
+              {date ? `Saved ${date}` : "Saved search"}
             </Typography>
           </Box>
 
-          {typeof onSelect === "function" && (
+          {typeof onSelect === "function" ? (
             <Checkbox
               checked={!!selected}
-              onChange={(e) => {
-                e.stopPropagation();
+              onChange={(event) => {
+                event.stopPropagation();
                 onSelect();
               }}
-              color="info"
-              sx={{ ml: 1 }}
+              sx={{
+                color: colors.textMuted,
+                "&.Mui-checked": { color: colors.accent },
+              }}
               inputProps={{ "aria-label": `Select search ${query}` }}
             />
-          )}
-        </Box>
+          ) : null}
+        </Stack>
 
-        <Stack
-          direction="row"
-          spacing={1}
-          useFlexGap
-          flexWrap="wrap"
-          sx={{ mt: 1.5 }}
-        >
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
           <Chip
             size="small"
             label={`Sort: ${SORT_LABELS[sort] || sort}`}
             sx={{
-              bgcolor: "rgba(48,227,202,0.12)",
-              color: "#30e3ca",
-              border: "1px solid rgba(48,227,202,0.35)",
+              bgcolor: colors.accentSoft,
+              color: colors.accent,
+              border: `1px solid ${colors.accentBorder}`,
             }}
           />
-          {page > 1 && (
-            <Chip
-              size="small"
-              label={`Page ${page}`}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.08)",
-                color: "#ddd",
-                border: "1px solid rgba(255,255,255,0.14)",
-              }}
-            />
-          )}
-          {filterChips.length > 0 && (
+          <Chip
+            size="small"
+            label={`Page ${page}`}
+            sx={{
+              bgcolor: colors.surface2,
+              color: colors.textSecondary,
+              border: `1px solid ${colors.border}`,
+            }}
+          />
+          {filterChips.length > 0 ? (
             <Chip
               size="small"
               label={`${filterChips.length} filter${filterChips.length === 1 ? "" : "s"}`}
               sx={{
-                bgcolor: "rgba(255,215,0,0.12)",
-                color: "#ffd700",
-                border: "1px solid rgba(255,215,0,0.28)",
+                bgcolor: "rgba(255,255,255,0.04)",
+                color: colors.textPrimary,
+                border: `1px solid ${colors.border}`,
               }}
             />
-          )}
+          ) : null}
         </Stack>
 
-        {filterChips.length > 0 && (
-          <Stack
-            direction="row"
-            spacing={1}
-            useFlexGap
-            flexWrap="wrap"
-            sx={{ mt: 1.5 }}
-          >
+        {filterChips.length > 0 ? (
+          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
             {visibleChips.map((chip) => (
               <Chip
                 key={chip.key}
@@ -199,10 +192,10 @@ const SavedSearchCard = ({
                 label={chip.label}
                 sx={{
                   maxWidth: "100%",
-                  bgcolor: "rgba(255,255,255,0.05)",
-                  color: "#f4f4f4",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  ".MuiChip-label": {
+                  bgcolor: colors.surface2,
+                  color: colors.textSecondary,
+                  border: `1px solid ${colors.border}`,
+                  "& .MuiChip-label": {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -210,55 +203,63 @@ const SavedSearchCard = ({
                 }}
               />
             ))}
-
-            {remainingChipCount > 0 && (
+            {remainingChipCount > 0 ? (
               <Chip
                 size="small"
                 label={`+${remainingChipCount} more`}
                 sx={{
-                  bgcolor: "rgba(255,255,255,0.08)",
-                  color: "#bbb",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  bgcolor: colors.surface2,
+                  color: colors.textMuted,
+                  border: `1px solid ${colors.border}`,
                 }}
               />
-            )}
+            ) : null}
           </Stack>
-        )}
-      </CardContent>
+        ) : null}
 
-      <Box
-        sx={{
-          px: 2,
-          py: 1,
-          display: "flex",
-          alignItems: "center",
-          borderTop: "1px solid #232232",
-          mt: 2,
-          bgcolor: "rgba(30,180,220,0.06)",
-        }}
-      >
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="caption" sx={{ color: "#8fded6" }}>
-            Tap to rerun search
-          </Typography>
-        </Box>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={1}
+          sx={{
+            pt: 1,
+            borderTop: `1px solid ${colors.border}`,
+          }}
+        >
+          <Stack direction="row" spacing={0.75} alignItems="center">
+            <ArrowOutwardIcon sx={{ color: colors.accent, fontSize: 18 }} />
+            <Typography
+              sx={{ color: colors.textSecondary, fontSize: "0.9rem" }}
+            >
+              Run this search again
+            </Typography>
+          </Stack>
 
-        <Tooltip title="Delete saved search" arrow>
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            size="large"
-            edge="end"
-            aria-label="delete search"
-          >
-            <DeleteIcon sx={{ color: "#30e3ca", fontSize: 27 }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </Card>
+          <Tooltip title="Delete saved search">
+            <IconButton
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete();
+              }}
+              aria-label="Delete saved search"
+              sx={{
+                color: colors.textMuted,
+                border: `1px solid ${colors.border}`,
+                "&:hover": {
+                  color: colors.danger,
+                  borderColor: "rgba(255,127,150,0.35)",
+                  bgcolor: "rgba(255,127,150,0.08)",
+                },
+              }}
+            >
+              <DeleteOutlineIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Stack>
+    </Box>
   );
-};
+}
 
 export default SavedSearchCard;

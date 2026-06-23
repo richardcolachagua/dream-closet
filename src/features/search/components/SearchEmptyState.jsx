@@ -1,7 +1,10 @@
+import React from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { colors } from "../../../shared/ui/theme/designTokens";
+import { primaryButtonSx } from "../../../shared/ui/theme/componentStyles";
 
 const defaultSuggestions = [
   "Try a broader clothing term",
@@ -25,94 +28,93 @@ function SearchEmptyState({
       : "No results found";
 
   const description = !hasSearched
-    ? "Describe what you want to wear, then we’ll gather matching items across sources."
+    ? "Describe what you want to wear, and Dream Closet will surface matching pieces across available sources."
     : isFilteredEmpty
-      ? `We couldn’t find items for “${query}” with the current filters. Try clearing a few filters or broadening the description.`
-      : `We couldn’t find matches for “${query}”. Try a simpler phrase, another clothing term, or a broader style description.`;
+      ? `We couldn’t find items for "${query}" with the current filters. Try clearing a few filters or broadening the description.`
+      : `We couldn’t find matches for "${query}". Try a simpler phrase, another clothing term, or a broader style description.`;
 
   return (
     <Box
       sx={{
         width: "100%",
-        borderRadius: 3,
-        border: "1px dashed rgba(255,255,255,0.15)",
-        bgcolor: "rgba(255,255,255,0.03)",
-        color: "white",
-        px: { xs: 3, sm: 5 },
-        py: { xs: 5, sm: 7 },
-        textAlign: "center",
+        borderRadius: 5,
+        border: `1px dashed ${colors.borderStrong}`,
+        bgcolor: colors.surfaceSoft,
+        color: colors.textPrimary,
+        px: { xs: 2.5, sm: 5 },
+        py: { xs: 4.5, sm: 6.5 },
       }}
     >
-      <Box
-        sx={{
-          width: 64,
-          height: 64,
-          borderRadius: "50%",
-          mx: "auto",
-          mb: 2,
-          display: "grid",
-          placeItems: "center",
-          bgcolor: "rgba(64,224,208,0.12)",
-          color: "turquoise",
-        }}
-      >
-        <SearchOffIcon sx={{ fontSize: 32 }} />
-      </Box>
-
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 1.5 }}>
-        {title}
-      </Typography>
-
-      <Typography
-        variant="body1"
-        sx={{
-          color: "rgba(255,255,255,0.72)",
-          maxWidth: 620,
-          mx: "auto",
-          mb: 3,
-        }}
-      >
-        {description}
-      </Typography>
-
-      <Stack
-        direction="row"
-        spacing={1}
-        useFlexGap
-        flexWrap="wrap"
-        justifyContent="center"
-        sx={{ mb: 3 }}
-      >
-        {suggestions.map((suggestion, index) => (
-          <Chip
-            key={`${suggestion}-${index}`}
-            icon={<AutoAwesomeIcon />}
-            label={suggestion}
-            sx={{
-              color: "white",
-              borderColor: "rgba(255,255,255,0.14)",
-              bgcolor: "rgba(255,255,255,0.04)",
-            }}
-            variant="outlined"
-          />
-        ))}
-      </Stack>
-
-      {isFilteredEmpty && onClearAllFilters && (
-        <Button
-          variant="contained"
-          startIcon={<RestartAltIcon />}
-          onClick={onClearAllFilters}
+      <Stack spacing={2.5} alignItems="center" textAlign="center">
+        <Box
           sx={{
-            bgcolor: "turquoise",
-            color: "black",
-            fontWeight: 700,
-            "&:hover": { bgcolor: "darkturquoise" },
+            width: 68,
+            height: 68,
+            borderRadius: "50%",
+            display: "grid",
+            placeItems: "center",
+            bgcolor: colors.accentSoft,
+            color: colors.accent,
           }}
         >
-          Clear all filters
-        </Button>
-      )}
+          <SearchOffIcon sx={{ fontSize: 34 }} />
+        </Box>
+
+        <Box>
+          <Typography
+            sx={{
+              fontWeight: 850,
+              fontSize: { xs: "1.5rem", md: "1.9rem" },
+              mb: 1,
+            }}
+          >
+            {title}
+          </Typography>
+
+          <Typography
+            sx={{
+              color: colors.textSecondary,
+              maxWidth: 660,
+              mx: "auto",
+              lineHeight: 1.75,
+            }}
+          >
+            {description}
+          </Typography>
+        </Box>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          flexWrap="wrap"
+          justifyContent="center"
+        >
+          {suggestions.map((suggestion, index) => (
+            <Chip
+              key={`${suggestion}-${index}`}
+              icon={<AutoAwesomeIcon />}
+              label={suggestion}
+              sx={{
+                color: colors.textPrimary,
+                border: `1px solid ${colors.border}`,
+                bgcolor: colors.surface2,
+              }}
+            />
+          ))}
+        </Stack>
+
+        {isFilteredEmpty && onClearAllFilters ? (
+          <Button
+            variant="contained"
+            startIcon={<RestartAltIcon />}
+            onClick={onClearAllFilters}
+            sx={primaryButtonSx}
+          >
+            Clear all filters
+          </Button>
+        ) : null}
+      </Stack>
     </Box>
   );
 }

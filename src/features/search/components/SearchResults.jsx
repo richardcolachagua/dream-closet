@@ -1,14 +1,9 @@
-import {
-  Box,
-  Chip,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography,
-  Button,
-} from "@mui/material";
-import SearchResultCard from "../../search/components/SearchResultCard";
-import SearchEmptyState from "../../search/components/SearchEmptyState";
+import React from "react";
+import { Box, Button, Chip, Grid, Stack, Typography } from "@mui/material";
+import SearchResultCard from "./SearchResultCard";
+import SearchEmptyState from "./SearchEmptyState";
+import SearchResultsSkeleton from "./SearchResultsSkeleton";
+import { colors } from "../../../shared/ui/theme/designTokens";
 
 const FILTER_LABELS = {
   gender: "Gender",
@@ -22,7 +17,7 @@ const FILTER_LABELS = {
   priceMax: "Max price",
 };
 
-const buildFilterChips = ({ filters, onRemoveFilter }) => {
+const buildFilterChips = (filters, onRemoveFilter) => {
   if (!filters) return [];
 
   const chips = [];
@@ -38,7 +33,10 @@ const buildFilterChips = ({ filters, onRemoveFilter }) => {
           label: `${labelKey}: ${item}`,
         });
       });
-    } else if (value !== "" && value !== null && value !== undefined) {
+      return;
+    }
+
+    if (value !== "" && value !== null && value !== undefined) {
       chips.push({
         key,
         value,
@@ -55,15 +53,15 @@ const buildFilterChips = ({ filters, onRemoveFilter }) => {
         onRemoveFilter ? () => onRemoveFilter(chip.key, chip.value) : undefined
       }
       sx={{
-        bgcolor: "rgba(255,255,255,0.05)",
-        color: "white",
-        border: "1px solid rgba(255,255,255,0.12)",
+        bgcolor: colors.surface2,
+        color: colors.textPrimary,
+        border: `1px solid ${colors.border}`,
         height: 34,
         "& .MuiChip-deleteIcon": {
-          color: "rgba(255,255,255,0.6)",
+          color: colors.textMuted,
         },
         "& .MuiChip-deleteIcon:hover": {
-          color: "turquoise",
+          color: colors.accent,
         },
       }}
     />
@@ -75,7 +73,7 @@ function SearchResults({
   isLoading = false,
   hasSearched = false,
   query = "",
-  suggestions = [],
+  suggestions,
   onSaveItem,
   viewMode = "grid",
   userId,
@@ -83,58 +81,23 @@ function SearchResults({
   onRemoveFilter,
   onClearAllFilters,
 }) {
-  const activeFilterChips = buildFilterChips({ filters, onRemoveFilter });
+  const activeFilterChips = buildFilterChips(filters, onRemoveFilter);
   const hasResults = results.length > 0;
 
   if (isLoading) {
     return (
       <Box sx={{ width: "100%" }}>
         <Typography
-          variant="h6"
-          sx={{ color: "white", mb: 2.5, fontWeight: 700 }}
+          sx={{
+            color: colors.textPrimary,
+            mb: 2.5,
+            fontWeight: 800,
+            fontSize: "1.15rem",
+          }}
         >
           Finding matching pieces...
         </Typography>
-
-        <Grid container spacing={2.5}>
-          {Array.from({ length: viewMode === "list" ? 4 : 8 }).map(
-            (_, index) => (
-              <Grid
-                key={index}
-                item
-                xs={12}
-                sm={viewMode === "list" ? 12 : 6}
-                md={viewMode === "list" ? 12 : 4}
-                lg={viewMode === "list" ? 12 : 3}
-              >
-                <Box
-                  sx={{
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    bgcolor: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  <Skeleton
-                    variant="rectangular"
-                    height={280}
-                    animation="wave"
-                  />
-                  <Box sx={{ p: 2 }}>
-                    <Skeleton width="42%" height={26} animation="wave" />
-                    <Skeleton width="88%" height={30} animation="wave" />
-                    <Skeleton width="54%" height={24} animation="wave" />
-                    <Skeleton width="36%" height={28} animation="wave" />
-                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                      <Skeleton width={70} height={28} animation="wave" />
-                      <Skeleton width={90} height={28} animation="wave" />
-                    </Stack>
-                  </Box>
-                </Box>
-              </Grid>
-            ),
-          )}
-        </Grid>
+        <SearchResultsSkeleton viewMode={viewMode} />
       </Box>
     );
   }
@@ -154,35 +117,40 @@ function SearchResults({
   return (
     <Box sx={{ width: "100%" }}>
       <Stack
-        direction={{ xs: "column", md: "row" }}
+        direction={{ xs: "column", lg: "row" }}
         justifyContent="space-between"
-        alignItems={{ xs: "flex-start", md: "center" }}
+        alignItems={{ xs: "flex-start", lg: "center" }}
         spacing={1.5}
         sx={{ mb: 2.5 }}
       >
         <Box>
-          <Typography variant="h6" sx={{ color: "white", fontWeight: 700 }}>
+          <Typography
+            sx={{
+              color: colors.textPrimary,
+              fontWeight: 800,
+              fontSize: "1.15rem",
+            }}
+          >
             {results.length} result{results.length === 1 ? "" : "s"}
-            {query ? ` for “${query}”` : ""}
+            {query ? ` for "${query}"` : ""}
           </Typography>
 
-          {activeFilterChips.length > 0 && (
+          {activeFilterChips.length > 0 ? (
             <Typography
-              variant="body2"
-              sx={{ color: "rgba(255,255,255,0.68)", mt: 0.5 }}
+              sx={{ color: colors.textMuted, mt: 0.5, fontSize: "0.94rem" }}
             >
               Narrowed by {activeFilterChips.length} active filter
-              {activeFilterChips.length === 1 ? "" : "s"}
+              {activeFilterChips.length === 1 ? "" : "s"}.
             </Typography>
-          )}
+          ) : null}
         </Box>
 
-        {activeFilterChips.length > 0 && (
+        {activeFilterChips.length > 0 ? (
           <Button
             onClick={onClearAllFilters}
             sx={{
-              color: "turquoise",
-              fontWeight: 700,
+              color: colors.accent,
+              fontWeight: 800,
               textTransform: "none",
               px: 0,
               minWidth: "auto",
@@ -190,10 +158,10 @@ function SearchResults({
           >
             Clear all filters
           </Button>
-        )}
+        ) : null}
       </Stack>
 
-      {activeFilterChips.length > 0 && (
+      {activeFilterChips.length > 0 ? (
         <Stack
           direction="row"
           spacing={1}
@@ -203,17 +171,22 @@ function SearchResults({
         >
           {activeFilterChips}
         </Stack>
-      )}
+      ) : null}
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={3}>
         {results.map((result, index) => (
           <Grid
             item
-            key={`${result.itemId || "no-id"}-${result.productUrl || result.name || "item"}-${index}`}
+            key={
+              result.itemId ||
+              result.productUrl ||
+              result.name ||
+              `item-${index}`
+            }
             xs={12}
             sm={viewMode === "list" ? 12 : 6}
-            md={viewMode === "list" ? 12 : 4}
-            lg={viewMode === "list" ? 12 : 3}
+            lg={viewMode === "list" ? 12 : 4}
+            sx={{ display: "flex" }}
           >
             <SearchResultCard
               result={result}

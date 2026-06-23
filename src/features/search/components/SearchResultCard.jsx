@@ -1,22 +1,19 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
+import React from "react";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LaunchIcon from "@mui/icons-material/Launch";
+import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
+import { colors } from "../../../shared/ui/theme/designTokens";
+import {
+  interactiveCardSx,
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../../../shared/ui/theme/componentStyles";
 
 const formatPrice = (result) => {
   if (result?.price && String(result.price).trim()) return result.price;
-  if (typeof result?.numericPrice === "number") {
+  if (typeof result?.numericPrice === "number")
     return `$${result.numericPrice.toFixed(2)}`;
-  }
   return "Price unavailable";
 };
 
@@ -26,8 +23,6 @@ const getSourceLabel = (source) => {
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
-
-const fallbackImage = "/assets/fallback-product-image.png";
 
 function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
   const {
@@ -45,115 +40,91 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
   } = result || {};
 
   const isList = viewMode === "list";
+
   const detailChips = [brand, category, color, size, gender, material]
     .filter(Boolean)
-    .slice(0, 4);
-
-  const handleOpenProduct = () => {
-    if (productUrl) {
-      window.open(productUrl, "_blank", "noopener,noreferrer");
-    }
-  };
+    .slice(0, 5);
 
   const handleSave = () => {
-    if (onSaveItem) {
-      onSaveItem(result);
-    }
+    if (onSaveItem) onSaveItem(result);
   };
 
   return (
-    <Card
+    <Box
       sx={{
-        display: "flex",
-        flexDirection: isList ? { xs: "column", md: "row" } : "column",
+        ...interactiveCardSx,
+        p: 0,
         height: "100%",
-        minHeight: isList ? "unset" : 470,
-        borderRadius: 3,
-        backgroundColor: "#111",
-        color: "white",
-        border: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: "0 10px 28px rgba(0,0,0,0.22)",
         overflow: "hidden",
       }}
     >
-      <CardMedia
-        component="img"
-        image={imageUrl || fallbackImage}
-        alt={name || "Search result image"}
-        onError={(event) => {
-          event.currentTarget.src = fallbackImage;
-        }}
+      <Box
         sx={{
-          width: isList ? { xs: "100%", md: 240 } : "100%",
-          height: isList ? { xs: 280, md: "auto" } : 290,
-          objectFit: "cover",
-          backgroundColor: "rgba(255,255,255,0.04)",
+          display: "flex",
+          flexDirection: isList ? { xs: "column", md: "row" } : "column",
+          height: "100%",
         }}
-      />
-
-      <Box sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
-        <CardContent sx={{ flex: 1, p: 2.25 }}>
-          <Stack
-            direction="row"
-            spacing={1}
-            useFlexGap
-            flexWrap="wrap"
-            sx={{ mb: 1.5 }}
-          >
-            <Chip
-              label={getSourceLabel(source)}
-              size="small"
+      >
+        <Box
+          sx={{
+            width: isList ? { xs: "100%", md: 250 } : "100%",
+            minWidth: isList ? { md: 250 } : "auto",
+            aspectRatio: isList ? { xs: "4 / 5", md: "auto" } : "4 / 5",
+            bgcolor: colors.surface2,
+            borderBottom: isList
+              ? { xs: `1px solid ${colors.border}`, md: "none" }
+              : `1px solid ${colors.border}`,
+            borderRight: isList ? { md: `1px solid ${colors.border}` } : "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+          }}
+        >
+          {imageUrl ? (
+            <Box
+              component="img"
+              src={imageUrl}
+              alt={name || "Search result"}
+              loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+                const fallback = event.currentTarget.nextSibling;
+                if (fallback) fallback.style.display = "flex";
+              }}
               sx={{
-                bgcolor: "rgba(64,224,208,0.16)",
-                color: "turquoise",
-                fontWeight: 700,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
               }}
             />
+          ) : null}
 
-            {availability && (
-              <Chip
-                label={availability}
-                size="small"
-                variant="outlined"
-                sx={{
-                  borderColor: "rgba(255,255,255,0.15)",
-                  color: "rgba(255,255,255,0.8)",
-                }}
-              />
-            )}
-          </Stack>
-
-          <Typography
-            variant="h6"
+          <Stack
+            spacing={1}
+            alignItems="center"
+            justifyContent="center"
             sx={{
-              fontWeight: 700,
-              mb: 0.75,
-              lineHeight: 1.25,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              minHeight: isList ? "unset" : "3.5rem",
+              display: imageUrl ? "none" : "flex",
+              width: "100%",
+              height: "100%",
+              px: 2,
+              color: colors.textMuted,
             }}
           >
-            {name || "Untitled item"}
-          </Typography>
+            <ImageNotSupportedOutlinedIcon sx={{ fontSize: 40 }} />
+            <Typography sx={{ fontSize: "0.94rem", textAlign: "center" }}>
+              Image unavailable
+            </Typography>
+          </Stack>
+        </Box>
 
-          <Typography
-            variant="body2"
-            sx={{ color: "rgba(255,255,255,0.72)", mb: 1.5 }}
-          >
-            {brand || "Brand unavailable"}
-          </Typography>
-
-          <Typography
-            variant="h6"
-            sx={{ color: "turquoise", fontWeight: 800, mb: 1.5 }}
-          >
-            {formatPrice(result)}
-          </Typography>
-
-          {detailChips.length > 0 && (
+        <Stack
+          spacing={1.4}
+          sx={{ p: 2.25, flex: 1, justifyContent: "space-between" }}
+        >
+          <Box>
             <Stack
               direction="row"
               spacing={1}
@@ -161,86 +132,149 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
               flexWrap="wrap"
               sx={{ mb: 1.5 }}
             >
-              {detailChips.map((detail, index) => (
+              <Chip
+                label={getSourceLabel(source)}
+                size="small"
+                sx={{
+                  bgcolor: colors.accentSoft,
+                  color: colors.accent,
+                  border: `1px solid ${colors.accentBorder}`,
+                  fontWeight: 700,
+                }}
+              />
+              {availability ? (
                 <Chip
-                  key={`${detail}-${index}`}
-                  label={detail}
+                  label={availability}
                   size="small"
-                  variant="outlined"
                   sx={{
-                    borderColor: "rgba(255,255,255,0.12)",
-                    color: "rgba(255,255,255,0.78)",
+                    bgcolor: colors.surface2,
+                    color: colors.textSecondary,
+                    border: `1px solid ${colors.border}`,
                   }}
                 />
-              ))}
+              ) : null}
             </Stack>
-          )}
 
-          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.62)" }}>
-            {productUrl
-              ? "Open the retailer page to view current availability, shipping, and product details."
-              : "Product link unavailable for this result."}
-          </Typography>
-        </CardContent>
+            <Typography
+              sx={{
+                color: colors.textPrimary,
+                fontWeight: 800,
+                mb: 0.75,
+                lineHeight: 1.3,
+                fontSize: "1.08rem",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {name || "Untitled item"}
+            </Typography>
 
-        <CardActions
-          sx={{
-            px: 2.25,
-            pb: 2.25,
-            pt: 0,
-            gap: 1,
-            flexWrap: "wrap",
-          }}
-        >
-          <Button
-            variant="contained"
-            endIcon={<LaunchIcon />}
-            onClick={handleOpenProduct}
-            disabled={!productUrl}
-            sx={{
-              minHeight: 42,
-              px: 2,
-              borderRadius: 2,
-              bgcolor: "turquoise",
-              color: "black",
-              fontWeight: 700,
-              textTransform: "none",
-              boxShadow: "none",
-              "&:hover": { bgcolor: "#35d8cb" },
-              "&.Mui-disabled": {
-                bgcolor: "rgba(255,255,255,0.12)",
-                color: "rgba(255,255,255,0.4)",
-              },
-            }}
+            <Typography
+              sx={{
+                color: colors.textMuted,
+                mb: 1.2,
+                fontSize: "0.95rem",
+              }}
+            >
+              {brand || "Brand unavailable"}
+            </Typography>
+
+            <Typography
+              sx={{
+                color: colors.accent,
+                fontWeight: 800,
+                mb: 1.5,
+                fontSize: "1.08rem",
+              }}
+            >
+              {formatPrice(result)}
+            </Typography>
+
+            {detailChips.length > 0 ? (
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+                sx={{ mb: 1.5 }}
+              >
+                {detailChips.map((detail, index) => (
+                  <Chip
+                    key={`${detail}-${index}`}
+                    label={detail}
+                    size="small"
+                    sx={{
+                      bgcolor: colors.surface2,
+                      color: colors.textSecondary,
+                      border: `1px solid ${colors.border}`,
+                    }}
+                  />
+                ))}
+              </Stack>
+            ) : null}
+
+            <Typography
+              sx={{
+                color: colors.textSecondary,
+                lineHeight: 1.7,
+                fontSize: "0.94rem",
+              }}
+            >
+              {productUrl
+                ? "Open the retailer page to check current stock, sizing, shipping, and product details."
+                : "Product link unavailable for this result."}
+            </Typography>
+          </Box>
+
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            sx={{ pt: 1 }}
           >
-            View item
-          </Button>
+            <Button
+              component="a"
+              href={productUrl || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="contained"
+              endIcon={<LaunchIcon />}
+              disabled={!productUrl}
+              sx={{
+                ...primaryButtonSx,
+                flex: 1,
+                minHeight: 44,
+                "&.Mui-disabled": {
+                  bgcolor: "rgba(255,255,255,0.10)",
+                  color: "rgba(255,255,255,0.38)",
+                },
+              }}
+            >
+              View item
+            </Button>
 
-          <Button
-            variant="outlined"
-            startIcon={<FavoriteBorderIcon />}
-            onClick={handleSave}
-            disabled={!userId || !onSaveItem}
-            sx={{
-              minHeight: 42,
-              px: 2,
-              borderRadius: 2,
-              textTransform: "none",
-              borderColor: "rgba(255,255,255,0.18)",
-              color: "white",
-              fontWeight: 700,
-              "&:hover": {
-                borderColor: "turquoise",
-                color: "turquoise",
-                backgroundColor: "rgba(64,224,208,0.05)",
-              },
-            }}
-          >
-            Save
-          </Button>
-        </CardActions>
+            <Button
+              variant="outlined"
+              startIcon={<FavoriteBorderIcon />}
+              onClick={handleSave}
+              disabled={!userId || !onSaveItem}
+              sx={{
+                ...secondaryButtonSx,
+                flex: isList ? { xs: 1, sm: "0 0 auto" } : 1,
+                minHeight: 44,
+                "&.Mui-disabled": {
+                  borderColor: colors.border,
+                  color: colors.textFaint,
+                },
+              }}
+            >
+              Save
+            </Button>
+          </Stack>
+        </Stack>
       </Box>
-    </Card>
+    </Box>
   );
 }
 

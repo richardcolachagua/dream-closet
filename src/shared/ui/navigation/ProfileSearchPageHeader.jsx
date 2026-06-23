@@ -1,22 +1,29 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Box,
-  Toolbar,
+  Button,
+  Container,
   IconButton,
   Menu,
   MenuItem,
-  Button,
-  Container,
   Stack,
+  Toolbar,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../../Components/Buttons/LogoutButton/LogoutButton";
-import { navButtonSx } from "../Buttons/navButtonSx";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../backend/firebase/firebase";
+import { colors } from "../theme/designTokens";
+import {
+  ghostButtonSx,
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../theme/componentStyles";
 
 function ProfileSearchPageHeader() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -26,9 +33,20 @@ function ProfileSearchPageHeader() {
     setAnchorElNav(null);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      handleCloseNavMenu();
+      navigate("/homepage", { replace: true });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   const navButtons = [
-    { label: "Saved Searches", to: "/SavedItemsAndSearches" },
-    { label: "Searches", to: "/searchpage" },
+    { label: "Saved", to: "/SavedItemsAndSearches" },
+    { label: "Search", to: "/searchpage" },
+    { label: "Profile", to: "/profilepage" },
   ];
 
   return (
@@ -36,8 +54,9 @@ function ProfileSearchPageHeader() {
       position="static"
       elevation={0}
       sx={{
-        backgroundColor: "black",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: colors.background,
+        borderBottom: `1px solid ${colors.border}`,
+        backgroundImage: "none",
       }}
     >
       <Container maxWidth="xl">
@@ -57,7 +76,7 @@ function ProfileSearchPageHeader() {
               alt="Dream Closet Logo"
               src="/assets/Logo-svg.svg"
               sx={{
-                height: { xs: 40, sm: 48, md: 56 },
+                height: { xs: 38, sm: 46, md: 52 },
                 width: "auto",
                 display: "block",
               }}
@@ -75,64 +94,78 @@ function ProfileSearchPageHeader() {
                 key={btn.label}
                 component={RouterLink}
                 to={btn.to}
-                variant="contained"
-                sx={navButtonSx}
+                variant="text"
+                sx={ghostButtonSx}
               >
                 {btn.label}
               </Button>
             ))}
-            <LogoutButton />
+
+            <Button
+              onClick={handleLogout}
+              variant="outlined"
+              sx={secondaryButtonSx}
+            >
+              Log out
+            </Button>
           </Stack>
 
           <Box sx={{ display: { xs: "flex", md: "none" }, ml: "auto" }}>
             <IconButton
               size="large"
-              aria-label="open navigation menu"
+              aria-label="Open navigation menu"
               aria-controls="profile-search-mobile-menu"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
+              sx={{ color: colors.textPrimary }}
             >
               <MenuIcon />
             </IconButton>
-
-            <Menu
-              id="profile-search-mobile-menu"
-              anchorEl={anchorElNav}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              keepMounted
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              sx={{
-                "& .MuiPaper-root": {
-                  backgroundColor: "#0f0f0f",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  minWidth: 240,
-                  mt: 1,
-                },
-              }}
-            >
-              {navButtons.map((btn) => (
-                <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
-                  <Button
-                    component={RouterLink}
-                    to={btn.to}
-                    fullWidth
-                    variant="contained"
-                    sx={navButtonSx}
-                  >
-                    {btn.label}
-                  </Button>
-                </MenuItem>
-              ))}
-
-              <MenuItem onClick={handleCloseNavMenu}>
-                <LogoutButton fullWidth />
-              </MenuItem>
-            </Menu>
           </Box>
+
+          <Menu
+            id="profile-search-mobile-menu"
+            anchorEl={anchorElNav}
+            open={Boolean(anchorElNav)}
+            onClose={handleCloseNavMenu}
+            keepMounted
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            sx={{
+              "& .MuiPaper-root": {
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                border: `1px solid ${colors.border}`,
+                minWidth: 240,
+                mt: 1,
+                backgroundImage: "none",
+              },
+            }}
+          >
+            {navButtons.map((btn) => (
+              <MenuItem key={btn.label} onClick={handleCloseNavMenu}>
+                <Button
+                  component={RouterLink}
+                  to={btn.to}
+                  fullWidth
+                  variant="text"
+                  sx={{ ...ghostButtonSx, justifyContent: "flex-start" }}
+                >
+                  {btn.label}
+                </Button>
+              </MenuItem>
+            ))}
+
+            <MenuItem onClick={handleLogout}>
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{ ...primaryButtonSx, minHeight: 42 }}
+              >
+                Log out
+              </Button>
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </Container>
     </AppBar>

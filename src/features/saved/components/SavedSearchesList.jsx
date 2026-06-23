@@ -1,29 +1,35 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Typography,
+  Box,
+  Button,
+  Fade,
   Grid,
   Skeleton,
-  Container,
-  Button,
-  Box,
-  Fade,
+  Stack,
+  Typography,
 } from "@mui/material";
 import {
+  collection,
   deleteDoc,
   doc,
-  collection,
+  getDocs,
   query,
   where,
-  getDocs,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { db, auth } from "../../../backend/firebase/firebase";
+import { auth, db } from "../../../backend/firebase/firebase";
 import SavedSearchCard from "./SavedSearchCard";
+import PageSection from "../../../shared/ui/layout/PageSection";
 import {
   buildSearchStateQuery,
-  DEFAULT_SORT,
   DEFAULT_PAGE,
-} from "../../../features/search/utils/searchStateHelpers";
+  DEFAULT_SORT,
+} from "../../search/utils/searchStateHelpers";
+import { colors } from "../../../shared/ui/theme/designTokens";
+import {
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../../../shared/ui/theme/componentStyles";
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);
@@ -38,15 +44,18 @@ const useSavedSearches = (userId) => {
 
     try {
       setIsLoadingSearches(true);
+
       const q = query(
         collection(db, "saved-searches"),
         where("userId", "==", userId),
       );
+
       const querySnapshot = await getDocs(q);
       const searches = querySnapshot.docs.map((savedDoc) => ({
         id: savedDoc.id,
         ...savedDoc.data(),
       }));
+
       setSavedSearches(searches);
     } catch (error) {
       console.error("Error fetching saved searches", error);
@@ -62,16 +71,15 @@ const useSavedSearches = (userId) => {
   return {
     savedSearches,
     isLoadingSearches,
-    fetchSavedSearches,
     setSavedSearches,
+    fetchSavedSearches,
   };
 };
 
-const SavedSearches = () => {
+function SavedSearchesList() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selected, setSelected] = useState([]);
   const [justDeleted, setJustDeleted] = useState(null);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,12 +87,17 @@ const SavedSearches = () => {
       setCurrentUser(user);
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const userId = currentUser?.uid;
   const { savedSearches, isLoadingSearches, setSavedSearches } =
     useSavedSearches(userId);
+
+  const hasSavedSearches = useMemo(
+    () => savedSearches.length > 0,
+    [savedSearches],
+  );
 
   const handleDeleteSearch = async (searchId) => {
     try {
@@ -94,7 +107,7 @@ const SavedSearches = () => {
       );
       setSelected((prev) => prev.filter((id) => id !== searchId));
       setJustDeleted(searchId);
-      setTimeout(() => setJustDeleted(null), 850);
+      window.setTimeout(() => setJustDeleted(null), 700);
     } catch (error) {
       console.error("Error deleting saved search", error);
     }
@@ -125,51 +138,115 @@ const SavedSearches = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 6, mb: 8 }}>
-      <Typography
-        variant="h4"
-        sx={{
-          mb: 4,
-          fontWeight: "bold",
-          color: "white",
-          justifyContent: "center",
-          display: "flex",
-        }}
-      >
-        Saved Searches
-      </Typography>
-
-      {selected.length > 0 && (
-        <Fade in={!!selected.length}>
-          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+    <PageSection
+      eyebrow="Saved searches"
+      title="Searches worth coming back to"
+      description="Saved searches make it easier to revisit strong ideas, compare directions, and continue shopping without starting over."
+      actions={
+        hasSavedSearches ? (
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
             <Button
-              color="error"
+              onClick={() => navigate("/searchpage")}
               variant="contained"
-              onClick={handleBulkDelete}
-              sx={{ borderRadius: 50, fontWeight: 700 }}
+              sx={primaryButtonSx}
             >
-              Delete {selected.length} Selected
+              New search
             </Button>
-          </Box>
-        </Fade>
-      )}
-
-      <Grid container spacing={6} justifyContent="center">
-        {isLoadingSearches ? (
-          Array.from({ length: 6 }).map((_, idx) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={idx}>
-              <Skeleton
-                variant="rectangular"
-                height={170}
-                sx={{ borderRadius: 3 }}
-              />
+            {selected.length > 0 ? (
+              <Button
+                onClick={handleBulkDelete}
+                variant="outlined"
+                sx={secondaryButtonSx}
+              >
+                Delete {selected.length} selected
+              </Button>
+            ) : null}
+          </Stack>
+        ) : null
+      }
+    >
+      {isLoadingSearches ? (
+        <Grid container spacing={3}>
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <Grid item xs={12} md={6} lg={4} key={idx}>
+              <Box
+                sx={{
+                  borderRadius: 4,
+                  border: `1px solid ${colors.border}`,
+                  bgcolor: colors.surfaceSoft,
+                  p: 2.5,
+                }}
+              >
+                <Skeleton height={34} width="70%" animation="wave" />
+                <Skeleton height={24} width="35%" animation="wave" />
+                <Skeleton
+                  height={28}
+                  width="100%"
+                  animation="wave"
+                  sx={{ mt: 2 }}
+                />
+                <Skeleton height={28} width="80%" animation="wave" />
+                <Skeleton
+                  height={46}
+                  width="100%"
+                  animation="wave"
+                  sx={{ mt: 2 }}
+                />
+              </Box>
             </Grid>
-          ))
-        ) : savedSearches.length > 0 ? (
-          savedSearches.map((search) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={search.id}>
+          ))}
+        </Grid>
+      ) : !hasSavedSearches ? (
+        <Stack
+          spacing={2}
+          alignItems="flex-start"
+          sx={{
+            border: `1px solid ${colors.border}`,
+            bgcolor: colors.surfaceSoft,
+            borderRadius: 4,
+            p: { xs: 2.5, md: 3.5 },
+          }}
+        >
+          <Typography
+            sx={{
+              color: colors.textPrimary,
+              fontWeight: 800,
+              fontSize: "1.1rem",
+            }}
+          >
+            No saved searches yet.
+          </Typography>
+          <Typography
+            sx={{
+              color: colors.textSecondary,
+              maxWidth: 620,
+              lineHeight: 1.75,
+            }}
+          >
+            When you save a promising search from the results page, it will
+            appear here for quick reruns and comparison.
+          </Typography>
+          <Button
+            onClick={() => navigate("/searchpage")}
+            variant="contained"
+            sx={primaryButtonSx}
+          >
+            Start searching
+          </Button>
+        </Stack>
+      ) : (
+        <Grid container spacing={3}>
+          {savedSearches.map((search) => (
+            <Grid
+              item
+              xs={12}
+              md={6}
+              lg={4}
+              key={search.id}
+              sx={{ display: "flex" }}
+            >
               <Fade in={justDeleted !== search.id}>
-                <div>
+                <Box sx={{ width: "100%" }}>
                   <SavedSearchCard
                     query={search.query}
                     date={
@@ -177,7 +254,7 @@ const SavedSearches = () => {
                         ? new Date(search.date).toLocaleDateString()
                         : null
                     }
-                    filters={search.filters || {}}
+                    filters={search.filters}
                     sort={search.sort || "relevance"}
                     page={search.page || 1}
                     onDelete={() => handleDeleteSearch(search.id)}
@@ -185,25 +262,14 @@ const SavedSearches = () => {
                     selected={selected.includes(search.id)}
                     onSelect={() => handleToggleSelect(search.id)}
                   />
-                </div>
+                </Box>
               </Fade>
             </Grid>
-          ))
-        ) : (
-          <Grid item xs={12}>
-            <Box sx={{ textAlign: "center", color: "white", mt: 6 }}>
-              <Typography variant="h6" sx={{ mt: 2 }}>
-                No saved searches yet!
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                Search for your favorite items and save a search here.
-              </Typography>
-            </Box>
-          </Grid>
-        )}
-      </Grid>
-    </Container>
+          ))}
+        </Grid>
+      )}
+    </PageSection>
   );
-};
+}
 
-export default SavedSearches;
+export default SavedSearchesList;
