@@ -73,7 +73,6 @@ const getFriendlySignupError = (code) => {
       return "We couldn’t create your account. Please try again.";
   }
 };
-
 const buildUserPayload = ({ firstName, lastName, email }) => ({
   firstName: normalizeName(firstName),
   lastName: normalizeName(lastName),
@@ -87,9 +86,16 @@ const buildUserPayload = ({ firstName, lastName, email }) => ({
   preferences: {
     emailNotifications: true,
   },
+  subscription: {
+    status: "inactive",
+    plan: "free",
+    customerId: null,
+    subscriptionId: null,
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
+  },
   updatedAt: serverTimestamp(),
 });
-
 const SignUpPage = () => {
   const navigate = useNavigate();
   const location = useLocation();

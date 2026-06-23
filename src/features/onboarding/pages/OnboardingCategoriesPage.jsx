@@ -6,6 +6,10 @@ import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
 import CategoryMultiSelectStep from "../components/CategoryStep";
+import {
+  EMPTY_ONBOARDING,
+  buildOnboardingState,
+} from "../utils/onboardingSchema";
 
 export const femaleCategories = [
   "Tops",
@@ -190,17 +194,19 @@ const OnboardingCategories = () => {
     try {
       const userRef = doc(db, "users", currentUser.uid);
       const snap = await getDoc(userRef);
-      const existing = snap.exists() ? snap.data()?.onboarding || {} : {};
+      const existing = snap.exists()
+        ? buildOnboardingState(snap.data()?.onboarding)
+        : EMPTY_ONBOARDING;
 
       await setDoc(
         userRef,
         {
-          onboarding: {
-            completed: false,
+          onboarding: buildOnboardingState({
+            ...existing,
             gender,
             categories: selectedCategories,
-            brands: Array.isArray(existing.brands) ? existing.brands : [],
-          },
+            completed: false,
+          }),
           updatedAt: serverTimestamp(),
         },
         { merge: true },

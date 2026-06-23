@@ -6,6 +6,10 @@ import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
 import BrandMultiSelectStep from "../components/BrandStep";
+import {
+  EMPTY_ONBOARDING,
+  buildOnboardingState,
+} from "../utils/onboardingSchema";
 
 const sharedLuxury = [
   "Louis Vuitton",
@@ -280,24 +284,25 @@ const OnboardingBrands = () => {
     try {
       const userRef = doc(db, "users", currentUser.uid);
       const snap = await getDoc(userRef);
-      const existing = snap.exists() ? snap.data()?.onboarding || {} : {};
+
+      const existing = snap.exists()
+        ? buildOnboardingState(snap.data()?.onboarding)
+        : EMPTY_ONBOARDING;
 
       await setDoc(
         userRef,
         {
-          onboarding: {
-            completed: true,
+          onboarding: buildOnboardingState({
+            ...existing,
             gender,
-            categories: Array.isArray(existing.categories)
-              ? existing.categories
-              : [],
+            categories: existing.categories,
             brands: selectedBrands,
-          },
+            completed: true,
+          }),
           updatedAt: serverTimestamp(),
         },
         { merge: true },
       );
-
       navigate("/searchpage");
     } catch (err) {
       console.error("Error saving brands:", err);

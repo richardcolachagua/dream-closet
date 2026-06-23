@@ -12,13 +12,12 @@ import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
 import GenderSelectStep from "../components/GenderStep";
+import {
+  EMPTY_ONBOARDING,
+  buildOnboardingState,
+} from "../utils/onboardingSchema";
 
-const DEFAULT_ONBOARDING = {
-  completed: false,
-  gender: "",
-  categories: [],
-  brands: [],
-};
+const DEFAULT_ONBOARDING = EMPTY_ONBOARDING;
 
 const OnboardingGender = () => {
   const navigate = useNavigate();
@@ -89,19 +88,18 @@ const OnboardingGender = () => {
     try {
       const userRef = doc(db, "users", currentUser.uid);
       const snap = await getDoc(userRef);
-      const existing = snap.exists() ? snap.data()?.onboarding || {} : {};
+      const existing = snap.exists()
+        ? buildOnboardingState(snap.data()?.onboarding)
+        : EMPTY_ONBOARDING;
 
       await setDoc(
         userRef,
         {
-          onboarding: {
-            completed: false,
+          onboarding: buildOnboardingState({
+            ...existing,
             gender: selectedGender,
-            categories: Array.isArray(existing.categories)
-              ? existing.categories
-              : [],
-            brands: Array.isArray(existing.brands) ? existing.brands : [],
-          },
+            completed: false,
+          }),
           updatedAt: serverTimestamp(),
         },
         { merge: true },

@@ -11,7 +11,7 @@ import ProfilePage from "../features/profile/pages/ProfilePage";
 import FreeSearchPage from "../features/search/pages/FreeSearchPage";
 import PricingPage from "../features/pricing/pages/PricingPage";
 import { ProtectedRoute } from "../features/auth/ProtectedRoute";
-import { SubscriptionGuard } from "../features/pricing/components/SubscriptionGuard";
+import SubscriptionGuard from "../features/pricing/components/SubscriptionGuard";
 import { OnboardingGuard } from "../features/onboarding/OnboardingGuard";
 import { ROUTES } from "./routes/routePaths";
 
