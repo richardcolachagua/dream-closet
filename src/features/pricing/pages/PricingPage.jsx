@@ -3,6 +3,8 @@ import { Alert, Box, Container, Stack, Typography } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../shared/ui/navigation/PublicHeader";
 import PricingSection from "../components/PricingSection";
+import PricingFeatureComparison from "../components/PricingFeatureComparison";
+import PricingFaq from "../components/PricingFaq";
 import {
   ENABLE_BILLING,
   createCheckoutSession,
@@ -91,8 +93,8 @@ const PricingPage = () => {
               fontSize: { xs: "1rem", md: "1.1rem" },
             }}
           >
-            Start free, then upgrade to Pro when you want unlimited searches,
-            stronger personalization, and premium style discovery tools.
+            Start free, then upgrade to Pro when you want broader search access,
+            stronger personalization, and premium discovery tools.
           </Typography>
         </Stack>
 
@@ -115,6 +117,9 @@ const PricingPage = () => {
           loadingPlanId={loadingPlanId}
           onSelectTier={handleSelectTier}
         />
+
+        <PricingFeatureComparison />
+        <PricingFaq />
       </Container>
     </Box>
   );

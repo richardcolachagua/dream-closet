@@ -72,6 +72,13 @@ export const FILTER_OPTIONS = {
     { label: "Depop", value: "Depop" },
     { label: "Unknown", value: "Unknown" },
   ],
+
+  brand: [
+    { label: "Zara", value: "Zara" },
+    { label: "Aritzia", value: "Aritzia" },
+    { label: "Reformation", value: "Reformation" },
+    { label: "COS", value: "COS" },
+  ],
 };
 
 export const DEFAULT_FILTERS = {

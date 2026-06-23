@@ -1,10 +1,30 @@
-import { useState } from "react";
-import { TextField, Button, Box, InputAdornment } from "@mui/material";
+import React, { useMemo, useState } from "react";
+import {
+  Box,
+  Button,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+  Chip,
+} from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
 import SearchIcon from "@mui/icons-material/Search";
-import SaveSearchButton from "../../../shared/ui/buttons/SaveButton";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
+import {
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../../../shared/ui/theme/componentStyles";
 
-function UserDescriptionInput({
+const EXAMPLES = [
+  "oversized cream cardigan",
+  "black satin midi dress",
+  "men's navy wool overcoat",
+];
+
+function SearchInputBar({
   onSearchStart,
   onSearchResults,
   onSearchError,
@@ -18,20 +38,26 @@ function UserDescriptionInput({
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
+  const filterButtonLabel = useMemo(() => {
+    return activeFilterCount > 0
+      ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"}`
+      : "Filters";
+  }, [activeFilterCount]);
+
   const handleSubmit = async () => {
-    if (!value || value.trim() === "") {
-      onSearchError("Please enter a description.");
+    if (!value || !value.trim()) {
+      onSearchError?.("Please enter a description.");
       return;
     }
 
-    onSearchStart();
+    onSearchStart?.();
     setIsLoading(true);
 
     try {
-      const results = await onSearchSubmit(value);
-      onSearchResults(results);
+      const results = await onSearchSubmit?.(value.trim());
+      onSearchResults?.(results);
     } catch (error) {
-      onSearchError(
+      onSearchError?.(
         error?.response?.status === 429
           ? "Too many requests. Please wait a moment."
           : "Error fetching results. Please try again.",
@@ -44,127 +70,181 @@ function UserDescriptionInput({
   const handleSaveSearch = () => {
     if (saveDisabled || !onSaveSearch) return;
 
-    if (!value || value.trim() === "") {
-      onSearchError("Cannot save empty search");
+    if (!value || !value.trim()) {
+      onSearchError?.("Cannot save an empty search.");
       return;
     }
 
-    onSaveSearch(value);
+    onSaveSearch(value.trim());
   };
 
-  const filterButtonLabel =
-    activeFilterCount > 0 ? `Filters (${activeFilterCount})` : "Filters";
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
-        justifyContent: "center",
-        mb: 3,
-        width: "100%",
-        gap: 1.5,
-      }}
-    >
-      <TextField
-        label="I am looking for a..."
-        variant="filled"
-        value={value}
-        onChange={onChange}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSubmit();
-        }}
-        fullWidth
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: "rgba(0,0,0,0.45)" }} />
-            </InputAdornment>
-          ),
-          disableUnderline: true,
-        }}
-        sx={{
-          width: "100%",
-          "& .MuiFilledInput-root": {
-            minHeight: 56,
-            borderRadius: 3,
-            backgroundColor: "white",
-            "&:hover": {
-              backgroundColor: "white",
-            },
-            "&.Mui-focused": {
-              backgroundColor: "white",
-            },
-          },
-        }}
-      />
-
+    <Stack spacing={1.75} sx={{ width: "100%" }}>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          gap: 1,
-          width: "100%",
+          p: { xs: 1.25, md: 1.5 },
+          borderRadius: 4,
+          border: `1px solid ${colors.border}`,
+          bgcolor: colors.surface,
+          boxShadow: "0 18px 44px rgba(0,0,0,0.18)",
         }}
       >
-        <Button
-          variant="outlined"
-          startIcon={<TuneIcon />}
-          onClick={onOpenFilters}
-          sx={{
-            minHeight: 44,
-            px: 2,
-            borderRadius: 2,
-            borderColor: "turquoise",
-            color: "turquoise",
-            fontWeight: 700,
-            textTransform: "none",
-            width: { xs: "100%", sm: "auto" },
-            "&:hover": {
-              borderColor: "#35d8cb",
-              backgroundColor: "rgba(64,224,208,0.05)",
-            },
-          }}
-        >
-          {filterButtonLabel}
-        </Button>
-
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isLoading}
-          startIcon={<SearchIcon />}
-          sx={{
-            minHeight: 44,
-            px: 2.5,
-            borderRadius: 2,
-            bgcolor: "turquoise",
-            color: "black",
-            fontWeight: 700,
-            fontSize: "0.95rem",
-            textTransform: "none",
-            boxShadow: "none",
-            width: { xs: "100%", sm: "auto" },
-            "&:hover": { bgcolor: "#35d8cb" },
-          }}
-        >
-          {isLoading ? "Searching..." : "Search"}
-        </Button>
-
-        {!saveDisabled && onSaveSearch && (
-          <SaveSearchButton
-            sx={{
-              minHeight: 44,
-              width: { xs: "100%", sm: "auto" },
+        <Stack spacing={1.25}>
+          <TextField
+            placeholder="Describe the piece you want to find..."
+            variant="outlined"
+            fullWidth
+            value={value}
+            onChange={onChange}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleSubmit();
+              }
             }}
-            onSave={handleSaveSearch}
-            disabled={isLoading}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: colors.textMuted }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                minHeight: 62,
+                borderRadius: radius.lg,
+                bgcolor: colors.surface2,
+                color: colors.textPrimary,
+                fontSize: "1rem",
+                "& fieldset": {
+                  borderColor: colors.border,
+                },
+                "&:hover fieldset": {
+                  borderColor: colors.accent,
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: colors.accent,
+                  borderWidth: "1px",
+                },
+              },
+              "& .MuiInputBase-input::placeholder": {
+                color: colors.textMuted,
+                opacity: 1,
+              },
+            }}
           />
-        )}
+
+          <Stack
+            direction={{ xs: "column", lg: "row" }}
+            spacing={1.1}
+            alignItems={{ xs: "stretch", lg: "center" }}
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Chip
+                icon={<AutoAwesomeIcon />}
+                label="Natural language search"
+                sx={{
+                  color: colors.textPrimary,
+                  bgcolor: colors.surface2,
+                  border: `1px solid ${colors.border}`,
+                }}
+              />
+              <Chip
+                label={
+                  activeFilterCount > 0
+                    ? `${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`
+                    : "No filters applied"
+                }
+                sx={{
+                  color:
+                    activeFilterCount > 0
+                      ? colors.accent
+                      : colors.textSecondary,
+                  bgcolor:
+                    activeFilterCount > 0 ? colors.accentSoft : colors.surface2,
+                  border: `1px solid ${activeFilterCount > 0 ? colors.accentBorder : colors.border}`,
+                }}
+              />
+            </Stack>
+
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              sx={{ width: { xs: "100%", lg: "auto" } }}
+            >
+              <Button
+                variant="outlined"
+                startIcon={<TuneIcon />}
+                onClick={onOpenFilters}
+                sx={{
+                  ...secondaryButtonSx,
+                  minHeight: 46,
+                  width: { xs: "100%", sm: "auto" },
+                  ...(activeFilterCount > 0
+                    ? {
+                        color: colors.accent,
+                        borderColor: colors.accentBorder,
+                        bgcolor: colors.accentSoft,
+                      }
+                    : {}),
+                }}
+              >
+                {filterButtonLabel}
+              </Button>
+
+              <Button
+                variant="contained"
+                startIcon={<SearchIcon />}
+                onClick={handleSubmit}
+                disabled={isLoading}
+                sx={{
+                  ...primaryButtonSx,
+                  minHeight: 46,
+                  width: { xs: "100%", sm: "auto" },
+                  minWidth: 130,
+                }}
+              >
+                {isLoading ? "Searching..." : "Search"}
+              </Button>
+
+              {!saveDisabled && onSaveSearch ? (
+                <Button
+                  variant="outlined"
+                  startIcon={<BookmarkBorderIcon />}
+                  onClick={handleSaveSearch}
+                  disabled={isLoading}
+                  sx={{
+                    ...secondaryButtonSx,
+                    minHeight: 46,
+                    width: { xs: "100%", sm: "auto" },
+                  }}
+                >
+                  Save search
+                </Button>
+              ) : null}
+            </Stack>
+          </Stack>
+        </Stack>
       </Box>
-    </Box>
+
+      <Box sx={{ px: { xs: 0.5, md: 1 } }}>
+        <Typography
+          sx={{
+            color: colors.textMuted,
+            fontSize: "0.93rem",
+            lineHeight: 1.7,
+          }}
+        >
+          Try searches like{" "}
+          <Box component="span" sx={{ color: colors.textPrimary }}>
+            {EXAMPLES.join(", ")}
+          </Box>
+          .
+        </Typography>
+      </Box>
+    </Stack>
   );
 }
 
-export default UserDescriptionInput;
+export default SearchInputBar;

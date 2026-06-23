@@ -1,106 +1,142 @@
 import React from "react";
-import { Box, Chip, Typography } from "@mui/material";
-import AnimatedPageShell from "../../../shared/ui/layout/AnimatedPageShell";
-import LegalSection from "../../legal/pages/LegalSection";
+import { Box, Container, Divider, Typography } from "@mui/material";
+import PublicHeader from "../../shared/ui/navigation/PublicHeader";
+import Footer from "../../shared/ui/navigation/Footer";
 
-const TOSPage = () => {
+const LAST_UPDATED = "June 2026";
+
+function TermsOfServicePage() {
   return (
-    <AnimatedPageShell maxWidth="md">
-      <Box sx={{ mb: 4 }}>
-        <Chip
-          label="Legal"
-          sx={{
-            mb: 2,
-            color: "black",
-            bgcolor: "turquoise",
-            fontWeight: 700,
-          }}
+    <Box sx={{ minHeight: "100vh", bgcolor: "black", color: "white" }}>
+      <PublicHeader />
+
+      <Container
+        maxWidth="md"
+        sx={{ pt: { xs: 5, md: 7 }, pb: { xs: 6, md: 8 } }}
+      >
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            sx={{
+              fontWeight: 900,
+              fontSize: { xs: "2rem", md: "2.6rem" },
+              lineHeight: 1.1,
+              mb: 1,
+            }}
+          >
+            Terms of Service
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.72)",
+              mb: 1.5,
+            }}
+          >
+            Last updated: {LAST_UPDATED}
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.8)",
+              lineHeight: 1.7,
+            }}
+          >
+            This page should set out the rules for using Dream Closet, including
+            accounts, subscriptions, allowed use, and termination. Best
+            practices recommend a dedicated terms page, linked from the footer
+            and at signup. [web:96][web:102][web:105]
+          </Typography>
+        </Box>
+
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.18)", mb: 4 }} />
+
+        <TosSection
+          title="Introduction"
+          body={[
+            "Describe Dream Closet as a clothing search and discovery service, and identify your company or entity operating it.",
+            "Explain that by creating an account or using the site, users agree to these terms.",
+          ]}
         />
-        <Typography
-          variant="h3"
-          sx={{ color: "white", fontWeight: 800, mb: 1 }}
-        >
-          Terms of Service
-        </Typography>
-        <Typography sx={{ color: "rgba(255,255,255,0.72)", mb: 1 }}>
-          Last updated: June 5, 2026
-        </Typography>
-        <Typography sx={{ color: "rgba(255,255,255,0.82)", maxWidth: 760 }}>
-          These Terms govern your access to and use of Dream Closet, including
-          search, saved items, saved searches, personalization, and related
-          features.
-        </Typography>
-      </Box>
 
-      <LegalSection number="1" title="Acceptance of Terms">
-        By accessing or using Dream Closet, you agree to be bound by these Terms
-        of Service and any policies referenced within them. If you do not agree,
-        do not use the service.
-      </LegalSection>
+        <TosSection
+          title="Accounts and eligibility"
+          body={[
+            "Explain who can create an account (e.g., age and jurisdiction requirements).",
+            "Mention that users must provide accurate information and keep credentials secure.",
+          ]}
+        />
 
-      <LegalSection number="2" title="Service Description">
-        Dream Closet helps users search for clothing and fashion products, save
-        items and searches, and receive more personalized discovery experiences
-        based on preferences and activity.
-      </LegalSection>
+        <TosSection
+          title="Use of the service"
+          body={[
+            "Describe what users can do with Dream Closet: search, save items and searches, manage onboarding preferences, and subscribe to member plans.",
+            "Clarify that misuse (e.g., scraping, automated abuse, or illegal use) is not allowed.",
+          ]}
+        />
 
-      <LegalSection number="3" title="Accounts and Eligibility">
-        You may need an account to use some features. You are responsible for
-        maintaining the confidentiality of your credentials and for activity
-        that occurs under your account.
-      </LegalSection>
+        <TosSection
+          title="Subscriptions and billing"
+          body={[
+            "Summarize how free vs. Pro plans work and that billing is handled through your payment provider.",
+            "Explain renewals, cancellation, and that users can manage their subscriptions via the billing portal or pricing page.",
+          ]}
+        />
 
-      <LegalSection number="4" title="Acceptable Use">
-        You agree not to misuse the service, interfere with its operation,
-        attempt unauthorized access, scrape protected systems, upload unlawful
-        content, or use Dream Closet in a way that violates applicable law or
-        third-party rights.
-      </LegalSection>
+        <TosSection
+          title="Content and third‑party links"
+          body={[
+            "Note that product links and images may come from third‑party retailers and are subject to their terms.",
+            "Clarify that you are not responsible for external sites linked within search results.",
+          ]}
+        />
 
-      <LegalSection number="5" title="Product Information and Availability">
-        Product listings, prices, availability, and images may come from
-        third-party sources and can change without notice. Dream Closet does not
-        guarantee that all displayed information is complete, current, or
-        error-free at all times.
-      </LegalSection>
+        <TosSection
+          title="Termination and deletion"
+          body={[
+            "Explain when you may suspend or terminate accounts (e.g., for misuse) and how users can close their accounts.",
+            "Connect this with the account deletion flow you plan to expose in the account center.",
+          ]}
+        />
 
-      <LegalSection number="6" title="Intellectual Property">
-        Dream Closet and its original content, branding, software, and site
-        design are protected by intellectual property laws. You may not copy,
-        modify, distribute, or exploit protected materials without permission.
-      </LegalSection>
+        <TosSection
+          title="Contact and changes"
+          body={[
+            "Explain how you will notify users about updates to these terms and how they can contact you with questions.",
+          ]}
+        />
+      </Container>
 
-      <LegalSection number="7" title="Third-Party Services">
-        The service may link to third-party merchants, payment providers, and
-        other external services. Dream Closet is not responsible for the
-        content, policies, or practices of those third parties.
-      </LegalSection>
-
-      <LegalSection number="8" title="Termination">
-        We may suspend or terminate access to the service if you violate these
-        Terms, create risk for the platform, or misuse Dream Closet in ways that
-        harm users or partners.
-      </LegalSection>
-
-      <LegalSection number="9" title="Disclaimers and Limitation of Liability">
-        Dream Closet is provided on an “as is” and “as available” basis. To the
-        fullest extent permitted by law, we disclaim warranties and limit
-        liability for indirect, incidental, special, consequential, or punitive
-        damages.
-      </LegalSection>
-
-      <LegalSection number="10" title="Changes to These Terms">
-        We may update these Terms from time to time. Continued use of the
-        service after updated Terms become effective constitutes acceptance of
-        those changes.
-      </LegalSection>
-
-      <LegalSection number="11" title="Contact">
-        Questions about these Terms can be sent through the Dream Closet help or
-        contact channels listed on the site.
-      </LegalSection>
-    </AnimatedPageShell>
+      <Footer />
+    </Box>
   );
-};
+}
 
-export default TOSPage;
+function TosSection({ title, body }) {
+  return (
+    <Box sx={{ mb: 3.5 }}>
+      <Typography
+        sx={{
+          fontWeight: 800,
+          fontSize: "1.12rem",
+          mb: 0.75,
+        }}
+      >
+        {title}
+      </Typography>
+      {body.map((paragraph, index) => (
+        <Typography
+          key={index}
+          sx={{
+            color: "rgba(255,255,255,0.8)",
+            lineHeight: 1.7,
+            mb: index === body.length - 1 ? 0 : 1,
+          }}
+        >
+          {paragraph}
+        </Typography>
+      ))}
+    </Box>
+  );
+}
+
+export default TermsOfServicePage;

@@ -1,111 +1,145 @@
 import React from "react";
-import { Box, Chip, Typography } from "@mui/material";
-import AnimatedPageShell from "../../../shared/ui/layout/AnimatedPageShell";
-import LegalSection from "../../legal/pages/LegalSection";
+import { Box, Container, Divider, Typography } from "@mui/material";
+import PublicHeader from "../../shared/ui/navigation/PublicHeader";
+import Footer from "../../shared/ui/navigation/Footer";
 
-const PrivacyPolicyPage = () => {
+const LAST_UPDATED = "June 2026";
+
+function PrivacyPolicyPage() {
   return (
-    <AnimatedPageShell maxWidth="md">
-      <Box sx={{ mb: 4 }}>
-        <Chip
-          label="Privacy"
-          sx={{
-            mb: 2,
-            color: "black",
-            bgcolor: "turquoise",
-            fontWeight: 700,
-          }}
+    <Box sx={{ minHeight: "100vh", bgcolor: "black", color: "white" }}>
+      <PublicHeader />
+
+      <Container
+        maxWidth="md"
+        sx={{ pt: { xs: 5, md: 7 }, pb: { xs: 6, md: 8 } }}
+      >
+        {/* Intro */}
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            sx={{
+              fontWeight: 900,
+              fontSize: { xs: "2rem", md: "2.6rem" },
+              lineHeight: 1.1,
+              mb: 1,
+            }}
+          >
+            Privacy Policy
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.72)",
+              mb: 1.5,
+            }}
+          >
+            Last updated: {LAST_UPDATED}
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.8)",
+              lineHeight: 1.7,
+            }}
+          >
+            This page should explain what data Dream Closet collects, how it’s
+            used, and the choices users have. Best practices recommend a clear
+            summary up top, readable sections, and a last-updated date.
+            [web:95][web:98][web:104]
+          </Typography>
+        </Box>
+
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.18)", mb: 4 }} />
+
+        {/* Example sections – replace with actual legal content */}
+        <Section
+          title="Scope"
+          body={[
+            "Describe that this policy applies to the Dream Closet website and application, including registered accounts and visitors.",
+            "Clarify whether it covers data collected through onboarding flows, search activity, saved items and searches, subscriptions, and support requests.",
+          ]}
         />
-        <Typography
-          variant="h3"
-          sx={{ color: "white", fontWeight: 800, mb: 1 }}
-        >
-          Privacy Policy
-        </Typography>
-        <Typography sx={{ color: "rgba(255,255,255,0.72)", mb: 1 }}>
-          Last updated: June 5, 2026
-        </Typography>
-        <Typography sx={{ color: "rgba(255,255,255,0.82)", maxWidth: 760 }}>
-          This Privacy Policy explains what information Dream Closet collects,
-          how it is used, when it may be shared, and what choices users have
-          regarding their information.
-        </Typography>
-      </Box>
 
-      <LegalSection number="1" title="Information We Collect">
-        We may collect information you provide directly, such as account
-        details, onboarding preferences, saved items, saved searches, and
-        communications with us. We may also collect technical and usage data
-        such as device information, browser type, pages viewed, search activity,
-        and interaction events.
-      </LegalSection>
+        <Section
+          title="Information we collect"
+          body={[
+            "Explain the types of personal data you collect, such as account information (name, email), onboarding preferences (gender, categories, brands), search and saved-item activity, and subscription data.",
+            "Note if you collect usage analytics, device information, or approximate location, and why.",
+          ]}
+        />
 
-      <LegalSection number="2" title="How We Use Information">
-        We use information to operate and improve Dream Closet, personalize
-        search and recommendations, maintain account features, analyze usage,
-        secure the platform, and support users.
-      </LegalSection>
+        <Section
+          title="How we use information"
+          body={[
+            "Summarize that data is used to power search, save searches and items, personalize results, manage subscriptions, and improve the product.",
+            "Mention that you may use aggregated or anonymized data to understand product usage patterns.",
+          ]}
+        />
 
-      <LegalSection number="3" title="Search and Personalization Data">
-        Search queries, filters, saved content, and onboarding selections may be
-        used to improve relevance, tune ranking systems, power saved
-        experiences, and make results more useful to you.
-      </LegalSection>
+        <Section
+          title="Sharing and disclosure"
+          body={[
+            "Indicate whether you share data with payment processors (e.g., Stripe), analytics providers, or other service providers, subject to appropriate safeguards.",
+            "Clarify that you don’t sell personal data and that you only share it when necessary to provide the service or comply with the law.",
+          ]}
+        />
 
-      <LegalSection number="4" title="Cookies and Similar Technologies">
-        We may use cookies and similar technologies for authentication,
-        security, analytics, preferences, and feature performance. Browser
-        settings may allow you to manage certain cookie behaviors.
-      </LegalSection>
+        <Section
+          title="Your choices and rights"
+          body={[
+            "Explain how users can access and update their information (e.g., via their profile or account center).",
+            "Include how users can unsubscribe from communications and request account deletion, aligning with the flows you plan to build.",
+          ]}
+        />
 
-      <LegalSection number="5" title="How Information Is Shared">
-        We do not sell personal information. We may share information with
-        service providers, infrastructure vendors, analytics tools, payment
-        processors, or legal authorities when necessary to operate the service,
-        comply with law, or protect rights and safety.
-      </LegalSection>
+        <Section
+          title="Data retention and deletion"
+          body={[
+            "Describe how long you retain account and usage data and how it is deleted when users close their accounts.",
+            "Mention that once an account is deleted, related personal data is removed or anonymized, subject to legal retention requirements.",
+          ]}
+        />
 
-      <LegalSection number="6" title="Data Retention">
-        We retain information for as long as reasonably necessary to provide the
-        service, comply with legal obligations, resolve disputes, enforce
-        agreements, and maintain security and business records.
-      </LegalSection>
+        <Section
+          title="Contact"
+          body={[
+            "Provide a contact method (email or form) for privacy questions and complaints.",
+            "Briefly mention how you will respond and in what timeframe.",
+          ]}
+        />
+      </Container>
 
-      <LegalSection number="7" title="Your Choices and Rights">
-        Depending on your location, you may have rights to access, correct,
-        delete, or request a copy of your personal information, or object to
-        certain processing. Requests can be submitted through Dream Closet
-        support channels.
-      </LegalSection>
-
-      <LegalSection number="8" title="Security">
-        We use reasonable administrative, technical, and organizational
-        safeguards to protect information. No method of transmission or storage
-        is completely secure, so absolute security cannot be guaranteed.
-      </LegalSection>
-
-      <LegalSection number="9" title="Children’s Privacy">
-        Dream Closet is not directed to children under 13, and we do not
-        knowingly collect personal information from children under 13.
-      </LegalSection>
-
-      <LegalSection number="10" title="International Transfers">
-        Your information may be processed in countries other than your own,
-        depending on where service providers and infrastructure are located.
-      </LegalSection>
-
-      <LegalSection number="11" title="Changes to This Policy">
-        We may update this Privacy Policy from time to time. When material
-        changes are made, we may revise the effective date and provide
-        additional notice where appropriate.
-      </LegalSection>
-
-      <LegalSection number="12" title="Contact">
-        For privacy-related questions or requests, use the contact or support
-        options provided through Dream Closet.
-      </LegalSection>
-    </AnimatedPageShell>
+      <Footer />
+    </Box>
   );
-};
+}
+
+function Section({ title, body }) {
+  return (
+    <Box sx={{ mb: 3.5 }}>
+      <Typography
+        sx={{
+          fontWeight: 800,
+          fontSize: "1.12rem",
+          mb: 0.75,
+        }}
+      >
+        {title}
+      </Typography>
+      {body.map((paragraph, index) => (
+        <Typography
+          key={index}
+          sx={{
+            color: "rgba(255,255,255,0.8)",
+            lineHeight: 1.7,
+            mb: index === body.length - 1 ? 0 : 1,
+          }}
+        >
+          {paragraph}
+        </Typography>
+      ))}
+    </Box>
+  );
+}
 
 export default PrivacyPolicyPage;
