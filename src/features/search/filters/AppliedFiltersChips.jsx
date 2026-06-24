@@ -1,21 +1,5 @@
 import { Box, Chip, Button, Typography } from "@mui/material";
-import { buildFilterChips } from "../utils/filterHelpers";
-
-const FILTER_LABELS = {
-  gender: "Gender",
-  category: "Category",
-  size: "Size",
-  color: "Color",
-  brand: "Brand",
-  store: "Store",
-  availability: "Availability",
-  price: "Price",
-};
-
-function formatChipLabel(chip) {
-  const groupLabel = FILTER_LABELS[chip.key] || chip.key;
-  return `${groupLabel}: ${chip.label}`;
-}
+import { buildFilterChips, formatChipLabel } from "../utils/filterHelpers";
 
 function AppliedFiltersChips({
   filters,
@@ -100,6 +84,7 @@ function AppliedFiltersChips({
               color: "white",
               border: "1px solid rgba(255,255,255,0.14)",
               fontWeight: 500,
+              height: 34,
               "& .MuiChip-deleteIcon": {
                 color: "rgba(255,255,255,0.8)",
                 "&:hover": {

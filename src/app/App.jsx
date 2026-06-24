@@ -43,7 +43,7 @@ const routeConfigs = [
     ),
   },
   {
-    path: ROUTES.SIGNUP,
+    path: ROUTES.SIGNUP, // use SIGNUP consistently
     element: (
       <PublicOnlyRoute>
         <SignUpPage />
@@ -87,7 +87,7 @@ const routeConfigs = [
     ),
   },
   {
-    path: ROUTES.SAVED_SEARCH_DETAIL,
+    path: ROUTES.SAVED, // unified saved route
     element: (
       <ProtectedRoute>
         <OnboardingGuard>
@@ -97,7 +97,7 @@ const routeConfigs = [
     ),
   },
   {
-    path: ROUTES.PREMIUM_SEARCH,
+    path: ROUTES.PREMIUM_SEARCH, // add this to ROUTES if you use it
     element: (
       <ProtectedRoute>
         <OnboardingGuard>

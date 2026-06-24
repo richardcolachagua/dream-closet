@@ -27,7 +27,7 @@ import UserDescriptionInput from "../components/SearchInputBar";
 import SearchResults from "../components/SearchResults";
 import SearchSortBar from "../components/SearchSortBar";
 import Footer from "../../../shared/ui/navigation/Footer";
-import ProfileSearchPageHeader from "../../../shared/ui/navigation/ProfileSearchPageHeader";
+import ProfileSearchPageHeader from "../../../shared/ui/navigation/SearchPageHeader";
 import FilterDrawer from "../filters/FilterDrawer";
 import { fetchCombinedResults } from "../services/fetchSearchResults";
 import {

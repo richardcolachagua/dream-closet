@@ -15,9 +15,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
 import LogoutButton from "../buttons/LogoutButton.jsx";
 import { useTheme } from "@mui/material/styles";
-import { navButtonSx } from "../../ui/buttons/navButtonStyles.jsx";
+import { navButtonSx } from "../buttons/navButtonStyles.jsx";
+import { ROUTES } from "../../../app/routes/routePaths";
 
-function SearchPageHeader() {
+function SavedPageHeader() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -37,8 +38,8 @@ function SearchPageHeader() {
   };
 
   const navButtons = [
-    { label: "Profile", to: "/profilepage" },
-    { label: "Saved Searches", to: "/SavedItemsAndSearches" },
+    { label: "Profile", to: ROUTES.PROFILE },
+    { label: "Search", to: ROUTES.SEARCH },
   ];
 
   return (
@@ -62,7 +63,7 @@ function SearchPageHeader() {
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
+            <RouterLink to={ROUTES.HOME} style={{ display: "inline-flex" }}>
               <Box
                 component="img"
                 alt="Dream Closet Logo"
@@ -151,4 +152,4 @@ function SearchPageHeader() {
   );
 }
 
-export default SearchPageHeader;
+export default SavedPageHeader;

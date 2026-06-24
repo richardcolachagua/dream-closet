@@ -49,24 +49,21 @@ function SaveForLaterButton({ item, userId, sx }) {
         await Promise.all(querySnapshot.docs.map((doc) => deleteDoc(doc.ref)));
         setIsSaved(false);
       } else {
-        await addDoc(
-          collection(db, "saved-items"),
-          buildSavedItemPayload(item, userId),
-          {
-            userId,
-            itemId: String(item.itemId),
-            name: item.name || item.title || "",
-            imageUrl: item.imageUrl || "",
-            price: item.price || "Price unavailable",
-            numericPrice:
-              typeof item.numericPrice === "number" ? item.numericPrice : null,
-            productUrl: item.productUrl || "",
-            brand: item.brand || "",
-            source: item.source || "",
-            description: item.description || "",
-            createdAt: serverTimestamp(),
-          },
-        );
+        await addDoc(collection(db, "saved-items"), {
+          ...buildSavedItemPayload(item, userId),
+          userId,
+          itemId: String(item.itemId),
+          name: item.name || item.title || "",
+          imageUrl: item.imageUrl || "",
+          price: item.price || "Price unavailable",
+          numericPrice:
+            typeof item.numericPrice === "number" ? item.numericPrice : null,
+          productUrl: item.productUrl || "",
+          brand: item.brand || "",
+          source: item.source || "",
+          description: item.description || "",
+          createdAt: serverTimestamp(),
+        });
         setIsSaved(true);
       }
     } catch (error) {

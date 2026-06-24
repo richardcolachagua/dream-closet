@@ -4,7 +4,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SavedSearchesList from "../components/SavedSearchesList";
 import SavedItemsList from "../components/SavedItemsList";
 import Footer from "../../../shared/ui/navigation/Footer";
-import ProfileSearchPageHeader from "../../../shared/ui/navigation/ProfileSearchPageHeader";
+import SavedPageHeader from "../../../shared/ui/navigation/SavedHeader";
 import { colors, layout } from "../../../shared/ui/theme/designTokens";
 
 const defaultTheme = createTheme();
@@ -24,7 +24,7 @@ function SavedItemsAndSearches() {
             "radial-gradient(circle at top, rgba(89,230,219,0.06), transparent 28%)",
         }}
       >
-        <ProfileSearchPageHeader />
+        <SavedPageHeader />
 
         <Box component="main" sx={{ flex: 1 }}>
           <Container maxWidth={layout.pageMax} sx={{ py: { xs: 4, md: 6 } }}>

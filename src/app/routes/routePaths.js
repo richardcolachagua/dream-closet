@@ -3,7 +3,7 @@ export const ROUTES = {
   HOME: "/homepage",
   CONTACT: "/contactpage",
   LOGIN: "/loginpage",
-  SIGN_UP: "/signuppage",
+  SIGNUP: "/signuppage",
   LOGOUT: "/logoutpage",
   FORGOT_PASSWORD: "/forgotpassword",
   CHECK_EMAIL: "/checkyouremail",
@@ -14,7 +14,7 @@ export const ROUTES = {
   SEARCH: "/searchpage",
   FREE_SEARCH: "/freesearchpage",
   PROFILE: "/profilepage",
-  SAVED: "/SavedItemsAndSearches",
+  SAVED: "/saved-items-and-searches", // unified saved route
   PRICING: "/pricing",
   PRIVACY_POLICY: "/privacypolicypage",
   TERMS: "/tospage",

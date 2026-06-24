@@ -44,7 +44,7 @@ function TermsOfServicePage() {
             This page should set out the rules for using Dream Closet, including
             accounts, subscriptions, allowed use, and termination. Best
             practices recommend a dedicated terms page, linked from the footer
-            and at signup. [web:96][web:102][web:105]
+            and at signup.
           </Typography>
         </Box>
 

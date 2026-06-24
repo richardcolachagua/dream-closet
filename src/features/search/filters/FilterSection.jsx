@@ -1,93 +1,93 @@
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Box,
-  Typography,
-  Button,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { colors } from "../../../shared/ui/theme/designTokens";
+
+const sectionTitleSx = {
+  color: colors.textPrimary,
+  fontWeight: 800,
+  fontSize: "1rem",
+};
+
+const helperTextSx = {
+  color: colors.textMuted,
+  fontSize: "0.9rem",
+};
 
 function FilterSection({
   title,
-  children,
+  subtitle,
+  options = [],
+  selectedValues = [],
+  onToggle,
   onClear,
-  hasActiveValues = false,
-  defaultExpanded = false,
+  renderOption,
 }) {
+  const hasSelections = selectedValues.length > 0;
+
   return (
-    <Accordion
-      disableGutters
-      defaultExpanded={defaultExpanded}
-      sx={{
-        bgcolor: "transparent",
-        color: "white",
-        boxShadow: "none",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        "&::before": {
-          display: "none",
-        },
-      }}
-    >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
-        sx={{
-          px: 0,
-          minHeight: "unset",
-          "& .MuiAccordionSummary-content": {
-            my: 1.5,
-          },
-        }}
+    <Stack spacing={1.25}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        spacing={1}
       >
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1,
-          }}
-        >
-          <Typography
+        <Box>
+          <Typography sx={sectionTitleSx}>{title}</Typography>
+          {subtitle ? (
+            <Typography sx={helperTextSx}>{subtitle}</Typography>
+          ) : null}
+        </Box>
+
+        {hasSelections ? (
+          <Button
+            onClick={onClear}
             sx={{
-              fontWeight: "bold",
-              fontSize: "0.95rem",
+              color: colors.accent,
+              fontWeight: 700,
+              textTransform: "none",
+              minWidth: "auto",
+              px: 0,
             }}
           >
-            {title}
-          </Typography>
+            Clear
+          </Button>
+        ) : null}
+      </Stack>
 
-          {hasActiveValues && onClear && (
+      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+        {options.map((option) => {
+          const value = typeof option === "string" ? option : option.value;
+          const label = typeof option === "string" ? option : option.label;
+          const isSelected = selectedValues.includes(value);
+
+          if (renderOption) {
+            return renderOption({ option, value, label, isSelected, onToggle });
+          }
+
+          return (
             <Button
-              size="small"
-              onClick={(event) => {
-                event.stopPropagation();
-                onClear();
-              }}
+              key={value}
+              onClick={() => onToggle?.(value)}
               sx={{
-                minWidth: "auto",
-                px: 1,
-                color: "turquoise",
+                height: 36,
+                borderRadius: 999,
+                px: 1.5,
+                border: `1px solid ${
+                  isSelected ? colors.accentBorder : colors.border
+                }`,
+                bgcolor: isSelected ? colors.accentSoft : colors.surface2,
+                color: isSelected ? colors.accent : colors.textPrimary,
+                fontWeight: isSelected ? 700 : 500,
                 textTransform: "none",
-                fontWeight: "bold",
+                fontSize: "0.9rem",
               }}
             >
-              Clear
+              {label}
             </Button>
-          )}
-        </Box>
-      </AccordionSummary>
-
-      <AccordionDetails
-        sx={{
-          px: 0,
-          pb: 2,
-          pt: 0,
-        }}
-      >
-        {children}
-      </AccordionDetails>
-    </Accordion>
+          );
+        })}
+      </Stack>
+    </Stack>
   );
 }
 

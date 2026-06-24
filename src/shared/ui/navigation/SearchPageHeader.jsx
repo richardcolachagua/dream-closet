@@ -20,8 +20,9 @@ import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../theme/componentStyles";
+import { ROUTES } from "../../../app/routes/routePaths";
 
-function ProfileSearchPageHeader() {
+function SearchPageHeader() {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const navigate = useNavigate();
 
@@ -37,16 +38,15 @@ function ProfileSearchPageHeader() {
     try {
       await signOut(auth);
       handleCloseNavMenu();
-      navigate("/homepage", { replace: true });
+      navigate(ROUTES.HOME, { replace: true });
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
 
   const navButtons = [
-    { label: "Saved", to: "/SavedItemsAndSearches" },
-    { label: "Search", to: "/searchpage" },
-    { label: "Profile", to: "/profilepage" },
+    { label: "Saved", to: ROUTES.SAVED },
+    { label: "Profile", to: ROUTES.PROFILE },
   ];
 
   return (
@@ -70,7 +70,7 @@ function ProfileSearchPageHeader() {
             gap: 2,
           }}
         >
-          <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
+          <RouterLink to={ROUTES.HOME} style={{ display: "inline-flex" }}>
             <Box
               component="img"
               alt="Dream Closet Logo"
@@ -172,4 +172,4 @@ function ProfileSearchPageHeader() {
   );
 }
 
-export default ProfileSearchPageHeader;
+export default SearchPageHeader;

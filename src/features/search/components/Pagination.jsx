@@ -1,21 +1,26 @@
-import { Pagination } from "@mui/material";
-import { useState } from "react";
+import React from "react";
+import { Box, Pagination } from "@mui/material";
 
-const pageSize = 5; // Show 5 per page
-const [page, setPage] = useState(1);
+function ResultsPagination({
+  totalItems = 0,
+  page = 1,
+  pageSize = 5,
+  onPageChange,
+}) {
+  const totalPages = Math.ceil(totalItems / pageSize);
 
-const paginatedSearches = savedSearches.slice(
-  (page - 1) * pageSize,
-  page * pageSize,
-);
+  if (totalPages <= 1) return null;
 
-return (
-  <Pagination
-    count={Math.ceil(savedSearches.length / pageSize)}
-    page={page}
-    onChange={(event, value) => setPage(value)}
-    color="primary"
-  />
+  return (
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+      <Pagination
+        count={totalPages}
+        page={page}
+        onChange={(event, value) => onPageChange?.(value)}
+        color="primary"
+      />
+    </Box>
+  );
+}
 
-  // Use paginatedSearches instead of savedSearches when mapping over your UI
-);
+export default ResultsPagination;

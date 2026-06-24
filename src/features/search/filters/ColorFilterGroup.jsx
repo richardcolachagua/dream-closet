@@ -16,7 +16,6 @@ function ColorFilterGroup({
       {options.map((option) => {
         const isSelected = selectedColors.includes(option.value);
         const isWhite = option.value === "white";
-        const isMulti = option.value === "multi";
 
         return (
           <Tooltip key={option.value} title={option.label} arrow>
@@ -36,7 +35,7 @@ function ColorFilterGroup({
                     : "1px solid transparent",
                 outline: "none",
                 cursor: "pointer",
-                background: isMulti ? option.hex : option.hex,
+                background: option.hex,
                 boxShadow: isSelected
                   ? "0 0 0 3px rgba(64, 224, 208, 0.2)"
                   : "none",

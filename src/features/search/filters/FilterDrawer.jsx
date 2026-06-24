@@ -2,7 +2,6 @@ import React from "react";
 import {
   Box,
   Button,
-  Chip,
   Divider,
   Drawer,
   Stack,
@@ -18,6 +17,8 @@ import {
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
 import { FILTER_OPTIONS } from "../utils/filterOptions";
+import FilterSection from "./FilterSection";
+import ColorFilterGroup from "./ColorFilterGroup";
 
 const sectionTitleSx = {
   color: colors.textPrimary,
@@ -29,82 +30,6 @@ const helperTextSx = {
   color: colors.textMuted,
   fontSize: "0.9rem",
 };
-
-function FilterSection({
-  title,
-  subtitle,
-  options = [],
-  selectedValues = [],
-  onToggle,
-  onClear,
-  renderOption,
-}) {
-  const hasSelections = selectedValues.length > 0;
-
-  return (
-    <Stack spacing={1.25}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={1}
-      >
-        <Box>
-          <Typography sx={sectionTitleSx}>{title}</Typography>
-          {subtitle ? (
-            <Typography sx={helperTextSx}>{subtitle}</Typography>
-          ) : null}
-        </Box>
-
-        {hasSelections ? (
-          <Button
-            onClick={onClear}
-            sx={{
-              color: colors.accent,
-              fontWeight: 700,
-              textTransform: "none",
-              minWidth: "auto",
-              px: 0,
-            }}
-          >
-            Clear
-          </Button>
-        ) : null}
-      </Stack>
-
-      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-        {options.map((option) => {
-          const value = typeof option === "string" ? option : option.value;
-          const label = typeof option === "string" ? option : option.label;
-          const isSelected = selectedValues.includes(value);
-
-          if (renderOption) {
-            return renderOption({ option, value, label, isSelected, onToggle });
-          }
-
-          return (
-            <Chip
-              key={value}
-              label={label}
-              onClick={() => onToggle?.(value)}
-              icon={isSelected ? <DoneIcon /> : undefined}
-              sx={{
-                height: 36,
-                color: isSelected ? colors.accent : colors.textPrimary,
-                bgcolor: isSelected ? colors.accentSoft : colors.surface2,
-                border: `1px solid ${isSelected ? colors.accentBorder : colors.border}`,
-                fontWeight: isSelected ? 700 : 500,
-                "& .MuiChip-icon": {
-                  color: colors.accent,
-                },
-              }}
-            />
-          );
-        })}
-      </Stack>
-    </Stack>
-  );
-}
 
 function FilterDrawer({
   open,
@@ -140,6 +65,7 @@ function FilterDrawer({
           gridTemplateRows: "auto 1fr auto",
         }}
       >
+        {/* Header */}
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -179,6 +105,7 @@ function FilterDrawer({
           </Button>
         </Stack>
 
+        {/* Body */}
         <Stack
           spacing={3}
           sx={{
@@ -217,53 +144,37 @@ function FilterDrawer({
 
           <Divider sx={{ borderColor: colors.border }} />
 
-          <FilterSection
-            title="Color"
-            subtitle="Choose one or more tones."
-            options={FILTER_OPTIONS.color || []}
-            selectedValues={safeFilters.color || []}
-            onToggle={(value) => onToggleFilter("color", value)}
-            onClear={() => onClearGroup("color")}
-            renderOption={({ option, value, label, isSelected, onToggle }) => {
-              const swatchStyle =
-                option.value === "multi"
-                  ? {
-                      background: option.hex,
-                    }
-                  : {
-                      backgroundColor: option.hex,
-                    };
+          {/* Color using ColorFilterGroup */}
+          <Stack spacing={1.25}>
+            <Box>
+              <Typography sx={sectionTitleSx}>Color</Typography>
+              <Typography sx={helperTextSx}>
+                Choose one or more tones.
+              </Typography>
+            </Box>
 
-              return (
-                <Chip
-                  key={value}
-                  label={label}
-                  onClick={() => onToggle?.(value)}
-                  icon={
-                    <Box
-                      sx={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: "50%",
-                        border: "1px solid rgba(255,255,255,0.28)",
-                        ...swatchStyle,
-                      }}
-                    />
-                  }
-                  sx={{
-                    height: 36,
-                    color: isSelected ? colors.accent : colors.textPrimary,
-                    bgcolor: isSelected ? colors.accentSoft : colors.surface2,
-                    border: `1px solid ${isSelected ? colors.accentBorder : colors.border}`,
-                    fontWeight: isSelected ? 700 : 500,
-                    "& .MuiChip-icon": {
-                      ml: 0.75,
-                    },
-                  }}
-                />
-              );
-            }}
-          />
+            <ColorFilterGroup
+              options={FILTER_OPTIONS.color || []}
+              selectedColors={safeFilters.color || []}
+              onToggleColor={(value) => onToggleFilter("color", value)}
+            />
+
+            {safeFilters.color?.length > 0 && (
+              <Button
+                onClick={() => onClearGroup("color")}
+                sx={{
+                  alignSelf: "flex-start",
+                  color: colors.accent,
+                  fontWeight: 700,
+                  textTransform: "none",
+                  minWidth: "auto",
+                  px: 0,
+                }}
+              >
+                Clear colors
+              </Button>
+            )}
+          </Stack>
 
           <Divider sx={{ borderColor: colors.border }} />
 
@@ -287,6 +198,7 @@ function FilterDrawer({
 
           <Divider sx={{ borderColor: colors.border }} />
 
+          {/* Price range */}
           <Stack spacing={1.5}>
             <Box>
               <Typography sx={sectionTitleSx}>Price range</Typography>
@@ -363,6 +275,7 @@ function FilterDrawer({
           </Stack>
         </Stack>
 
+        {/* Footer actions */}
         <Box
           sx={{
             p: 2.25,

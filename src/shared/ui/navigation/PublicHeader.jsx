@@ -1,5 +1,6 @@
 import { AppBar, Box, Toolbar, Button, Container, Stack } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
+import { ROUTES } from "../../../app/routes/routePaths";
 
 const actionButtonSx = {
   minHeight: 44,
@@ -11,7 +12,7 @@ const actionButtonSx = {
   boxShadow: "none",
 };
 
-function Header() {
+function PublicHeader() {
   return (
     <AppBar
       position="static"
@@ -32,7 +33,7 @@ function Header() {
             gap: 2,
           }}
         >
-          <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
+          <RouterLink to={ROUTES.HOME} style={{ display: "inline-flex" }}>
             <Box
               component="img"
               alt="Dream Closet Logo"
@@ -48,7 +49,7 @@ function Header() {
           <Stack direction="row" spacing={1.25} alignItems="center">
             <Button
               component={RouterLink}
-              to="/loginpage"
+              to={ROUTES.LOGIN}
               variant="contained"
               sx={{
                 ...actionButtonSx,
@@ -64,7 +65,7 @@ function Header() {
 
             <Button
               component={RouterLink}
-              to="/signuppage"
+              to={ROUTES.SIGNUP}
               variant="outlined"
               sx={{
                 ...actionButtonSx,
@@ -86,4 +87,4 @@ function Header() {
   );
 }
 
-export default Header;
+export default PublicHeader;

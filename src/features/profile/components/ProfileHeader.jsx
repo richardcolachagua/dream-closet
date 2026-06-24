@@ -14,6 +14,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Link as RouterLink } from "react-router-dom";
 import LogoutButton from "../../../shared/ui/buttons/LogoutButton";
 import { navButtonSx } from "../../../shared/ui/buttons/buttonStyles";
+import { ROUTES } from "../../../app/routes/routePaths";
 
 function ProfileHeader() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -27,8 +28,8 @@ function ProfileHeader() {
   };
 
   const navButtons = [
-    { label: "Search Page", to: "/searchpage" },
-    { label: "Profile", to: "/profilepage" },
+    { label: "Search", to: ROUTES.SEARCH },
+    { label: "Saved", to: ROUTES.SAVED },
   ];
 
   return (
@@ -51,7 +52,7 @@ function ProfileHeader() {
             gap: 2,
           }}
         >
-          <RouterLink to="/homepage" style={{ display: "inline-flex" }}>
+          <RouterLink to={ROUTES.HOME} style={{ display: "inline-flex" }}>
             <Box
               component="img"
               alt="Dream Closet Logo"
