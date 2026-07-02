@@ -36,19 +36,11 @@ const routeConfigs = [
   },
   {
     path: ROUTES.LOGIN,
-    element: (
-      <PublicOnlyRoute>
-        <LoginPage />
-      </PublicOnlyRoute>
-    ),
+    element: <LoginPage />,
   },
   {
-    path: ROUTES.SIGNUP, // use SIGNUP consistently
-    element: (
-      <PublicOnlyRoute>
-        <SignUpPage />
-      </PublicOnlyRoute>
-    ),
+    path: ROUTES.SIGNUP,
+    element: <SignUpPage />,
   },
   {
     path: ROUTES.FORGOT_PASSWORD,
@@ -87,7 +79,7 @@ const routeConfigs = [
     ),
   },
   {
-    path: ROUTES.SAVED, // unified saved route
+    path: ROUTES.SAVED,
     element: (
       <ProtectedRoute>
         <OnboardingGuard>
@@ -97,7 +89,7 @@ const routeConfigs = [
     ),
   },
   {
-    path: ROUTES.PREMIUM_SEARCH, // add this to ROUTES if you use it
+    path: ROUTES.PREMIUM_SEARCH,
     element: (
       <ProtectedRoute>
         <OnboardingGuard>
