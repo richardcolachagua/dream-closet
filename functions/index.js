@@ -1,121 +1,121 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const axios = require('axios');
+const cors = require('cors')({ origin: ['http://localhost:3000'] });
 
 admin.initializeApp();
-
 const db = admin.firestore();
 
 const CATEGORY_KEYWORDS = {
   outerwear: [
-    'jacket',
-    'coat',
-    'blazer',
-    'parka',
-    'trench',
-    'puffer',
-    'bomber',
-    'windbreaker',
+    "jacket",
+    "coat",
+    "blazer",
+    "parka",
+    "trench",
+    "puffer",
+    "bomber",
+    "windbreaker",
   ],
   tops: [
-    'top',
-    'shirt',
-    't-shirt',
-    'tee',
-    'blouse',
-    'tank',
-    'camisole',
-    'sweater',
-    'hoodie',
-    'cardigan',
-    'knit',
-    'polo',
+    "top",
+    "shirt",
+    "t-shirt",
+    "tee",
+    "blouse",
+    "tank",
+    "camisole",
+    "sweater",
+    "hoodie",
+    "cardigan",
+    "knit",
+    "polo",
   ],
   bottoms: [
-    'jeans',
-    'pants',
-    'trousers',
-    'leggings',
-    'joggers',
-    'shorts',
-    'skirt',
+    "jeans",
+    "pants",
+    "trousers",
+    "leggings",
+    "joggers",
+    "shorts",
+    "skirt",
   ],
-  dresses: ['dress', 'gown', 'maxi dress', 'mini dress', 'midi dress'],
+  dresses: ["dress", "gown", "maxi dress", "mini dress", "midi dress"],
   shoes: [
-    'shoe',
-    'sneaker',
-    'boot',
-    'heel',
-    'loafer',
-    'sandal',
-    'trainer',
-    'slipper',
+    "shoe",
+    "sneaker",
+    "boot",
+    "heel",
+    "loafer",
+    "sandal",
+    "trainer",
+    "slipper",
   ],
   accessories: [
-    'bag',
-    'purse',
-    'belt',
-    'hat',
-    'cap',
-    'scarf',
-    'jewelry',
-    'necklace',
-    'earrings',
-    'bracelet',
-    'watch',
-    'sunglasses',
+    "bag",
+    "purse",
+    "belt",
+    "hat",
+    "cap",
+    "scarf",
+    "jewelry",
+    "necklace",
+    "earrings",
+    "bracelet",
+    "watch",
+    "sunglasses",
   ],
   activewear: [
-    'legging',
-    'sports bra',
-    'track pants',
-    'running',
-    'gym',
-    'activewear',
-    'workout',
+    "legging",
+    "sports bra",
+    "track pants",
+    "running",
+    "gym",
+    "activewear",
+    "workout",
   ],
   swimwear: [
-    'swimsuit',
-    'bikini',
-    'one-piece',
-    'swim',
-    'trunks',
-    'boardshorts',
+    "swimsuit",
+    "bikini",
+    "one-piece",
+    "swim",
+    "trunks",
+    "boardshorts",
   ],
   loungewear: [
-    'loungewear',
-    'pajama',
-    'robe',
-    'sweatpants',
-    'sweatshirt',
-    'sleepwear',
+    "loungewear",
+    "pajama",
+    "robe",
+    "sweatpants",
+    "sweatshirt",
+    "sleepwear",
   ],
 };
 
 const COLOR_KEYWORDS = {
-  black: ['black', 'jet black', 'charcoal black'],
-  white: ['white', 'ivory', 'off-white', 'cream'],
-  gray: ['gray', 'grey', 'charcoal', 'heather gray'],
-  beige: ['beige', 'tan', 'sand', 'camel', 'stone', 'nude'],
-  brown: ['brown', 'chocolate', 'mocha', 'espresso', 'taupe'],
-  blue: ['blue', 'cobalt', 'sky blue', 'baby blue', 'royal blue'],
-  navy: ['navy', 'midnight navy'],
-  green: ['green', 'emerald', 'mint', 'sage', 'forest'],
-  olive: ['olive', 'khaki', 'army green'],
-  yellow: ['yellow', 'mustard'],
-  orange: ['orange', 'rust', 'terracotta', 'burnt orange'],
-  red: ['red', 'crimson', 'burgundy', 'maroon', 'wine'],
-  pink: ['pink', 'rose', 'blush', 'fuchsia', 'hot pink'],
-  purple: ['purple', 'lavender', 'lilac', 'violet', 'plum'],
-  gold: ['gold'],
-  silver: ['silver'],
-  multi: ['multi', 'multicolor', 'rainbow', 'printed', 'patterned'],
+  black: ["black", "jet black", "charcoal black"],
+  white: ["white", "ivory", "off-white", "cream"],
+  gray: ["gray", "grey", "charcoal", "heather gray"],
+  beige: ["beige", "tan", "sand", "camel", "stone", "nude"],
+  brown: ["brown", "chocolate", "mocha", "espresso", "taupe"],
+  blue: ["blue", "cobalt", "sky blue", "baby blue", "royal blue"],
+  navy: ["navy", "midnight navy"],
+  green: ["green", "emerald", "mint", "sage", "forest"],
+  olive: ["olive", "khaki", "army green"],
+  yellow: ["yellow", "mustard"],
+  orange: ["orange", "rust", "terracotta", "burnt orange"],
+  red: ["red", "crimson", "burgundy", "maroon", "wine"],
+  pink: ["pink", "rose", "blush", "fuchsia", "hot pink"],
+  purple: ["purple", "lavender", "lilac", "violet", "plum"],
+  gold: ["gold"],
+  silver: ["silver"],
+  multi: ["multi", "multicolor", "rainbow", "printed", "patterned"],
 };
 
 const GENDER_KEYWORDS = {
-  female: ['women', 'woman', 'womens', 'female', 'ladies', 'girl', 'girls'],
-  male: ['men', 'man', 'mens', 'male', 'boys', 'boy'],
-  unisex: ['unisex'],
+  female: ["women", "woman", "womens", "female", "ladies", "girl", "girls"],
+  male: ["men", "man", "mens", "male", "boys", "boy"],
+  unisex: ["unisex"],
 };
 
 function validateProfileData(data) {
@@ -123,28 +123,28 @@ function validateProfileData(data) {
 
   if (
     data.firstName &&
-    (typeof data.firstName !== 'string' ||
+    (typeof data.firstName !== "string" ||
       data.firstName.length < 1 ||
       data.firstName.length > 50)
   ) {
-    errors.push('Invalid first name');
+    errors.push("Invalid first name");
   }
 
   if (
     data.lastName &&
-    (typeof data.lastName !== 'string' ||
+    (typeof data.lastName !== "string" ||
       data.lastName.length < 1 ||
       data.lastName.length > 50)
   ) {
-    errors.push('Invalid last name');
+    errors.push("Invalid last name");
   }
 
   if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push('Invalid email address');
+    errors.push("Invalid email address");
   }
 
-  if (data.newPassword && typeof data.newPassword !== 'string') {
-    errors.push('Password must be a string');
+  if (data.newPassword && typeof data.newPassword !== "string") {
+    errors.push("Password must be a string");
   }
 
   return errors;
@@ -159,9 +159,9 @@ function isRecentlyAuthenticated(context) {
 }
 
 function normalizeString(value) {
-  return String(value || '')
-      .trim()
-      .toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function includesKeyword(text, keywords = []) {
@@ -169,21 +169,21 @@ function includesKeyword(text, keywords = []) {
 }
 
 function parsePriceValue(price) {
-  if (typeof price === 'number') {
+  if (typeof price === "number") {
     return price;
   }
 
-  if (!price || typeof price !== 'string') {
+  if (!price || typeof price !== "string") {
     return null;
   }
 
-  const normalized = price.replace(/,/g, '');
+  const normalized = price.replace(/,/g, "");
   const match = normalized.match(/\d+(?:\.\d+)?/);
 
   return match ? Number(match[0]) : null;
 }
 
-function inferCategory(productName = '') {
+function inferCategory(productName = "") {
   const normalizedName = normalizeString(productName);
 
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
@@ -192,10 +192,10 @@ function inferCategory(productName = '') {
     }
   }
 
-  return 'unknown';
+  return "unknown";
 }
 
-function inferColors(productName = '') {
+function inferColors(productName = "") {
   const normalizedName = normalizeString(productName);
   const matches = [];
 
@@ -208,7 +208,7 @@ function inferColors(productName = '') {
   return matches;
 }
 
-function inferGender(productName = '') {
+function inferGender(productName = "") {
   const normalizedName = normalizeString(productName);
 
   for (const [gender, keywords] of Object.entries(GENDER_KEYWORDS)) {
@@ -217,35 +217,35 @@ function inferGender(productName = '') {
     }
   }
 
-  return 'unknown';
+  return "unknown";
 }
 
 function inferAvailability(product = {}) {
-  if (typeof product.inStock === 'boolean') {
-    return product.inStock ? 'instock' : 'outofstock';
+  if (typeof product.inStock === "boolean") {
+    return product.inStock ? "instock" : "outofstock";
   }
 
   const normalizedAvailability = normalizeString(product.availability);
 
   if (
-    normalizedAvailability.includes('in stock') ||
-    normalizedAvailability.includes('available')
+    normalizedAvailability.includes("in stock") ||
+    normalizedAvailability.includes("available")
   ) {
-    return 'instock';
+    return "instock";
   }
 
   if (
-    normalizedAvailability.includes('out of stock') ||
-    normalizedAvailability.includes('unavailable') ||
-    normalizedAvailability.includes('sold out')
+    normalizedAvailability.includes("out of stock") ||
+    normalizedAvailability.includes("unavailable") ||
+    normalizedAvailability.includes("sold out")
   ) {
-    return 'outofstock';
+    return "outofstock";
   }
 
-  return 'unknown';
+  return "unknown";
 }
 
-function inferBrand(product = {}, fallbackSource = 'Unknown') {
+function inferBrand(product = {}, fallbackSource = "Unknown") {
   return (
     product.brandName ||
     product.brand ||
@@ -262,61 +262,62 @@ function buildSearchQuery(query, gender) {
 
   const normalizedGender = normalizeString(gender);
 
-  if (normalizedGender === 'female') {
+  if (normalizedGender === "female") {
     return `women ${query}`;
   }
 
-  if (normalizedGender === 'male') {
+  if (normalizedGender === "male") {
     return `men ${query}`;
   }
 
-  if (normalizedGender === 'unisex') {
+  if (normalizedGender === "unisex") {
     return `unisex ${query}`;
   }
 
   return query;
 }
 
-function mapSortForAsos(sort = 'relevance') {
+function mapSortForAsos(sort = "relevance") {
   switch (sort) {
-    case 'price_asc':
-      return 'priceasc';
-    case 'price_desc':
-      return 'pricedesc';
-    case 'newest':
-      return 'freshness';
+    case "price_asc":
+      return "priceasc";
+    case "price_desc":
+      return "pricedesc";
+    case "newest":
+      return "freshness";
     default:
-      return 'freshness';
+      return "freshness";
   }
 }
 
-function mapSortForRealtime(sort = 'relevance') {
+function mapSortForRealtime(sort = "relevance") {
   switch (sort) {
-    case 'price_asc':
-      return 'LOWEST_PRICE';
-    case 'price_desc':
-      return 'HIGHEST_PRICE';
-    case 'newest':
-      return 'NEWEST';
+    case "price_asc":
+      return "LOWEST_PRICE";
+    case "price_desc":
+      return "HIGHEST_PRICE";
+    case "newest":
+      return "NEWEST";
     default:
-      return 'BEST_MATCH';
+      return "BEST_MATCH";
   }
 }
 
 function getRapidApiKey() {
   const config = functions.config ? functions.config() : {};
+  const key =
+    process.env.RAPIDAPI_KEY ||
+    (config && config.rapidapi && config.rapidapi.key) ||
+    "";
 
-  return process.env.RAPIDAPI_KEY || config?.rapidapi?.key || '';
+  console.log("[searchProducts] RAPIDAPI_KEY present:", !!key);
+  return key;
 }
 
-async function searchAsos({
-  query,
-  gender,
-  page = 1,
-  pageSize = 24,
-  sort = 'relevance',
-}) {
+async function searchAsos({ query, gender, page = 1, pageSize = 24, sort = 'relevance' }) {
   const apiKey = getRapidApiKey();
+
+  console.log('[ASOS] key exists:', !!apiKey);
 
   if (!apiKey) {
     throw new Error('Missing RapidAPI key for ASOS search.');
@@ -325,29 +326,41 @@ async function searchAsos({
   const finalQuery = buildSearchQuery(query, gender);
   const offset = Math.max(0, (Number(page) - 1) * Number(pageSize));
 
-  const response = await axios.request({
-    method: 'GET',
-    url: 'https://asos2.p.rapidapi.com/products/v2/list',
-    timeout: 9000,
-    params: {
-      store: 'US',
-      offset: String(offset),
-      categoryId: '4209',
-      limit: String(pageSize),
-      country: 'US',
-      sort: mapSortForAsos(sort),
-      q: finalQuery,
-      currency: 'USD',
-      sizeSchema: 'US',
-      lang: 'en-US',
-    },
-    headers: {
-      'x-rapidapi-key': apiKey,
-      'x-rapidapi-host': 'asos2.p.rapidapi.com',
-    },
-  });
+  try {
+    console.log('[ASOS] request', { finalQuery, page, pageSize, sort, offset });
 
-  return response.data?.products || [];
+    const response = await axios.request({
+      method: 'GET',
+      url: 'https://asos2.p.rapidapi.com/products/v2/list',
+      timeout: 9000,
+      params: {
+        store: 'US',
+        offset: String(offset),
+        categoryId: '4209',
+        limit: String(pageSize),
+        country: 'US',
+        sort: mapSortForAsos(sort),
+        q: finalQuery,
+        currency: 'USD',
+        sizeSchema: 'US',
+        lang: 'en-US',
+      },
+      headers: {
+        'x-rapidapi-key': apiKey,
+        'x-rapidapi-host': 'asos2.p.rapidapi.com',
+      },
+    });
+
+    console.log('[ASOS] success count:', response.data?.products?.length || 0);
+    return response.data?.products || [];
+  } catch (error) {
+    console.error('[ASOS] failed:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
+  }
 }
 
 async function searchRealTimeProducts({
@@ -355,42 +368,60 @@ async function searchRealTimeProducts({
   gender,
   page = 1,
   pageSize = 24,
-  sort = 'relevance',
+  sort = "relevance",
 }) {
   const apiKey = getRapidApiKey();
 
   if (!apiKey) {
-    throw new Error('Missing RapidAPI key for marketplace search.');
+    throw new Error("Missing RapidAPI key for marketplace search.");
   }
 
   const finalQuery = buildSearchQuery(query, gender);
 
-  const response = await axios.request({
-    method: 'GET',
-    url: 'https://real-time-product-search.p.rapidapi.com/search-v2',
-    timeout: 9000,
-    params: {
-      q: finalQuery,
-      country: 'us',
-      language: 'en',
-      page: String(page),
-      limit: String(pageSize),
-      sort_by: mapSortForRealtime(sort),
-      product_condition: 'ANY',
-      min_rating: 'ANY',
-      return_filters: 'true',
-    },
-    headers: {
-      'x-rapidapi-key': apiKey,
-      'x-rapidapi-host': 'real-time-product-search.p.rapidapi.com',
-    },
-  });
+  try {
+    console.log("[Realtime] request", {
+      finalQuery,
+      page,
+      pageSize,
+      sort,
+    });
 
-  return response.data?.data?.products || [];
+    const response = await axios.request({
+      method: "GET",
+      url: "https://real-time-product-search.p.rapidapi.com/search-v2",
+      timeout: 9000,
+      params: {
+        q: finalQuery,
+        country: "us",
+        language: "en",
+        page: String(page),
+        limit: String(pageSize),
+        sort_by: mapSortForRealtime(sort),
+        product_condition: "ANY",
+        min_rating: "ANY",
+        return_filters: "true",
+      },
+      headers: {
+        "x-rapidapi-key": apiKey,
+        "x-rapidapi-host": "real-time-product-search.p.rapidapi.com",
+      },
+    });
+
+    const count = response.data?.data?.products?.length || 0;
+    console.log("[Realtime] success, products:", count);
+    return response.data?.data?.products || [];
+  } catch (error) {
+    console.error("[Realtime] error", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
+  }
 }
 
 function normalizeAsosProduct(product = {}) {
-  const name = product.name || '';
+  const name = product.name || "";
   const numericPrice =
     product.price?.current?.value ||
     parsePriceValue(product.price?.current?.text);
@@ -399,29 +430,29 @@ function normalizeAsosProduct(product = {}) {
     itemId: product.id || null,
     name,
     title: name,
-    price: product.price?.current?.text || 'Price unavailable',
+    price: product.price?.current?.text || "Price unavailable",
     numericPrice,
-    currency: 'USD',
-    imageUrl: product.imageUrl ? `https://${product.imageUrl}` : '',
-    productUrl: product.url ? `https://www.asos.com${product.url}` : '',
-    source: 'ASOS',
-    brand: inferBrand(product, 'ASOS'),
+    currency: "USD",
+    imageUrl: product.imageUrl ? `https://${product.imageUrl}` : "",
+    productUrl: product.url ? `https://www.asos.com${product.url}` : "",
+    source: "ASOS",
+    brand: inferBrand(product, "ASOS"),
     gender: inferGender(name),
     category: inferCategory(name),
-    subcategory: '',
+    subcategory: "",
     size: [],
     color: inferColors(name),
-    material: '',
+    material: "",
     availability: inferAvailability(product),
     rawData: product,
   };
 }
 
 function normalizeRealtimeProduct(product = {}) {
-  const name = product.product_title || product.productTitle || '';
-  const rawPrice = product.offer?.price || 'Price unavailable';
+  const name = product.product_title || product.productTitle || "";
+  const rawPrice = product.offer?.price || "Price unavailable";
   const source =
-    product.offer?.store_name || product.offer?.storeName || 'Unknown';
+    product.offer?.store_name || product.offer?.storeName || "Unknown";
 
   return {
     itemId: product.product_id || product.productId || null,
@@ -429,30 +460,30 @@ function normalizeRealtimeProduct(product = {}) {
     title: name,
     price: rawPrice,
     numericPrice: parsePriceValue(rawPrice),
-    currency: 'USD',
-    imageUrl: product.product_photos?.[0] || product.productPhotos?.[0] || '',
+    currency: "USD",
+    imageUrl: product.product_photos?.[0] || product.productPhotos?.[0] || "",
     productUrl:
-      product.offer?.offer_page_url || product.offer?.offerPageUrl || '',
+      product.offer?.offer_page_url || product.offer?.offerPageUrl || "",
     source,
     brand: inferBrand(product, source),
     gender: inferGender(name),
     category: inferCategory(name),
-    subcategory: '',
+    subcategory: "",
     size: [],
     color: inferColors(name),
-    material: '',
+    material: "",
     availability: inferAvailability(product),
     rawData: product,
   };
 }
 
 function normalizeCombinedResults(asosResults = [], realTimeResults = []) {
-  const normalizedAsos = Array.isArray(asosResults) ?
-    asosResults.map(normalizeAsosProduct) :
-    [];
-  const normalizedRealtime = Array.isArray(realTimeResults) ?
-    realTimeResults.map(normalizeRealtimeProduct) :
-    [];
+  const normalizedAsos = Array.isArray(asosResults)
+    ? asosResults.map(normalizeAsosProduct)
+    : [];
+  const normalizedRealtime = Array.isArray(realTimeResults)
+    ? realTimeResults.map(normalizeRealtimeProduct)
+    : [];
 
   return [...normalizedAsos, ...normalizedRealtime];
 }
@@ -480,8 +511,8 @@ function matchesPriceFilter(numericPrice, priceMin, priceMax) {
     return false;
   }
 
-  const min = priceMin !== '' ? Number(priceMin) : null;
-  const max = priceMax !== '' ? Number(priceMax) : null;
+  const min = priceMin !== "" ? Number(priceMin) : null;
+  const max = priceMax !== "" ? Number(priceMax) : null;
 
   if (min !== null && numericPrice < min) {
     return false;
@@ -524,18 +555,18 @@ function applyProductFilters(products = [], filters = {}) {
     brand: (filters.brand || []).map(normalizeString),
     store: (filters.store || []).map(normalizeString),
     availability: (filters.availability || []).map(normalizeString),
-    priceMin: filters.priceMin ?? '',
-    priceMax: filters.priceMax ?? '',
+    priceMin: filters.priceMin ?? "",
+    priceMax: filters.priceMax ?? "",
   };
 
   return products.filter((product) => {
     const matchesGender = matchesArrayFilter(
-        product.gender,
-        normalizedFilters.gender,
+      product.gender,
+      normalizedFilters.gender,
     );
     const matchesCategory = matchesArrayFilter(
-        product.category,
-        normalizedFilters.category,
+      product.category,
+      normalizedFilters.category,
     );
     const matchesSize =
       !normalizedFilters.size.length ||
@@ -543,25 +574,25 @@ function applyProductFilters(products = [], filters = {}) {
       !product.size.length ||
       matchesArrayFilter(product.size, normalizedFilters.size);
     const matchesColor = matchesArrayFilter(
-        product.color,
-        normalizedFilters.color,
+      product.color,
+      normalizedFilters.color,
     );
     const matchesAvailability = matchesArrayFilter(
-        product.availability,
-        normalizedFilters.availability,
+      product.availability,
+      normalizedFilters.availability,
     );
     const matchesStore = matchesArrayFilter(
-        product.source,
-        normalizedFilters.store,
+      product.source,
+      normalizedFilters.store,
     );
     const matchesBrand = matchesBrandFilter(
-        product.brand,
-        normalizedFilters.brand,
+      product.brand,
+      normalizedFilters.brand,
     );
     const matchesPrice = matchesPriceFilter(
-        product.numericPrice,
-        normalizedFilters.priceMin,
-        normalizedFilters.priceMax,
+      product.numericPrice,
+      normalizedFilters.priceMin,
+      normalizedFilters.priceMax,
     );
 
     return (
@@ -595,19 +626,19 @@ function dedupeProducts(products = []) {
   });
 }
 
-function sortProducts(products = [], sort = 'relevance') {
+function sortProducts(products = [], sort = "relevance") {
   const sorted = [...products];
 
-  if (sort === 'price_asc') {
+  if (sort === "price_asc") {
     sorted.sort(
-        (a, b) =>
-          (a.numericPrice ?? Number.POSITIVE_INFINITY) -
+      (a, b) =>
+        (a.numericPrice ?? Number.POSITIVE_INFINITY) -
         (b.numericPrice ?? Number.POSITIVE_INFINITY),
     );
-  } else if (sort === 'price_desc') {
+  } else if (sort === "price_desc") {
     sorted.sort(
-        (a, b) =>
-          (b.numericPrice ?? Number.NEGATIVE_INFINITY) -
+      (a, b) =>
+        (b.numericPrice ?? Number.NEGATIVE_INFINITY) -
         (a.numericPrice ?? Number.NEGATIVE_INFINITY),
     );
   }
@@ -616,61 +647,79 @@ function sortProducts(products = [], sort = 'relevance') {
 }
 
 function validateSearchPayload(data = {}) {
-  const query = typeof data.query === 'string' ? data.query.trim() : '';
+  const query = typeof data.query === "string" ? data.query.trim() : "";
 
   if (!query) {
     throw new functions.https.HttpsError(
-        'invalid-argument',
-        'Query is required.',
+      "invalid-argument",
+      "Query is required.",
     );
   }
 
   return {
     query,
-    gender: typeof data.gender === 'string' ? data.gender : '',
+    gender: typeof data.gender === "string" ? data.gender : "",
     filters:
-      typeof data.filters === 'object' && data.filters ? data.filters : {},
-    sort: typeof data.sort === 'string' ? data.sort : 'relevance',
-    page: Number.isFinite(Number(data.page)) ?
-      Math.max(1, Number(data.page)) :
-      1,
-    pageSize: Number.isFinite(Number(data.pageSize)) ?
-      Math.min(48, Math.max(1, Number(data.pageSize))) :
-      24,
+      typeof data.filters === "object" && data.filters ? data.filters : {},
+    sort: typeof data.sort === "string" ? data.sort : "relevance",
+    page: Number.isFinite(Number(data.page))
+      ? Math.max(1, Number(data.page))
+      : 1,
+    pageSize: Number.isFinite(Number(data.pageSize))
+      ? Math.min(48, Math.max(1, Number(data.pageSize)))
+      : 24,
   };
 }
 
 async function performSearch({
   query,
-  gender = '',
+  gender = "",
   filters = {},
-  sort = 'relevance',
+  sort = "relevance",
   page = 1,
   pageSize = 24,
 }) {
+  console.log("[performSearch] query:", {
+    query,
+    gender,
+    sort,
+    page,
+    pageSize,
+  });
+
   const providerCalls = await Promise.allSettled([
-    searchAsos({query, gender, page, pageSize, sort}),
-    searchRealTimeProducts({query, gender, page, pageSize, sort}),
+    searchAsos({ query, gender, page, pageSize, sort }),
+    searchRealTimeProducts({ query, gender, page, pageSize, sort }),
   ]);
 
   const asosResults =
-    providerCalls[0].status === 'fulfilled' ? providerCalls[0].value : [];
+    providerCalls[0].status === "fulfilled" ? providerCalls[0].value : [];
   const realtimeResults =
-    providerCalls[1].status === 'fulfilled' ? providerCalls[1].value : [];
+    providerCalls[1].status === "fulfilled" ? providerCalls[1].value : [];
 
   const warnings = [];
 
-  if (providerCalls[0].status === 'rejected') {
-    warnings.push('ASOS search unavailable');
+  if (providerCalls[0].status === "rejected") {
+    console.error("[performSearch] ASOS rejected:", providerCalls[0].reason);
+    warnings.push("ASOS search unavailable");
   }
 
-  if (providerCalls[1].status === 'rejected') {
-    warnings.push('Marketplace search unavailable');
+  if (providerCalls[1].status === "rejected") {
+    console.error(
+      "[performSearch] Realtime rejected:",
+      providerCalls[1].reason,
+    );
+    warnings.push("Marketplace search unavailable");
   }
+
+  console.log("[performSearch] provider counts", {
+    asos: asosResults.length,
+    realtime: realtimeResults.length,
+  });
 
   const normalizedResults = normalizeCombinedResults(
-      asosResults,
-      realtimeResults,
+    asosResults,
+    realtimeResults,
   );
   const dedupedResults = dedupeProducts(normalizedResults);
   const filteredResults = applyProductFilters(dedupedResults, filters);
@@ -678,6 +727,11 @@ async function performSearch({
   const startIndex = Math.max(0, (Number(page) - 1) * Number(pageSize));
   const endIndex = startIndex + Number(pageSize);
   const pagedResults = sortedResults.slice(startIndex, endIndex);
+
+  console.log("[performSearch] final counts", {
+    total: sortedResults.length,
+    pageSize: Number(pageSize),
+  });
 
   return {
     results: pagedResults,
@@ -700,44 +754,40 @@ exports.checkSearchLimit = functions.https.onCall(async () => {
   };
 });
 
-exports.searchProducts = functions.https.onRequest(async (req, res) => {
-  res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    res.status(405).json({error: 'Method not allowed'});
-    return;
-  }
-
-  try {
-    const payload = validateSearchPayload(req.body?.data || req.body || {});
-    const result = await performSearch(payload);
-    res.status(200).json({result});
-  } catch (error) {
-    console.error('Error searching products:', error);
-
-    if (error instanceof functions.https.HttpsError) {
-      res.status(400).json({error: error.message});
+exports.searchProducts = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'Method not allowed' });
       return;
     }
 
-    res.status(500).json({
-      error: error?.message || 'Search failed.',
-    });
-  }
+    try {
+      console.log('[searchProducts] incoming body:', req.body);
+
+      const payload = validateSearchPayload(req.body?.data || req.body || {});
+      const result = await performSearch(payload);
+
+      res.status(200).json({ result });
+    } catch (error) {
+      console.error('Error searching products:', error);
+
+      if (error instanceof functions.https.HttpsError) {
+        res.status(400).json({ error: error.message });
+        return;
+      }
+
+      res.status(500).json({
+        error: error?.message || 'Search failed.',
+      });
+    }
+  });
 });
 
 exports.updateUserProfile = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
-        'unauthenticated',
-        'User must be logged in to update profile',
+      "unauthenticated",
+      "User must be logged in to update profile",
     );
   }
 
@@ -745,33 +795,33 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
 
   if (validationErrors.length > 0) {
     throw new functions.https.HttpsError(
-        'invalid-argument',
-        validationErrors.join(', '),
+      "invalid-argument",
+      validationErrors.join(", "),
     );
   }
 
   if ((data.email || data.newPassword) && !isRecentlyAuthenticated(context)) {
     throw new functions.https.HttpsError(
-        'failed-precondition',
-        'Recent authentication required for sensitive updates.',
+      "failed-precondition",
+      "Recent authentication required for sensitive updates.",
     );
   }
 
   const uid = context.auth.uid;
-  const {firstName, lastName, email, newPassword} = data;
+  const { firstName, lastName, email, newPassword } = data;
 
   try {
     const authUpdates = {};
 
-    if (typeof firstName === 'string' && typeof lastName === 'string') {
+    if (typeof firstName === "string" && typeof lastName === "string") {
       authUpdates.displayName = `${firstName} ${lastName}`.trim();
     }
 
-    if (typeof email === 'string') {
+    if (typeof email === "string") {
       authUpdates.email = email;
     }
 
-    if (typeof newPassword === 'string') {
+    if (typeof newPassword === "string") {
       authUpdates.password = newPassword;
     }
 
@@ -781,23 +831,23 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
 
     const firestoreUpdates = {};
 
-    if (typeof firstName === 'string') {
+    if (typeof firstName === "string") {
       firestoreUpdates.firstName = firstName;
     }
 
-    if (typeof lastName === 'string') {
+    if (typeof lastName === "string") {
       firestoreUpdates.lastName = lastName;
     }
 
-    if (typeof email === 'string') {
+    if (typeof email === "string") {
       firestoreUpdates.email = email;
     }
 
     if (Object.keys(firestoreUpdates).length > 0) {
       await db
-          .collection('users')
-          .doc(uid)
-          .set(firestoreUpdates, {merge: true});
+        .collection('user)
+        .doc(uid)
+        .set(firestoreUpdates, { merge: true });
     }
 
     console.log(`User profile updated for UID: ${uid}`, {
@@ -808,8 +858,8 @@ exports.updateUserProfile = functions.https.onCall(async (data, context) => {
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw new functions.https.HttpsError(
-        'internal',
-        'An error occured while updating the profile',
+      "internal",
+      "An error occured while updating the profile",
     );
   }
 });
