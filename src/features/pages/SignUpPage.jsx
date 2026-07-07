@@ -32,14 +32,14 @@ const theme = createTheme();
 
 const normalizeName = (value = "") => value.replace(/\s+/g, " ").trim();
 
-const validationSchema = Yup.object().shape({
+const validationSchema = Yup.object({
   firstName: Yup.string()
     .trim()
-    .required("First Name is required")
+    .required("First name is required")
     .max(60, "Too long"),
   lastName: Yup.string()
     .trim()
-    .required("Last Name is required")
+    .required("Last name is required")
     .max(60, "Too long"),
   email: Yup.string()
     .email("Invalid email address")
@@ -56,8 +56,30 @@ const validationSchema = Yup.object().shape({
     ),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password"), null], "Passwords must match")
-    .required("Confirm Password is required"),
+    .required("Confirm password is required"),
 });
+
+const passwordRules = [
+  { label: "At least 8 characters", test: (v) => v.length >= 8 },
+  { label: "One lowercase letter", test: (v) => /[a-z]/.test(v) },
+  { label: "One uppercase letter", test: (v) => /[A-Z]/.test(v) },
+  { label: "One number", test: (v) => /[0-9]/.test(v) },
+  { label: "One special character", test: (v) => /[@$!%*?&]/.test(v) },
+];
+
+const getPasswordStrength = (password) => {
+  if (!password) return 0;
+  return passwordRules.filter((rule) => rule.test(password)).length;
+};
+
+const strengthMeta = [
+  { label: "", color: "transparent" },
+  { label: "Very weak", color: "#ef5350" },
+  { label: "Weak", color: "#fb8c00" },
+  { label: "Fair", color: "#fbc02d" },
+  { label: "Strong", color: "#66bb6a" },
+  { label: "Very strong", color: "#43a047" },
+];
 
 const getFriendlySignupError = (code) => {
   switch (code) {
@@ -70,9 +92,10 @@ const getFriendlySignupError = (code) => {
     case "auth/popup-closed-by-user":
       return "Google sign-up was cancelled.";
     default:
-      return "We couldn’t create your account. Please try again.";
+      return "We couldn't create your account. Please try again.";
   }
 };
+
 const buildUserPayload = ({ firstName, lastName, email }) => ({
   firstName: normalizeName(firstName),
   lastName: normalizeName(lastName),
@@ -96,17 +119,93 @@ const buildUserPayload = ({ firstName, lastName, email }) => ({
   },
   updatedAt: serverTimestamp(),
 });
-const SignUpPage = () => {
+
+const authCardSx = {
+  width: "100%",
+  maxWidth: 540,
+  borderRadius: radius.xl,
+  border: `1px solid rgba(255,255,255,0.1)`,
+  bgcolor: "rgba(255,255,255,0.94)",
+  boxShadow: "0 22px 56px rgba(0,0,0,0.26)",
+  px: { xs: 2.25, sm: 3.5 },
+  py: { xs: 2.5, sm: 3.5 },
+};
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    minHeight: 54,
+    borderRadius: radius.md,
+    backgroundColor: "#fafafa",
+    color: "#111",
+    transition: "box-shadow 180ms ease, border-color 180ms ease",
+    "& fieldset": {
+      borderColor: "rgba(0,0,0,0.12)",
+    },
+    "&:hover fieldset": {
+      borderColor: colors.accent,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: colors.accent,
+      borderWidth: "2px",
+    },
+    "&.Mui-focused": {
+      boxShadow: "0 0 0 4px rgba(89,230,219,0.16)",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "rgba(0,0,0,0.62)",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: colors.accent,
+  },
+  "& .MuiFormHelperText-root": {
+    ml: 0.25,
+  },
+};
+
+const googleButtonSx = {
+  minHeight: 48,
+  borderRadius: radius.md,
+  textTransform: "none",
+  fontSize: "0.96rem",
+  fontWeight: 800,
+  backgroundColor: colors.accent,
+  color: "#000",
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: colors.accentHover,
+    boxShadow: "none",
+  },
+};
+
+const submitButtonSx = {
+  minHeight: 48,
+  borderRadius: radius.md,
+  textTransform: "none",
+  fontSize: "0.96rem",
+  fontWeight: 800,
+  backgroundColor: "#000",
+  color: "#fff",
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: "#111",
+    boxShadow: "none",
+  },
+};
+
+function SignUpPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState("");
   const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const redirectTarget = useMemo(() => {
     const from = location.state?.from;
-    return typeof from === "string" && from.startsWith("/onboarding")
+    return typeof from === "string" && from.startsWith(ROUTES.ONBOARDING_ROOT)
       ? from
-      : "/onboarding/gender";
+      : ROUTES.ONBOARDING_GENDER;
   }, [location.state]);
 
   const persistAndRedirect = () => {
@@ -116,7 +215,6 @@ const SignUpPage = () => {
   const upsertUserDocument = async ({ uid, firstName, lastName, email }) => {
     const userRef = doc(db, "users", uid);
     const existing = await getDoc(userRef);
-
     const payload = buildUserPayload({ firstName, lastName, email });
 
     if (!existing.exists()) {
@@ -152,13 +250,10 @@ const SignUpPage = () => {
 
     try {
       await setPersistence(auth, browserSessionPersistence);
-
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
       const fullName = (user.displayName || "User").trim();
       const names = fullName.split(/\s+/);
       const firstName = names[0] || "User";
@@ -193,7 +288,6 @@ const SignUpPage = () => {
 
       try {
         await setPersistence(auth, browserSessionPersistence);
-
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           values.email.trim().toLowerCase(),
@@ -216,69 +310,122 @@ const SignUpPage = () => {
     },
   });
 
+  const strength = getPasswordStrength(formik.values.password);
+  const strengthInfo = strengthMeta[strength];
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundImage: `url(/assets/backgroundImage.png)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        minHeight: "100vh",
-      }}
-    >
-      <ThemeProvider theme={theme}>
-        <Header />
-        <Grid
-          container
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          sx={{ minHeight: "100vh" }}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: colors.background,
+          backgroundImage:
+            'linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)), url("/assets/hero-bg.jpg")',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <PublicHeader />
+
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 2,
+            py: { xs: 5, md: 8 },
+          }}
         >
           <Container
-            component="main"
-            maxWidth="xs"
-            sx={{ backgroundColor: "white", borderRadius: 2 }}
+            maxWidth="sm"
+            sx={{ display: "flex", justifyContent: "center" }}
           >
-            <CssBaseline />
-            <Box
-              sx={{
-                marginTop: 4,
-                marginBottom: 4,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
+            <Box sx={authCardSx}>
               <Typography
-                component="h1"
-                variant="h5"
-                sx={{ fontWeight: "bold" }}
+                sx={{
+                  color: colors.accent,
+                  fontSize: "0.76rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  mb: 0.75,
+                }}
               >
-                Sign Up
+                Dream Closet
               </Typography>
 
-              {error && (
-                <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  textAlign: "center",
+                  fontWeight: 800,
+                  color: "#111",
+                  fontSize: { xs: "1.6rem", sm: "1.95rem" },
+                  mb: 0.75,
+                }}
+              >
+                Create your account
+              </Typography>
+
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  color: "rgba(0,0,0,0.62)",
+                  fontSize: "0.96rem",
+                  mb: 3,
+                }}
+              >
+                Start building your dream closet with smarter search and saved
+                style preferences.
+              </Typography>
+
+              {error ? (
+                <Alert
+                  severity="error"
+                  sx={{ mb: 2.25, borderRadius: radius.md }}
+                >
                   {error}
                 </Alert>
-              )}
+              ) : null}
 
-              <Box
-                component="form"
-                onSubmit={formik.handleSubmit}
-                sx={{ mt: 3, width: "100%" }}
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={
+                  loadingGoogle ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <GoogleIcon />
+                  )
+                }
+                onClick={handleGoogleSignUp}
+                disabled={formik.isSubmitting || loadingGoogle}
+                sx={{ ...googleButtonSx, mb: 2 }}
               >
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                {loadingGoogle ? "Signing up..." : "Sign up with Google"}
+              </Button>
+
+              <Divider
+                sx={{ mb: 2.5, color: "rgba(0,0,0,0.45)", fontSize: "0.8rem" }}
+              >
+                or sign up with email
+              </Divider>
+
+              <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+                <Stack spacing={2}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
                     <TextField
-                      required
                       fullWidth
                       id="firstName"
                       name="firstName"
-                      label="First Name"
+                      label="First name"
                       autoComplete="given-name"
                       value={formik.values.firstName}
                       onChange={formik.handleChange}
@@ -290,16 +437,13 @@ const SignUpPage = () => {
                       helperText={
                         formik.touched.firstName && formik.errors.firstName
                       }
+                      sx={fieldSx}
                     />
-                  </Grid>
-
-                  <Grid item xs={12}>
                     <TextField
-                      required
                       fullWidth
                       id="lastName"
                       name="lastName"
-                      label="Last Name"
+                      label="Last name"
                       autoComplete="family-name"
                       value={formik.values.lastName}
                       onChange={formik.handleChange}
@@ -311,35 +455,32 @@ const SignUpPage = () => {
                       helperText={
                         formik.touched.lastName && formik.errors.lastName
                       }
+                      sx={fieldSx}
                     />
-                  </Grid>
+                  </Stack>
 
-                  <Grid item xs={12}>
-                    <TextField
-                      required
-                      fullWidth
-                      id="email"
-                      name="email"
-                      label="Email Address"
-                      autoComplete="email"
-                      value={formik.values.email}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      error={
-                        formik.touched.email && Boolean(formik.errors.email)
-                      }
-                      helperText={formik.touched.email && formik.errors.email}
-                    />
-                  </Grid>
+                  <TextField
+                    fullWidth
+                    id="email"
+                    name="email"
+                    label="Email address"
+                    type="email"
+                    autoComplete="email"
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
+                    sx={fieldSx}
+                  />
 
-                  <Grid item xs={12}>
+                  <Box>
                     <TextField
-                      required
                       fullWidth
                       id="password"
                       name="password"
                       label="Password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
                       value={formik.values.password}
                       onChange={formik.handleChange}
@@ -351,95 +492,180 @@ const SignUpPage = () => {
                       helperText={
                         formik.touched.password && formik.errors.password
                       }
+                      sx={fieldSx}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPassword((prev) => !prev)}
+                              edge="end"
+                              aria-label={
+                                showPassword ? "Hide password" : "Show password"
+                              }
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
-                  </Grid>
 
-                  <Grid item xs={12}>
-                    <TextField
-                      required
-                      fullWidth
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      label="Confirm Password"
-                      type="password"
-                      value={formik.values.confirmPassword}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      error={
-                        formik.touched.confirmPassword &&
-                        Boolean(formik.errors.confirmPassword)
-                      }
-                      helperText={
-                        formik.touched.confirmPassword &&
-                        formik.errors.confirmPassword
-                      }
-                    />
-                  </Grid>
-                </Grid>
+                    {formik.values.password ? (
+                      <Box sx={{ mt: 1 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={(strength / 5) * 100}
+                          sx={{
+                            height: 5,
+                            borderRadius: 999,
+                            backgroundColor: "rgba(0,0,0,0.08)",
+                            "& .MuiLinearProgress-bar": {
+                              backgroundColor: strengthInfo.color,
+                              borderRadius: 999,
+                            },
+                          }}
+                        />
+                        <Typography
+                          sx={{
+                            mt: 0.6,
+                            color: strengthInfo.color,
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {strengthInfo.label}
+                        </Typography>
+
+                        <Stack
+                          direction="row"
+                          flexWrap="wrap"
+                          gap={0.75}
+                          sx={{ mt: 1 }}
+                        >
+                          {passwordRules.map((rule) => {
+                            const passed = rule.test(formik.values.password);
+                            return (
+                              <Box
+                                key={rule.label}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.45,
+                                  width: { xs: "100%", sm: "48%" },
+                                  color: passed ? "#43a047" : "rgba(0,0,0,0.5)",
+                                  fontSize: "0.76rem",
+                                }}
+                              >
+                                {passed ? (
+                                  <CheckCircleOutlineIcon
+                                    sx={{ fontSize: "0.9rem" }}
+                                  />
+                                ) : (
+                                  <RadioButtonUncheckedIcon
+                                    sx={{ fontSize: "0.85rem" }}
+                                  />
+                                )}
+                                {rule.label}
+                              </Box>
+                            );
+                          })}
+                        </Stack>
+                      </Box>
+                    ) : null}
+                  </Box>
+
+                  <TextField
+                    fullWidth
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    label="Confirm password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={
+                      formik.touched.confirmPassword &&
+                      Boolean(formik.errors.confirmPassword)
+                    }
+                    helperText={
+                      formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword
+                    }
+                    sx={fieldSx}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() =>
+                              setShowConfirmPassword((prev) => !prev)
+                            }
+                            edge="end"
+                            aria-label={
+                              showConfirmPassword
+                                ? "Hide password"
+                                : "Show password"
+                            }
+                          >
+                            {showConfirmPassword ? (
+                              <VisibilityOff />
+                            ) : (
+                              <Visibility />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Stack>
 
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{
-                    mt: 3,
-                    mb: 2,
-                    backgroundColor: "black",
-                    color: "white",
-                    minHeight: 48,
-                    fontWeight: 700,
-                    textTransform: "none",
-                  }}
                   disabled={formik.isSubmitting || loadingGoogle}
+                  sx={{ ...submitButtonSx, mt: 3 }}
                 >
                   {formik.isSubmitting ? (
-                    <CircularProgress size={24} color="inherit" />
+                    <CircularProgress size={20} color="inherit" />
                   ) : (
-                    "Sign Up"
+                    "Create account"
                   )}
                 </Button>
-
-                <Stack>
-                  <Button
-                    variant="contained"
-                    aria-label="Sign Up With Google"
-                    startIcon={<GoogleIcon />}
-                    sx={{
-                      mb: 2,
-                      backgroundColor: "turquoise",
-                      color: "black",
-                      minHeight: 48,
-                      fontWeight: 700,
-                      textTransform: "none",
-                    }}
-                    onClick={handleGoogleSignUp}
-                    disabled={formik.isSubmitting || loadingGoogle}
-                  >
-                    {loadingGoogle ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Sign Up With Google"
-                    )}
-                  </Button>
-                </Stack>
               </Box>
 
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Link to="/loginpage" style={{ textDecoration: "none" }}>
-                    <Typography variant="body2">
-                      Already have an account? Sign in
-                    </Typography>
-                  </Link>
-                </Grid>
-              </Grid>
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  mt: 3,
+                  color: "rgba(0,0,0,0.62)",
+                  fontSize: "0.92rem",
+                }}
+              >
+                Already have an account?{" "}
+                <RouterLink
+                  to={ROUTES.LOGIN}
+                  style={{
+                    color: "#111",
+                    fontWeight: 800,
+                    textDecoration: "none",
+                  }}
+                >
+                  Sign in
+                </RouterLink>
+              </Typography>
             </Box>
           </Container>
-        </Grid>
+        </Box>
+
         <Footer />
-      </ThemeProvider>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
-};
+}
 
 export default SignUpPage;

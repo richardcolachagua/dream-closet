@@ -14,8 +14,9 @@ export const ROUTES = {
   SEARCH: "/searchpage",
   FREE_SEARCH: "/freesearchpage",
   PROFILE: "/profilepage",
-  SAVED: "/saved-items-and-searches", // unified saved route
+  SAVED: "/saved-items-and-searches",
   PRICING: "/pricing",
+  SETTINGS: "/settingspage",
   PRIVACY_POLICY: "/privacypolicypage",
   TERMS: "/tospage",
   NOT_FOUND: "/notfound",

@@ -29,11 +29,11 @@ import {
 } from "firebase/auth";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-const defaultTheme = createTheme();
+const theme = createTheme();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
-const validationSchema = Yup.object().shape({
+const validationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required"),
@@ -59,24 +59,82 @@ const getFriendlyAuthError = (code) => {
   }
 };
 
-const LoginPage = () => {
+const authCardSx = {
+  width: "100%",
+  maxWidth: 500,
+  borderRadius: radius.xl,
+  border: `1px solid ${colors.border}`,
+  bgcolor: "rgba(255,255,255,0.94)",
+  boxShadow: "0 22px 56px rgba(0,0,0,0.26)",
+  px: { xs: 2.25, sm: 3.5 },
+  py: { xs: 2.5, sm: 3.5 },
+};
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    minHeight: 54,
+    borderRadius: radius.md,
+    backgroundColor: "#fafafa",
+    color: "#111",
+    transition: "box-shadow 180ms ease, border-color 180ms ease",
+    "& fieldset": {
+      borderColor: "rgba(0,0,0,0.12)",
+    },
+    "&:hover fieldset": {
+      borderColor: colors.accent,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: colors.accent,
+      borderWidth: "2px",
+    },
+    "&.Mui-focused": {
+      boxShadow: "0 0 0 4px rgba(89,230,219,0.16)",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "rgba(0,0,0,0.62)",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: colors.accent,
+  },
+  "& .MuiFormHelperText-root": {
+    ml: 0.25,
+  },
+};
+
+const googleButtonSx = {
+  minHeight: 48,
+  borderRadius: radius.md,
+  textTransform: "none",
+  fontSize: "0.96rem",
+  fontWeight: 800,
+  backgroundColor: colors.accent,
+  color: "#000",
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: colors.accentHover,
+    boxShadow: "none",
+  },
+};
+
+const submitButtonSx = {
+  minHeight: 48,
+  borderRadius: radius.md,
+  textTransform: "none",
+  fontSize: "0.96rem",
+  fontWeight: 800,
+  backgroundColor: "#000",
+  color: "#fff",
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: "#111",
+    boxShadow: "none",
+  },
+};
+
+function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const redirectTarget = useMemo(() => {
-    const from = location.state?.from;
-    const nextRoute =
-      typeof from === "string" && from.startsWith("/") ? from : "/searchpage";
-
-    console.log("[LoginPage] redirectTarget computed", {
-      from,
-      nextRoute,
-      locationState: location.state,
-    });
-
-    return nextRoute;
-  }, [location.state]);
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -85,42 +143,30 @@ const LoginPage = () => {
     lockedUntil: null,
   });
 
+  const redirectTarget = useMemo(() => {
+    const from = location.state?.from;
+    return typeof from === "string" && from.startsWith("/")
+      ? from
+      : ROUTES.SEARCH;
+  }, [location.state]);
+
   const isLocked =
     attemptState.lockedUntil && Date.now() < attemptState.lockedUntil;
 
   const registerFailure = () => {
     setAttemptState((prev) => {
       const nextCount = prev.count + 1;
-      const nextState =
-        nextCount >= MAX_ATTEMPTS
-          ? {
-              count: nextCount,
-              lockedUntil: Date.now() + LOCKOUT_MS,
-            }
-          : {
-              count: nextCount,
-              lockedUntil: prev.lockedUntil,
-            };
-
-      console.log("[LoginPage] registerFailure", {
-        previousState: prev,
-        nextState,
-      });
-
-      return nextState;
+      return nextCount >= MAX_ATTEMPTS
+        ? { count: nextCount, lockedUntil: Date.now() + LOCKOUT_MS }
+        : { count: nextCount, lockedUntil: prev.lockedUntil };
     });
   };
 
   const resetAttemptState = () => {
-    console.log("[LoginPage] resetAttemptState");
     setAttemptState({ count: 0, lockedUntil: null });
   };
 
-  const completeLoginRedirect = () => {
-    console.log("[LoginPage] completeLoginRedirect", {
-      redirectTarget,
-      currentUser: auth.currentUser,
-    });
+  const handleRedirect = () => {
     navigate(redirectTarget, { replace: true });
   };
 
@@ -133,12 +179,6 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       setError("");
 
-      console.log("[LoginPage] email login submit", {
-        email: values.email,
-        isLocked,
-        attemptState,
-      });
-
       if (isLocked) {
         setError("Too many attempts. Please wait 15 minutes and try again.");
         return;
@@ -148,23 +188,14 @@ const LoginPage = () => {
 
       try {
         await setPersistence(auth, browserSessionPersistence);
-        console.log("[LoginPage] persistence set to browserSessionPersistence");
-
-        const userCredential = await signInWithEmailAndPassword(
+        await signInWithEmailAndPassword(
           auth,
           values.email.trim(),
           values.password,
         );
-
-        console.log("[LoginPage] email login success", {
-          user: userCredential?.user,
-          currentUser: auth.currentUser,
-        });
-
         resetAttemptState();
-        completeLoginRedirect();
+        handleRedirect();
       } catch (authError) {
-        console.error("[LoginPage] email login error", authError);
         registerFailure();
         setError(getFriendlyAuthError(authError?.code));
       } finally {
@@ -176,11 +207,6 @@ const LoginPage = () => {
   const handleGoogleSignIn = async () => {
     setError("");
 
-    console.log("[LoginPage] google login start", {
-      isLocked,
-      attemptState,
-    });
-
     if (isLocked) {
       setError("Too many attempts. Please wait 15 minutes and try again.");
       return;
@@ -190,22 +216,12 @@ const LoginPage = () => {
 
     try {
       await setPersistence(auth, browserSessionPersistence);
-      console.log("[LoginPage] persistence set before Google sign-in");
-
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-
-      const result = await signInWithPopup(auth, provider);
-
-      console.log("[LoginPage] google login success", {
-        user: result?.user,
-        currentUser: auth.currentUser,
-      });
-
+      await signInWithPopup(auth, provider);
       resetAttemptState();
-      completeLoginRedirect();
+      handleRedirect();
     } catch (authError) {
-      console.error("[LoginPage] google login error", authError);
       if (authError?.code !== "auth/popup-closed-by-user") {
         registerFailure();
       }
@@ -216,181 +232,219 @@ const LoginPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        backgroundImage: `url(/assets/backgroundImage.png)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        minHeight: "100vh",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
-        <Header />
-        <Grid
-          container
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          sx={{ minHeight: "100vh" }}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: colors.background,
+          backgroundImage:
+            'linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)), url("/assets/hero-bg.jpg")',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <PublicHeader />
+
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 2,
+            py: { xs: 5, md: 8 },
+          }}
         >
           <Container
-            component="main"
-            maxWidth="xs"
-            sx={{ backgroundColor: "white", borderRadius: 2 }}
+            maxWidth="sm"
+            sx={{ display: "flex", justifyContent: "center" }}
           >
-            <CssBaseline />
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                py: 3,
-              }}
-            >
+            <Box sx={authCardSx}>
               <Typography
-                component="h1"
-                variant="h5"
-                sx={{ fontWeight: "bold" }}
+                sx={{
+                  color: colors.accent,
+                  fontSize: "0.76rem",
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  mb: 0.75,
+                }}
               >
-                Sign In
+                Dream Closet
               </Typography>
 
-              {error && (
-                <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  textAlign: "center",
+                  fontWeight: 800,
+                  color: "#111",
+                  fontSize: { xs: "1.65rem", sm: "2rem" },
+                  mb: 0.75,
+                }}
+              >
+                Welcome back
+              </Typography>
+
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  color: "rgba(0,0,0,0.62)",
+                  fontSize: "0.96rem",
+                  mb: 3,
+                }}
+              >
+                Sign in to continue your search, saved items, and style profile.
+              </Typography>
+
+              {error ? (
+                <Alert
+                  severity="error"
+                  sx={{ mb: 2.25, borderRadius: radius.md }}
+                >
                   {error}
                 </Alert>
-              )}
+              ) : null}
 
-              <Box
-                component="form"
-                onSubmit={formik.handleSubmit}
-                sx={{ width: "100%", mt: 2 }}
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <GoogleIcon />
+                  )
+                }
+                onClick={handleGoogleSignIn}
+                disabled={loading || isLocked}
+                sx={{ ...googleButtonSx, mb: 2 }}
               >
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="email"
-                  name="email"
-                  label="Email Address"
-                  autoComplete="email"
-                  autoFocus
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                />
+                {loading ? "Signing in..." : "Sign in with Google"}
+              </Button>
 
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="password"
-                  name="password"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.password && Boolean(formik.errors.password)
-                  }
-                  helperText={formik.touched.password && formik.errors.password}
-                  sx={{ mb: 2 }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          edge="end"
-                          aria-label={
-                            showPassword ? "Hide password" : "Show password"
-                          }
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+              <Divider
+                sx={{ mb: 2.5, color: "rgba(0,0,0,0.45)", fontSize: "0.8rem" }}
+              >
+                or sign in with email
+              </Divider>
+
+              <Box component="form" onSubmit={formik.handleSubmit} noValidate>
+                <Stack spacing={2}>
+                  <TextField
+                    fullWidth
+                    id="email"
+                    name="email"
+                    label="Email address"
+                    type="email"
+                    autoComplete="email"
+                    autoFocus
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
+                    sx={fieldSx}
+                  />
+
+                  <TextField
+                    fullWidth
+                    id="password"
+                    name="password"
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={
+                      formik.touched.password && Boolean(formik.errors.password)
+                    }
+                    helperText={
+                      formik.touched.password && formik.errors.password
+                    }
+                    sx={fieldSx}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            edge="end"
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Stack>
+
+                <Box sx={{ textAlign: "right", mt: 1.1, mb: 2.5 }}>
+                  <RouterLink
+                    to={ROUTES.FORGOT_PASSWORD}
+                    style={{
+                      color: colors.accent,
+                      textDecoration: "none",
+                      fontWeight: 700,
+                      fontSize: "0.86rem",
+                    }}
+                  >
+                    Forgot password?
+                  </RouterLink>
+                </Box>
 
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{
-                    mt: 2,
-                    mb: 2,
-                    backgroundColor: "black",
-                    color: "white",
-                    minHeight: 48,
-                    fontWeight: 700,
-                    textTransform: "none",
-                  }}
-                  disabled={loading || isLocked}
+                  disabled={loading || isLocked || formik.isSubmitting}
+                  sx={submitButtonSx}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
+                  {formik.isSubmitting || loading ? (
+                    <CircularProgress size={20} color="inherit" />
                   ) : (
                     "Sign in"
                   )}
                 </Button>
               </Box>
 
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<GoogleIcon />}
+              <Typography
                 sx={{
-                  mt: 1,
-                  py: 1.2,
-                  backgroundColor: "turquoise",
-                  color: "black",
-                  minHeight: 48,
-                  fontWeight: 700,
-                  textTransform: "none",
+                  textAlign: "center",
+                  mt: 3,
+                  color: "rgba(0,0,0,0.62)",
+                  fontSize: "0.92rem",
                 }}
-                onClick={handleGoogleSignIn}
-                disabled={loading || isLocked}
               >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Sign in with Google"
-                )}
-              </Button>
-
-              <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
-                <Grid item>
-                  <Link to="/forgotpassword" style={{ textDecoration: "none" }}>
-                    Forgot Password
-                  </Link>
-                </Grid>
-              </Grid>
-
-              <Grid container justifyContent="flex-end" sx={{ mt: 1 }}>
-                <Grid item>
-                  <Link to="/signuppage" style={{ textDecoration: "none" }}>
-                    <Typography
-                      color="black"
-                      align="center"
-                      sx={{ fontWeight: "bold", fontFamily: "Helvetica Neue" }}
-                    >
-                      Don&apos;t have an account? Sign Up
-                    </Typography>
-                  </Link>
-                </Grid>
-              </Grid>
+                Don&apos;t have an account?{" "}
+                <RouterLink
+                  to={ROUTES.SIGNUP}
+                  style={{
+                    color: "#111",
+                    fontWeight: 800,
+                    textDecoration: "none",
+                  }}
+                >
+                  Sign up
+                </RouterLink>
+              </Typography>
             </Box>
           </Container>
-        </Grid>
+        </Box>
+
         <Footer />
-      </ThemeProvider>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
-};
+}
 
 export default LoginPage;

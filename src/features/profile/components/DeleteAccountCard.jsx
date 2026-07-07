@@ -8,21 +8,37 @@ import {
   DialogContent,
   DialogTitle,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { httpsCallable } from "firebase/functions";
 import { deleteUser } from "firebase/auth";
-import { auth } from "../../../backend/firebase/firebase";
-// Later: import a callable Cloud Function that deletes Firestore data.
+import { auth, functions } from "../../../backend/firebase/firebase";
+import { ROUTES } from "../../../app/routes/routePaths";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
 
-function DeleteAccountCard({ onDeleteServerSide }) {
+const cardSx = {
+  borderRadius: radius.xl,
+  backgroundColor: "rgba(161,53,68,0.08)",
+  border: "1px solid rgba(161,53,68,0.22)",
+  boxShadow: "0 16px 40px rgba(0,0,0,0.22)",
+  px: { xs: 2.25, sm: 3 },
+  py: { xs: 2.25, sm: 3 },
+};
+
+function DeleteAccountCard() {
   const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const isValidConfirmation = confirmText.trim() === "DELETE";
+
   const handleOpen = () => {
     setError("");
+    setConfirmText("");
     setOpen(true);
   };
 
@@ -33,29 +49,29 @@ function DeleteAccountCard({ onDeleteServerSide }) {
 
   const handleConfirmDelete = async () => {
     setError("");
+
+    const user = auth.currentUser;
+    if (!user) {
+      setError("You need to be signed in to delete your account.");
+      return;
+    }
+
+    if (!isValidConfirmation) {
+      setError('Please type "DELETE" to confirm.');
+      return;
+    }
+
     setDeleting(true);
 
     try {
-      const user = auth.currentUser;
-
-      if (!user) {
-        setError("You need to be signed in to delete your account.");
-        setDeleting(false);
-        return;
-      }
-
-      // 1. Call backend to delete Firestore data, saved items/searches, etc.
-      await onDeleteServerSide?.(user);
-
-      // 2. Delete Firebase Auth user.
+      const deleteAccount = httpsCallable(functions, "deleteAccount");
+      await deleteAccount();
       await deleteUser(user);
-
-      // 3. Redirect to a public page (homepage).
-      navigate("/homepage", { replace: true });
+      navigate(ROUTES.HOMEPAGE, { replace: true });
     } catch (err) {
-      console.error("Error deleting account", err);
       setError(
-        "We couldn’t delete your account right now. Please try again or contact support.",
+        err?.message ||
+          "We couldn’t delete your account right now. Please try again or contact support.",
       );
     } finally {
       setDeleting(false);
@@ -64,73 +80,147 @@ function DeleteAccountCard({ onDeleteServerSide }) {
 
   return (
     <>
-      <Box
-        sx={{
-          borderRadius: 3,
-          border: "1px solid rgba(255,255,255,0.18)",
-          backgroundColor: "rgba(255,0,0,0.04)",
-          p: 3,
-        }}
-      >
-        <Stack spacing={1.5}>
-          <Typography
-            variant="h5"
-            sx={{ color: "rgba(255,255,255,0.9)", fontWeight: 800 }}
-          >
-            Delete account
-          </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
-            Permanently delete your Dream Closet account and associated data.
-            This action can’t be undone, and you’ll lose saved searches, saved
-            items, and subscription access. [web:106][web:109]
-          </Typography>
+      <Box sx={cardSx}>
+        <Stack spacing={2}>
+          <Box>
+            <Typography
+              sx={{
+                color: "white",
+                fontWeight: 800,
+                fontSize: "1.1rem",
+                mb: 0.5,
+              }}
+            >
+              Delete account
+            </Typography>
+            <Typography sx={{ color: "rgba(255,255,255,0.72)" }}>
+              Permanently delete your Dream Closet account, saved items, saved
+              searches, and account data.
+            </Typography>
+          </Box>
 
-          {error && <Alert severity="error">{error}</Alert>}
+          {error ? (
+            <Alert severity="error" sx={{ borderRadius: radius.md }}>
+              {error}
+            </Alert>
+          ) : null}
 
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleOpen}
-            sx={{
-              alignSelf: "flex-start",
-              mt: 1,
-              borderRadius: "16px",
-              textTransform: "none",
-              fontWeight: 800,
-              borderColor: "rgba(255,255,255,0.5)",
-              color: "rgba(255,255,255,0.9)",
-              "&:hover": {
-                borderColor: "rgba(255,0,0,0.8)",
-                bgcolor: "rgba(255,0,0,0.1)",
-              },
-            }}
-          >
-            Delete my account
-          </Button>
+          <Box>
+            <Button
+              variant="outlined"
+              onClick={handleOpen}
+              sx={{
+                minHeight: 46,
+                borderRadius: radius.md,
+                textTransform: "none",
+                fontWeight: 800,
+                color: "#ffb8c0",
+                borderColor: "rgba(255,184,192,0.35)",
+                "&:hover": {
+                  borderColor: "#ffb8c0",
+                  backgroundColor: "rgba(255,184,192,0.06)",
+                },
+              }}
+            >
+              Delete my account
+            </Button>
+          </Box>
         </Stack>
       </Box>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Confirm account deletion</DialogTitle>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: radius.xl,
+            backgroundColor: "#111",
+            color: "white",
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800 }}>
+          Confirm account deletion
+        </DialogTitle>
+
         <DialogContent>
-          <Typography sx={{ mb: 1.5 }}>Deleting your account will:</Typography>
-          <ul>
-            <li>Remove your profile and onboarding preferences.</li>
-            <li>Remove saved searches and saved items.</li>
-            <li>Cancel any active Dream Closet Pro subscription.</li>
-          </ul>
-          <Typography sx={{ mt: 1.5 }}>
-            This action is permanent and cannot be undone.
-          </Typography>
+          <Stack spacing={2}>
+            <Typography sx={{ color: "rgba(255,255,255,0.72)" }}>
+              Deleting your account will permanently remove:
+            </Typography>
+
+            <Box
+              component="ul"
+              sx={{ pl: 2.5, m: 0, color: "rgba(255,255,255,0.86)" }}
+            >
+              <li>Your profile and onboarding preferences</li>
+              <li>Your saved searches and saved items</li>
+              <li>Your active subscription access</li>
+            </Box>
+
+            <Typography sx={{ color: "#ffb8c0", fontWeight: 700 }}>
+              This action cannot be undone.
+            </Typography>
+
+            <TextField
+              fullWidth
+              label='Type "DELETE" to confirm'
+              value={confirmText}
+              onChange={(event) => setConfirmText(event.target.value)}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: radius.md,
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  color: "white",
+                  "& fieldset": {
+                    borderColor: "rgba(255,255,255,0.12)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255,255,255,0.22)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: colors.accent,
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255,255,255,0.62)",
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: colors.accent,
+                },
+              }}
+            />
+          </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} disabled={deleting}>
+
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handleClose}
+            disabled={deleting}
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.8)",
+            }}
+          >
             Keep my account
           </Button>
+
           <Button
             onClick={handleConfirmDelete}
-            color="error"
-            disabled={deleting}
+            disabled={deleting || !isValidConfirmation}
+            variant="contained"
+            sx={{
+              textTransform: "none",
+              fontWeight: 800,
+              borderRadius: radius.md,
+              backgroundColor: "#a13544",
+              "&:hover": {
+                backgroundColor: "#8b2d3a",
+              },
+            }}
           >
             {deleting ? "Deleting..." : "Delete account"}
           </Button>

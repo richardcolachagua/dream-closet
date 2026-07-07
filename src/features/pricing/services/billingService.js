@@ -34,9 +34,10 @@ export const getIdToken = async () => {
 };
 
 export const createCheckoutSession = async ({
-  returnPath = "/searchpage",
+  returnPath = "/settingspage",
 } = {}) => {
   const createSession = httpsCallable(functions, "createCheckoutSession");
+
   const result = await createSession({
     returnUrl: `${window.location.origin}${returnPath}`,
     cancelUrl: `${window.location.origin}/pricing`,
@@ -52,9 +53,10 @@ export const createCheckoutSession = async ({
 };
 
 export const createCustomerPortalSession = async ({
-  returnPath = "/profilepage",
+  returnPath = "/settingspage",
 } = {}) => {
   const createPortal = httpsCallable(functions, "createCustomerPortalSession");
+
   const result = await createPortal({
     returnUrl: `${window.location.origin}${returnPath}`,
   });
