@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import TuneIcon from "@mui/icons-material/Tune";
-import AddIcon from "@mui/icons-material/Add";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import UserDescriptionInput from "../components/SearchInputBar";
@@ -50,7 +50,6 @@ import { auth, db } from "../../../backend/firebase/firebase";
 import { colors, layout } from "../../../shared/ui/theme/designTokens";
 import {
   primaryButtonSx,
-  secondaryButtonSx,
   heroPanelSx,
 } from "../../../shared/ui/theme/componentStyles";
 
@@ -120,6 +119,12 @@ function SearchPage() {
       ? response
       : response?.results || [];
 
+    const nextSources = Array.isArray(response?.sources)
+      ? response.sources
+      : response?.sources
+        ? Object.values(response.sources)
+        : [];
+
     setSearchResults((prev) => (append ? [...prev, ...results] : results));
     setSearchMeta({
       total: response?.total ?? results.length,
@@ -127,7 +132,7 @@ function SearchPage() {
       pageSize: response?.pageSize ?? DEFAULT_PAGE_SIZE,
       hasMore: response?.hasMore ?? false,
       warnings: response?.warnings ?? [],
-      sources: response?.sources ?? [],
+      sources: nextSources,
     });
     setIsLoading(false);
   }, []);
@@ -205,13 +210,12 @@ function SearchPage() {
     }
 
     try {
-      await addDoc(collection(db, "saved-searches"), {
+      await addDoc(collection(db, "users", currentUser.uid, "savedSearches"), {
         query: searchQuery,
         filters,
         sort: sortBy,
         page: currentPage,
-        userId: currentUser.uid,
-        date: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       });
 
       setSuccessMessage("Search saved successfully.");
@@ -228,9 +232,9 @@ function SearchPage() {
     }
 
     try {
-      await addDoc(collection(db, "saved-items"), {
+      await addDoc(collection(db, "users", currentUser.uid, "savedItems"), {
         ...item,
-        userId: currentUser.uid,
+        createdAt: new Date().toISOString(),
       });
 
       setSuccessMessage("Item saved successfully.");
@@ -409,6 +413,7 @@ function SearchPage() {
   ]);
 
   const activeFilterCount = getActiveFilterCount(filters);
+  const personalizationActive = Boolean(onboardingGender) && !showAllGenders;
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -448,7 +453,7 @@ function SearchPage() {
                         mb: 1,
                       }}
                     >
-                      What clothes are we looking for today?
+                      Search for the exact look you have in mind
                     </Typography>
 
                     <Typography
@@ -458,8 +463,9 @@ function SearchPage() {
                         lineHeight: 1.75,
                       }}
                     >
-                      Search in plain language, refine the results, and save
-                      promising pieces as you go.
+                      Describe what you want in natural language, refine the
+                      results with filters, and save the pieces worth coming
+                      back to.
                     </Typography>
                   </Box>
 
@@ -517,21 +523,26 @@ function SearchPage() {
                           border: `1px solid ${colors.border}`,
                         }}
                       />
+
                       <Chip
-                        icon={<AddIcon />}
+                        icon={<AutoAwesomeRoundedIcon />}
                         label={
-                          showAllGenders
-                            ? "All genders enabled"
-                            : "Using onboarding gender"
+                          personalizationActive
+                            ? "Prioritizing your onboarding preference"
+                            : "Showing all gender results"
                         }
                         sx={{
-                          color: showAllGenders
+                          color: personalizationActive
                             ? colors.accent
                             : colors.textSecondary,
-                          bgcolor: showAllGenders
+                          bgcolor: personalizationActive
                             ? colors.accentSoft
                             : colors.surface2,
-                          border: `1px solid ${showAllGenders ? colors.accentBorder : colors.border}`,
+                          border: `1px solid ${
+                            personalizationActive
+                              ? colors.accentBorder
+                              : colors.border
+                          }`,
                         }}
                       />
                     </Stack>
@@ -550,6 +561,18 @@ function SearchPage() {
                       label="Show all genders"
                     />
                   </Stack>
+
+                  {personalizationActive ? (
+                    <Typography
+                      sx={{
+                        color: colors.textMuted,
+                        fontSize: "0.92rem",
+                      }}
+                    >
+                      Results are being prioritized using your onboarding
+                      preference, but you can broaden them anytime.
+                    </Typography>
+                  ) : null}
 
                   {searchMeta.warnings.length > 0 ? (
                     <Typography

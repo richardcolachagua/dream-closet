@@ -1,5 +1,27 @@
 import React from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import WestRoundedIcon from "@mui/icons-material/WestRounded";
+import { colors } from "../../../shared/ui/theme/designTokens";
+
+const chipSx = (selected) => ({
+  px: 1.2,
+  py: 2.4,
+  borderRadius: "999px",
+  border: `1px solid ${
+    selected ? "rgba(89,230,219,0.28)" : "rgba(255,255,255,0.10)"
+  }`,
+  backgroundColor: selected
+    ? "rgba(89,230,219,0.16)"
+    : "rgba(255,255,255,0.04)",
+  color: selected ? colors.accent : "rgba(255,255,255,0.9)",
+  fontWeight: selected ? 800 : 600,
+  "&:hover": {
+    backgroundColor: selected
+      ? "rgba(89,230,219,0.20)"
+      : "rgba(255,255,255,0.08)",
+  },
+});
 
 const CategoryMultiSelectStep = ({
   categories = [],
@@ -9,42 +31,68 @@ const CategoryMultiSelectStep = ({
   onNext,
   loading = false,
   title = "What do you like to wear?",
-  description = "Choose the clothing categories you're most into. Dream Closet will use this to prioritize results and recommendations.",
-  nextLabel = "Next: Favorite Brands",
+  description = "Choose the clothing categories you care about most. We’ll use them to prioritize search results and early recommendations.",
+  nextLabel = "Continue to brands",
   emptyMessage = "Choose a shopping preference first to unlock category recommendations.",
 }) => {
-  const handleToggle = (category) => {
-    if (onToggleCategory) {
-      onToggleCategory(category);
-    }
-  };
-
-  const canContinue = selectedCategories.length > 0 && !loading;
   const hasCategories = categories.length > 0;
+  const canContinue = selectedCategories.length > 0 && !loading;
 
   return (
-    <>
-      <Typography
-        variant="h6"
-        sx={{
-          textAlign: "center",
-          mb: 3,
-          fontWeight: "bold",
-          color: "white",
-        }}
+    <Box>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        justifyContent="space-between"
+        spacing={1}
+        sx={{ mb: 1 }}
       >
-        {title}
-      </Typography>
+        <Typography
+          sx={{
+            color: "white",
+            fontWeight: 800,
+            fontSize: { xs: "1.3rem", md: "1.55rem" },
+          }}
+        >
+          {title}
+        </Typography>
+
+        <Box
+          sx={{
+            px: 1.4,
+            py: 0.75,
+            borderRadius: "999px",
+            backgroundColor: "rgba(89,230,219,0.10)",
+            border: "1px solid rgba(89,230,219,0.18)",
+          }}
+        >
+          <Typography
+            sx={{ color: colors.accent, fontWeight: 800, fontSize: "0.84rem" }}
+          >
+            {selectedCategories.length} selected
+          </Typography>
+        </Box>
+      </Stack>
 
       <Typography
-        variant="body1"
         sx={{
-          textAlign: "center",
-          mb: 4,
-          color: "white",
+          color: "rgba(255,255,255,0.68)",
+          fontSize: "0.98rem",
+          lineHeight: 1.7,
+          mb: 1.25,
         }}
       >
         {description}
+      </Typography>
+
+      <Typography
+        sx={{
+          color: "rgba(255,255,255,0.55)",
+          fontSize: "0.88rem",
+          mb: 3,
+        }}
+      >
+        Pick as many as you want. You can change them later in Settings.
       </Typography>
 
       {hasCategories ? (
@@ -53,10 +101,7 @@ const CategoryMultiSelectStep = ({
           flexWrap="wrap"
           spacing={1}
           useFlexGap
-          sx={{
-            justifyContent: "center",
-            mb: 4,
-          }}
+          sx={{ mb: 4 }}
         >
           {categories.map((category) => {
             const selected = selectedCategories.includes(category);
@@ -66,78 +111,78 @@ const CategoryMultiSelectStep = ({
                 key={category}
                 label={category}
                 clickable
-                onClick={() => handleToggle(category)}
-                sx={{
-                  m: 0.5,
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: "999px",
-                  border: "1px solid turquoise",
-                  bgcolor: selected ? "turquoise" : "rgba(64, 224, 208, 0.12)",
-                  color: selected ? "black" : "grey.100",
-                  fontWeight: selected ? "bold" : "normal",
-                  "&:hover": {
-                    bgcolor: selected
-                      ? "turquoise"
-                      : "rgba(64, 224, 208, 0.12)",
-                  },
-                }}
+                onClick={() => onToggleCategory?.(category)}
+                sx={chipSx(selected)}
               />
             );
           })}
         </Stack>
       ) : (
-        <Box sx={{ mb: 4 }}>
+        <Box
+          sx={{
+            mb: 4,
+            p: 2.25,
+            borderRadius: "18px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            backgroundColor: "rgba(255,255,255,0.04)",
+          }}
+        >
           <Typography
-            variant="body2"
-            sx={{ textAlign: "center", color: "rgba(255,255,255,0.72)" }}
+            sx={{
+              textAlign: "center",
+              color: "rgba(255,255,255,0.68)",
+            }}
           >
             {emptyMessage}
           </Typography>
         </Box>
       )}
 
-      {(onBack || onNext) && (
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          {onBack && (
-            <Button
-              variant="text"
-              onClick={onBack}
-              sx={{
-                color: "grey.300",
-                textTransform: "none",
-              }}
-            >
-              Back
-            </Button>
-          )}
+      <Stack direction="row" spacing={1.5} justifyContent="space-between">
+        {onBack ? (
+          <Button
+            variant="text"
+            onClick={onBack}
+            startIcon={<WestRoundedIcon />}
+            sx={{
+              minHeight: 50,
+              px: 3,
+              borderRadius: "999px",
+              textTransform: "none",
+              fontWeight: 800,
+              color: "rgba(255,255,255,0.74)",
+            }}
+          >
+            Back
+          </Button>
+        ) : (
+          <Box />
+        )}
 
-          {onNext && (
-            <Button
-              variant="contained"
-              onClick={onNext}
-              disabled={!canContinue}
-              sx={{
-                ml: "auto",
-                px: 4,
-                py: 1.2,
-                borderRadius: "999px",
-                textTransform: "none",
-                fontSize: 16,
-                fontWeight: "bold",
-                bgcolor: "turquoise",
-                color: "black",
-                "&:hover": {
-                  bgcolor: "#00b4aa",
-                },
-              }}
-            >
-              {loading ? "Saving..." : nextLabel}
-            </Button>
-          )}
-        </Box>
-      )}
-    </>
+        {onNext ? (
+          <Button
+            variant="contained"
+            onClick={onNext}
+            disabled={!canContinue}
+            endIcon={<ArrowForwardRoundedIcon />}
+            sx={{
+              minHeight: 50,
+              px: 3.25,
+              borderRadius: "999px",
+              textTransform: "none",
+              fontWeight: 800,
+              backgroundColor: colors.accent,
+              color: "#061111",
+              "&:hover": {
+                backgroundColor: colors.accentHover || "#34cfc0",
+              },
+            }}
+          >
+            {loading ? "Saving..." : nextLabel}
+          </Button>
+        ) : null}
+      </Stack>
+    </Box>
   );
 };
 

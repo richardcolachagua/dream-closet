@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { CircularProgress, Alert, CssBaseline, Box } from "@mui/material";
+import { Alert, Box, CircularProgress, CssBaseline } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
 import CategoryMultiSelectStep from "../components/CategoryStep";
+import { ROUTES } from "../../../app/routes/routePaths";
 import {
   EMPTY_ONBOARDING,
   buildOnboardingState,
@@ -118,7 +119,7 @@ const OnboardingCategories = () => {
       if (authLoading) return;
 
       if (!currentUser) {
-        navigate("/loginpage", { replace: true });
+        navigate(ROUTES.LOGIN, { replace: true });
         return;
       }
 
@@ -137,12 +138,12 @@ const OnboardingCategories = () => {
         const onboarding = data?.onboarding || {};
 
         if (onboarding?.completed) {
-          navigate("/searchpage", { replace: true });
+          navigate(ROUTES.SEARCH, { replace: true });
           return;
         }
 
         if (!onboarding?.gender) {
-          navigate("/onboarding/gender", { replace: true });
+          navigate(ROUTES.ONBOARDING_GENDER, { replace: true });
           return;
         }
 
@@ -179,7 +180,7 @@ const OnboardingCategories = () => {
 
   const handleNext = async () => {
     if (!currentUser) {
-      navigate("/loginpage", { replace: true });
+      navigate(ROUTES.LOGIN, { replace: true });
       return;
     }
 
@@ -212,7 +213,7 @@ const OnboardingCategories = () => {
         { merge: true },
       );
 
-      navigate("/onboarding/brands", { replace: true });
+      navigate(ROUTES.ONBOARDING_BRANDS, { replace: true });
     } catch (err) {
       console.error("Error saving categories:", err);
       setError("Could not save your categories. Please try again.");
@@ -231,39 +232,47 @@ const OnboardingCategories = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "black",
+            bgcolor: "#050505",
           }}
         >
-          <CircularProgress sx={{ color: "turquoise" }} />
+          <CircularProgress sx={{ color: "#59e6db" }} />
         </Box>
       </>
     );
   }
 
   return (
-    <>
-      <CssBaseline />
-      <OnboardingLayout
-        stepLabel="STEP 2 OF 3"
-        title="What do you like to wear?"
-        subtitle="Choose the clothing categories you're most into. Dream Closet will use this to prioritize results and recommendations."
-      >
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+    <OnboardingLayout
+      currentStep={1}
+      stepLabel="Step 2 of 3"
+      title="Build your style profile"
+      subtitle="Choose the categories you reach for most often so we can rank better results earlier and improve recommendations over time."
+      helperText="Select as many as you want. These preferences help prioritize results, but they won’t hide everything else."
+    >
+      {error ? (
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            borderRadius: 3,
+            backgroundColor: "rgba(161,53,68,0.12)",
+            color: "white",
+            border: "1px solid rgba(161,53,68,0.22)",
+          }}
+        >
+          {error}
+        </Alert>
+      ) : null}
 
-        <CategoryMultiSelectStep
-          categories={categories}
-          selectedCategories={selectedCategories}
-          onToggleCategory={toggleCategory}
-          onBack={() => navigate("/onboarding/gender")}
-          onNext={handleNext}
-          loading={saving}
-        />
-      </OnboardingLayout>
-    </>
+      <CategoryMultiSelectStep
+        categories={categories}
+        selectedCategories={selectedCategories}
+        onToggleCategory={toggleCategory}
+        onBack={() => navigate(ROUTES.ONBOARDING_GENDER)}
+        onNext={handleNext}
+        loading={saving}
+      />
+    </OnboardingLayout>
   );
 };
 

@@ -7,7 +7,7 @@ const buildDefaultResponse = ({ page, pageSize }) => ({
   pageSize,
   hasMore: false,
   warnings: [],
-  sources: {},
+  sources: [],
 });
 
 export const fetchCombinedResults = async ({

@@ -30,6 +30,7 @@ function ProfileHeader() {
   const navButtons = [
     { label: "Search", to: ROUTES.SEARCH },
     { label: "Saved", to: ROUTES.SAVED },
+    { label: "Settings", to: ROUTES.SETTINGS },
   ];
 
   return (

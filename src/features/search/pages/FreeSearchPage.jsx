@@ -18,13 +18,14 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { httpsCallable } from "firebase/functions";
+import { useNavigate } from "react-router-dom";
 
 import Footer from "../../../shared/ui/navigation/Footer";
-import SearchResults from "../../search/components/SearchResults";
 import Header from "../../../shared/ui/navigation/PublicHeader";
 import UserDescriptionInput from "../../search/components/SearchInputBar";
+import SearchResults from "../../search/components/SearchResults";
 import SearchSortControls from "../../search/components/SearchSortBar";
-import FilterDrawer from "../filters/FilterDrawer";
+import FilterDrawer from "../../search/filters/FilterDrawer";
 
 import {
   functions,
@@ -45,6 +46,12 @@ import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
 } from "../../search/utils/searchStateHelpers";
+import { ROUTES } from "../../../app/routes/routePaths";
+import { colors, layout } from "../../../shared/ui/theme/designTokens";
+import {
+  heroPanelSx,
+  primaryButtonSx,
+} from "../../../shared/ui/theme/componentStyles";
 
 // Use provided analytics instance if available, else getAnalytics
 const analytics = analyticsExport || getAnalytics();
@@ -56,10 +63,12 @@ const DEFAULT_SEARCH_META = {
   pageSize: DEFAULT_PAGE_SIZE,
   hasMore: false,
   warnings: [],
-  sources: {},
+  sources: [],
 };
 
 const FreeSearchPage = () => {
+  const navigate = useNavigate();
+
   const [searchResults, setSearchResults] = useState([]);
   const [searchMeta, setSearchMeta] = useState(DEFAULT_SEARCH_META);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +85,7 @@ const FreeSearchPage = () => {
   const [resetTime, setResetTime] = useState(null);
   const [showSignUpDialog, setShowSignUpDialog] = useState(false);
 
-  // Prevent double-init if needed later
+  // Prevent double-init
   const initializedRef = useRef(false);
 
   // ---------- Free search limit logic ----------
@@ -129,7 +138,10 @@ const FreeSearchPage = () => {
     }, [resetTime, checkSearchLimit]);
 
     return timeRemaining ? (
-      <Typography variant="body2" sx={{ color: "white", textAlign: "center" }}>
+      <Typography
+        variant="body2"
+        sx={{ color: colors.textSecondary, textAlign: "center", mt: 0.5 }}
+      >
         Resets in: {timeRemaining}
       </Typography>
     ) : null;
@@ -150,7 +162,7 @@ const FreeSearchPage = () => {
         pageSize: response?.pageSize ?? DEFAULT_PAGE_SIZE,
         hasMore: response?.hasMore ?? false,
         warnings: response?.warnings ?? [],
-        sources: response?.sources ?? {},
+        sources: response?.sources ?? [],
       });
       setIsLoading(false);
 
@@ -170,6 +182,13 @@ const FreeSearchPage = () => {
       page = DEFAULT_PAGE,
       append = false,
     }) => {
+      if (!query?.trim()) {
+        setSearchResults([]);
+        setSearchMeta(DEFAULT_SEARCH_META);
+        setIsLoading(false);
+        return DEFAULT_SEARCH_META;
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -278,7 +297,7 @@ const FreeSearchPage = () => {
     });
   };
 
-  // Filter handlers (even if you choose to hide filter UI for free users, logic is ready)
+  // Filter handlers
   const handleToggleFilter = (key, value) => {
     setFilters((prev) => toggleFilterValue(prev, key, value));
   };
@@ -341,73 +360,77 @@ const FreeSearchPage = () => {
     setIsFilterDrawerOpen(false);
   };
 
+  const activeFilterCount = getActiveFilterCount(filters);
+
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        overflowX: "hidden",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: colors.background,
+          color: colors.textPrimary,
+          overflowX: "hidden",
+          backgroundImage:
+            "radial-gradient(circle at top, rgba(89,230,219,0.06), transparent 30%)",
+        }}
+      >
         <Header />
-        <CssBaseline />
 
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <Container
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              px: 2,
-              py: 4,
-            }}
-          >
-            <Typography
-              variant="h5"
+        <Box component="main" sx={{ flex: 1 }}>
+          <Container maxWidth={layout.pageMax} sx={{ py: { xs: 4, md: 6 } }}>
+            <Box
               sx={{
-                color: "white",
-                fontWeight: "bold",
-                textAlign: "center",
-                mb: 1,
+                ...heroPanelSx,
+                px: { xs: 2.25, md: 3.5 },
+                py: { xs: 2.5, md: 3.5 },
+                mb: 4,
               }}
             >
-              Try Dream Closet
-            </Typography>
+              <Typography
+                sx={{
+                  color: colors.textPrimary,
+                  fontWeight: 850,
+                  fontSize: { xs: "1.7rem", md: "2.2rem" },
+                  lineHeight: 1.08,
+                  mb: 1,
+                  textAlign: { xs: "left", md: "left" },
+                }}
+              >
+                Try Dream Closet
+              </Typography>
 
-            <Typography
-              variant="body1"
-              sx={{
-                color: "white",
-                textAlign: "center",
-                mb: 2,
-              }}
-            >
-              {remainingSearches} free searches remaining
-            </Typography>
+              <Typography
+                sx={{
+                  color: colors.textSecondary,
+                  mb: 1.5,
+                  textAlign: { xs: "left", md: "left" },
+                }}
+              >
+                {remainingSearches} free searches remaining
+              </Typography>
 
-            <Timer />
+              <Timer />
 
-            <UserDescriptionInput
-              value={searchInputValue}
-              onChange={(e) => setSearchInputValue(e.target.value)}
-              onSearchStart={handleSearchStart}
-              onSearchError={handleSearchError}
-              onSearchResults={(response) =>
-                handleSearchResults(response, false)
-              }
-              onSearchSubmit={handleSearchSubmit}
-              onSaveSearch={null} // no saving in free tier
-              onOpenFilters={() => setIsFilterDrawerOpen(true)}
-              activeFilterCount={getActiveFilterCount(filters)}
-              saveDisabled // ensures SaveSearchButton is hidden/disabled
-            />
+              <Box sx={{ mt: 3 }}>
+                <UserDescriptionInput
+                  value={searchInputValue}
+                  onChange={(e) => setSearchInputValue(e.target.value)}
+                  onSearchStart={handleSearchStart}
+                  onSearchError={handleSearchError}
+                  onSearchResults={(response) =>
+                    handleSearchResults(response, false)
+                  }
+                  onSearchSubmit={handleSearchSubmit}
+                  onSaveSearch={null} // no saving in free tier
+                  onOpenFilters={() => setIsFilterDrawerOpen(true)}
+                  activeFilterCount={activeFilterCount}
+                  saveDisabled // ensures SaveSearchButton is hidden/disabled
+                />
+              </Box>
+            </Box>
 
             {isLoading && searchResults.length === 0 && (
               <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
@@ -439,7 +462,7 @@ const FreeSearchPage = () => {
                   >
                     <Typography
                       variant="body2"
-                      sx={{ color: "rgba(255,255,255,0.72)" }}
+                      sx={{ color: colors.textSecondary }}
                     >
                       Showing {searchResults.length} of {searchMeta.total}{" "}
                       results
@@ -452,14 +475,13 @@ const FreeSearchPage = () => {
                       aria-label="view-mode"
                     >
                       <ToggleButton value="list" aria-label="list view">
-                        {/* icons colored to match paid page */}
                         <span>
                           <svg
                             width="20"
                             height="20"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="white"
+                            stroke={colors.textPrimary}
                             strokeWidth="2"
                           >
                             <path d="M4 6h16M4 12h16M4 18h16" />
@@ -473,7 +495,7 @@ const FreeSearchPage = () => {
                             height="20"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="white"
+                            stroke={colors.textPrimary}
                             strokeWidth="2"
                           >
                             <rect x="4" y="4" width="6" height="6" />
@@ -518,13 +540,7 @@ const FreeSearchPage = () => {
                       variant="contained"
                       onClick={handleLoadMore}
                       disabled={isLoading}
-                      sx={{
-                        bgcolor: "turquoise",
-                        color: "black",
-                        fontWeight: "bold",
-                        textTransform: "none",
-                        "&:hover": { bgcolor: "darkturquoise" },
-                      }}
+                      sx={primaryButtonSx}
                     >
                       {isLoading ? "Loading more..." : "Load more"}
                     </Button>
@@ -561,7 +577,7 @@ const FreeSearchPage = () => {
         </Box>
 
         <Footer />
-      </ThemeProvider>
+      </Box>
 
       <Dialog
         open={showSignUpDialog}
@@ -571,21 +587,24 @@ const FreeSearchPage = () => {
         <DialogContent>
           <Typography>
             You’ve reached the limit of free searches. Sign up to continue using
-            Dream Closet and unlock unlimited search.
+            Dream Closet and unlock unlimited search, saved items, and
+            personalized recommendations.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowSignUpDialog(false)}>Close</Button>
           <Button
+            variant="contained"
             onClick={() => {
-              window.location.href = "/signuppage";
+              setShowSignUpDialog(false);
+              navigate(ROUTES.SIGN_UP);
             }}
           >
             Sign up
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </ThemeProvider>
   );
 };
 

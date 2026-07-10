@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Container,
-  CssBaseline,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
+import { Alert, Box, CircularProgress, CssBaseline } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
 import GenderSelectStep from "../components/GenderStep";
+import { ROUTES } from "../../../app/routes/routePaths";
 import {
   EMPTY_ONBOARDING,
   buildOnboardingState,
 } from "../utils/onboardingSchema";
-
-const DEFAULT_ONBOARDING = EMPTY_ONBOARDING;
 
 const OnboardingGender = () => {
   const navigate = useNavigate();
@@ -35,7 +28,7 @@ const OnboardingGender = () => {
       if (authLoading) return;
 
       if (!currentUser) {
-        navigate("/loginpage", { replace: true });
+        navigate(ROUTES.LOGIN, { replace: true });
         return;
       }
 
@@ -47,10 +40,10 @@ const OnboardingGender = () => {
 
         if (snap.exists()) {
           const data = snap.data();
-          const onboarding = data?.onboarding || DEFAULT_ONBOARDING;
+          const onboarding = data?.onboarding || EMPTY_ONBOARDING;
 
           if (onboarding?.completed) {
-            navigate("/searchpage", { replace: true });
+            navigate(ROUTES.SEARCH, { replace: true });
             return;
           }
 
@@ -105,7 +98,7 @@ const OnboardingGender = () => {
         { merge: true },
       );
 
-      navigate("/onboarding/categories");
+      navigate(ROUTES.ONBOARDING_CATEGORIES, { replace: true });
     } catch (err) {
       console.error("Error saving gender:", err);
       setError("Could not save your selection. Please try again.");
@@ -124,59 +117,46 @@ const OnboardingGender = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "black",
+            bgcolor: "#050505",
           }}
         >
-          <CircularProgress sx={{ color: "turquoise" }} />
+          <CircularProgress sx={{ color: "#59e6db" }} />
         </Box>
       </>
     );
   }
 
   return (
-    <>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          bgcolor: "black",
-          color: "white",
-        }}
-      >
-        <Container
-          maxWidth="sm"
+    <OnboardingLayout
+      currentStep={0}
+      stepLabel="Step 1 of 3"
+      title="Start shaping your Dream Closet"
+      subtitle="Tell us how you usually shop so we can personalize your starting experience without narrowing what you can explore."
+      helperText="You can update this later in Settings, and it won’t lock you into one type of result."
+    >
+      {error ? (
+        <Alert
+          severity="error"
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
+            mb: 3,
+            borderRadius: 3,
+            backgroundColor: "rgba(161,53,68,0.12)",
+            color: "white",
+            border: "1px solid rgba(161,53,68,0.22)",
           }}
         >
-          <OnboardingLayout
-            title="Tell Dream Closet about you"
-            subtitle="Start by letting us know which clothing styles to prioritize."
-            stepLabel="Step 1 of 3"
-          >
-            {error && (
-              <Alert
-                severity="error"
-                sx={{ mb: 3, bgcolor: "#2b0000", color: "error.main" }}
-              >
-                {error}
-              </Alert>
-            )}
+          {error}
+        </Alert>
+      ) : null}
 
-            <GenderSelectStep
-              selectedGender={selectedGender}
-              onChangeGender={setSelectedGender}
-              onBack={() => navigate("/homepage")}
-              onNext={handleContinue}
-              loading={saving}
-            />
-          </OnboardingLayout>
-        </Container>
-      </Box>
-    </>
+      <GenderSelectStep
+        selectedGender={selectedGender}
+        onChangeGender={setSelectedGender}
+        onBack={() => navigate(ROUTES.HOME)}
+        onNext={handleContinue}
+        loading={saving}
+      />
+    </OnboardingLayout>
   );
 };
 

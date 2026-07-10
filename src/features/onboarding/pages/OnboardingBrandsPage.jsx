@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { CircularProgress, Alert, Box, CssBaseline } from "@mui/material";
+import { Alert, Box, CircularProgress, CssBaseline } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase/firebase";
 import { useAuth } from "../../auth/AuthContext";
 import OnboardingLayout from "../components/OnboardingLayout";
 import BrandMultiSelectStep from "../components/BrandStep";
+import { ROUTES } from "../../../app/routes/routePaths";
 import {
   EMPTY_ONBOARDING,
   buildOnboardingState,
@@ -192,6 +193,7 @@ const OnboardingBrands = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [completedState, setCompletedState] = useState(false);
 
   const brandGroups = buildBrandGroupsForGender(gender);
 
@@ -202,7 +204,7 @@ const OnboardingBrands = () => {
       if (authLoading) return;
 
       if (!currentUser) {
-        navigate("/loginpage", { replace: true });
+        navigate(ROUTES.LOGIN, { replace: true });
         return;
       }
 
@@ -221,12 +223,12 @@ const OnboardingBrands = () => {
         const onboarding = data?.onboarding || {};
 
         if (onboarding?.completed) {
-          navigate("/searchpage", { replace: true });
+          navigate(ROUTES.SEARCH, { replace: true });
           return;
         }
 
         if (!onboarding?.gender) {
-          navigate("/onboarding/gender", { replace: true });
+          navigate(ROUTES.ONBOARDING_GENDER, { replace: true });
           return;
         }
 
@@ -234,7 +236,7 @@ const OnboardingBrands = () => {
           !Array.isArray(onboarding?.categories) ||
           onboarding.categories.length === 0
         ) {
-          navigate("/onboarding/categories", { replace: true });
+          navigate(ROUTES.ONBOARDING_CATEGORIES, { replace: true });
           return;
         }
 
@@ -267,14 +269,9 @@ const OnboardingBrands = () => {
     );
   };
 
-  const handleFinish = async () => {
+  const persistAndFinish = async (brandsToSave = selectedBrands) => {
     if (!currentUser) {
-      navigate("/loginpage", { replace: true });
-      return;
-    }
-
-    if (selectedBrands.length === 0) {
-      setError("Pick at least a couple of brands you like.");
+      navigate(ROUTES.LOGIN, { replace: true });
       return;
     }
 
@@ -296,20 +293,38 @@ const OnboardingBrands = () => {
             ...existing,
             gender,
             categories: existing.categories,
-            brands: selectedBrands,
+            brands: brandsToSave,
             completed: true,
           }),
           updatedAt: serverTimestamp(),
         },
         { merge: true },
       );
-      navigate("/searchpage");
+
+      setCompletedState(true);
+
+      window.setTimeout(() => {
+        navigate(ROUTES.SEARCH, { replace: true });
+      }, 900);
     } catch (err) {
       console.error("Error saving brands:", err);
       setError("Could not save your brands. Please try again.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleFinish = async () => {
+    if (selectedBrands.length === 0) {
+      setError("Pick a few brands you like, or skip for now.");
+      return;
+    }
+
+    await persistAndFinish(selectedBrands);
+  };
+
+  const handleSkip = async () => {
+    await persistAndFinish([]);
   };
 
   if (authLoading || initialLoading) {
@@ -322,39 +337,78 @@ const OnboardingBrands = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "black",
+            bgcolor: "#050505",
           }}
         >
-          <CircularProgress sx={{ color: "turquoise" }} />
+          <CircularProgress sx={{ color: "#59e6db" }} />
         </Box>
       </>
     );
   }
 
   return (
-    <>
-      <CssBaseline />
-      <OnboardingLayout
-        stepLabel="STEP 3 OF 3"
-        title="Which brands feel like you?"
-        subtitle="Select your favorite luxury, streetwear, athletic, and up-and-coming brands so Dream Closet can prioritize results that match your vibe."
-      >
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+    <OnboardingLayout
+      currentStep={2}
+      stepLabel="Step 3 of 3"
+      title="Teach Dream Closet your taste"
+      subtitle="Favorite brands help us rank results more intelligently and start personalizing recommendations from day one."
+      helperText="You can skip this for now and still use the platform. Adding a few brands just gives us a better starting point."
+    >
+      {error ? (
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            borderRadius: 3,
+            backgroundColor: "rgba(161,53,68,0.12)",
+            color: "white",
+            border: "1px solid rgba(161,53,68,0.22)",
+          }}
+        >
+          {error}
+        </Alert>
+      ) : null}
 
+      {completedState ? (
+        <Box
+          sx={{
+            borderRadius: "24px",
+            p: 4,
+            textAlign: "center",
+            backgroundColor: "rgba(89,230,219,0.08)",
+            border: "1px solid rgba(89,230,219,0.18)",
+          }}
+        >
+          <Typography sx={{ color: "#59e6db", fontWeight: 800, mb: 1 }}>
+            You’re all set
+          </Typography>
+          <Typography
+            sx={{
+              color: "white",
+              fontWeight: 800,
+              fontSize: { xs: "1.4rem", md: "1.75rem" },
+              mb: 1,
+            }}
+          >
+            Your Dream Closet is getting smarter
+          </Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.72)", lineHeight: 1.7 }}>
+            We’re saving your preferences and getting your search experience
+            ready.
+          </Typography>
+        </Box>
+      ) : (
         <BrandMultiSelectStep
           brandGroups={brandGroups}
           selectedBrands={selectedBrands}
           onToggleBrand={toggleBrand}
-          onBack={() => navigate("/onboarding/categories")}
+          onBack={() => navigate(ROUTES.ONBOARDING_CATEGORIES)}
           onFinish={handleFinish}
+          onSkip={handleSkip}
           loading={saving}
         />
-      </OnboardingLayout>
-    </>
+      )}
+    </OnboardingLayout>
   );
 };
 
