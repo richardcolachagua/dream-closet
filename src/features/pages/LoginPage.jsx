@@ -1,23 +1,25 @@
 import React, { useMemo, useState } from "react";
 import {
-  Button,
-  TextField,
+  Alert,
   Box,
-  Typography,
-  Grid,
+  Button,
+  CircularProgress,
   Container,
   CssBaseline,
-  CircularProgress,
-  InputAdornment,
+  Divider,
   IconButton,
-  Alert,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import Header from "../../shared/ui/navigation/PublicHeader.jsx";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import PublicHeader from "../../shared/ui/navigation/PublicHeader.jsx";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../shared/ui/navigation/Footer";
 import { auth } from "../../backend/firebase/firebase";
 import {
@@ -27,7 +29,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { colors, radius } from "../../shared/ui/theme/designTokens";
+import { ROUTES } from "../../app/routes/routePaths";
 
 const theme = createTheme();
 const MAX_ATTEMPTS = 5;

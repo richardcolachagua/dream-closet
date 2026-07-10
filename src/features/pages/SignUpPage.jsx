@@ -1,16 +1,20 @@
 import React, { useMemo, useState } from "react";
 import {
-  Button,
-  TextField,
+  Alert,
   Box,
-  Typography,
-  Grid,
+  Button,
+  CircularProgress,
   Container,
   CssBaseline,
+  Divider,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
   Stack,
-  Alert,
-  CircularProgress,
+  TextField,
+  Typography,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import * as Yup from "yup";
@@ -24,10 +28,11 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../../backend/firebase/firebase";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import Header from "../../shared/ui/navigation/PublicHeader";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import PublicHeader from "../../shared/ui/navigation/PublicHeader.jsx";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../shared/ui/navigation/Footer";
-
+import { ROUTES } from "../../app/routes/routePaths";
+import { colors, radius } from "../../shared/ui/theme/designTokens";
 const theme = createTheme();
 
 const normalizeName = (value = "") => value.replace(/\s+/g, " ").trim();
