@@ -12,14 +12,21 @@ import {
   Stack,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../buttons/LogoutButton.jsx";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../backend/firebase/firebase";
 import { useTheme } from "@mui/material/styles";
-import { navButtonSx } from "../buttons/navButtonStyles.jsx";
 import { ROUTES } from "../../../app/routes/routePaths";
+import { colors } from "../theme/designTokens";
+import {
+  ghostButtonSx,
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../theme/componentStyles";
 
 function SavedPageHeader() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorElNav, setAnchorElNav] = React.useState(null);
 
@@ -37,6 +44,16 @@ function SavedPageHeader() {
     setAnchorElNav(null);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      handleCloseNavMenu();
+      navigate(ROUTES.HOME, { replace: true });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   const navButtons = [
     { label: "Profile", to: ROUTES.PROFILE },
     { label: "Search", to: ROUTES.SEARCH },
@@ -47,8 +64,9 @@ function SavedPageHeader() {
       position="static"
       elevation={0}
       sx={{
-        backgroundColor: "black",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: colors.background,
+        borderBottom: `1px solid ${colors.border}`,
+        backgroundImage: "none",
       }}
     >
       <Container maxWidth="xl">
@@ -80,16 +98,16 @@ function SavedPageHeader() {
               <IconButton
                 size="large"
                 aria-label="open navigation menu"
-                aria-controls="mobile-nav-menu"
+                aria-controls="saved-mobile-menu"
                 aria-haspopup="true"
                 onClick={handleOpenNavMenu}
-                color="inherit"
+                sx={{ color: colors.textPrimary }}
               >
                 <MenuIcon />
               </IconButton>
 
               <Menu
-                id="mobile-nav-menu"
+                id="saved-mobile-menu"
                 anchorEl={anchorElNav}
                 open={Boolean(anchorElNav)}
                 onClose={handleCloseNavMenu}
@@ -98,11 +116,12 @@ function SavedPageHeader() {
                 keepMounted
                 sx={{
                   "& .MuiPaper-root": {
-                    backgroundColor: "#0f0f0f",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    backgroundColor: colors.surface,
+                    color: colors.textPrimary,
+                    border: `1px solid ${colors.border}`,
                     minWidth: 240,
                     mt: 1,
+                    backgroundImage: "none",
                   },
                 }}
               >
@@ -112,16 +131,22 @@ function SavedPageHeader() {
                       component={RouterLink}
                       to={btn.to}
                       fullWidth
-                      variant="contained"
-                      sx={navButtonSx}
+                      variant="text"
+                      sx={{ ...ghostButtonSx, justifyContent: "flex-start" }}
                     >
                       {btn.label}
                     </Button>
                   </MenuItem>
                 ))}
 
-                <MenuItem onClick={handleCloseNavMenu}>
-                  <LogoutButton fullWidth />
+                <MenuItem onClick={handleLogout}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    sx={{ ...primaryButtonSx, minHeight: 42 }}
+                  >
+                    Log out
+                  </Button>
                 </MenuItem>
               </Menu>
             </Box>
@@ -138,13 +163,20 @@ function SavedPageHeader() {
                 key={btn.label}
                 component={RouterLink}
                 to={btn.to}
-                variant="contained"
-                sx={navButtonSx}
+                variant="text"
+                sx={ghostButtonSx}
               >
                 {btn.label}
               </Button>
             ))}
-            <LogoutButton />
+
+            <Button
+              onClick={handleLogout}
+              variant="outlined"
+              sx={secondaryButtonSx}
+            >
+              Log out
+            </Button>
           </Stack>
         </Toolbar>
       </Container>

@@ -1,11 +1,14 @@
+import React from "react";
 import { AppBar, Box, Toolbar, Button, Container, Stack } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { ROUTES } from "../../../app/routes/routePaths";
+import { colors } from "../theme/designTokens";
+import { primaryButtonSx, secondaryButtonSx } from "../theme/componentStyles";
 
 const actionButtonSx = {
   minHeight: 44,
   px: 2.25,
-  borderRadius: 2,
+  borderRadius: 2.25,
   textTransform: "none",
   fontSize: "0.95rem",
   fontWeight: 700,
@@ -18,8 +21,9 @@ function PublicHeader() {
       position="static"
       elevation={0}
       sx={{
-        backgroundColor: "black",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: colors.background,
+        borderBottom: `1px solid ${colors.border}`,
+        backgroundImage: "none",
       }}
     >
       <Container maxWidth="xl">
@@ -52,12 +56,8 @@ function PublicHeader() {
               to={ROUTES.LOGIN}
               variant="contained"
               sx={{
+                ...primaryButtonSx,
                 ...actionButtonSx,
-                backgroundColor: "turquoise",
-                color: "black",
-                "&:hover": {
-                  backgroundColor: "#35d8cb",
-                },
               }}
             >
               Login
@@ -68,14 +68,8 @@ function PublicHeader() {
               to={ROUTES.SIGNUP}
               variant="outlined"
               sx={{
+                ...secondaryButtonSx,
                 ...actionButtonSx,
-                color: "white",
-                borderColor: "rgba(255,255,255,0.22)",
-                "&:hover": {
-                  borderColor: "turquoise",
-                  color: "turquoise",
-                  backgroundColor: "rgba(64,224,208,0.06)",
-                },
               }}
             >
               Sign Up

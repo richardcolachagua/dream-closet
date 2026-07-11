@@ -13,6 +13,7 @@ export const ROUTES = {
 
   SEARCH: "/searchpage",
   FREE_SEARCH: "/freesearchpage",
+  PREMIUM_SEARCH: "/premium-search",
   PROFILE: "/profilepage",
   SAVED: "/saved-items-and-searches",
   PRICING: "/pricing",
@@ -26,7 +27,6 @@ export const ROUTES = {
   ONBOARDING_CATEGORIES: "/onboarding/categories",
   ONBOARDING_BRANDS: "/onboarding/brands",
 };
-
 export const DEFAULT_AUTHENTICATED_ROUTE = ROUTES.SEARCH;
 export const DEFAULT_PUBLIC_ROUTE = ROUTES.HOME;
 

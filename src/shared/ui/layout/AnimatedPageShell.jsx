@@ -4,9 +4,9 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import Header from "../../ui/navigation/PublicHeader";
 import Footer from "../../ui/navigation/Footer";
+import { colors, layout, spacing } from "../theme/designTokens";
 
 const defaultTheme = createTheme();
-
 const MotionBox = motion(Box);
 
 const pageVariants = {
@@ -24,22 +24,24 @@ const pageVariants = {
 
 const AnimatedPageShell = ({ children, maxWidth = "md" }) => {
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        background:
-          "radial-gradient(circle at top, rgba(64,224,208,0.08), transparent 28%), black",
-        color: "white",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
-        <Header />
-        <CssBaseline />
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
 
-        <Box sx={{ flex: 1, display: "flex", py: { xs: 4, md: 6 } }}>
-          <Container maxWidth={maxWidth}>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: colors.background,
+          color: colors.textPrimary,
+          backgroundImage:
+            "radial-gradient(circle at top, rgba(89,230,219,0.08), transparent 30%)",
+        }}
+      >
+        <Header />
+
+        <Box component="main" sx={{ flex: 1, py: spacing.section }}>
+          <Container maxWidth={maxWidth === "page" ? layout.pageMax : maxWidth}>
             <MotionBox
               variants={pageVariants}
               initial="hidden"
@@ -51,8 +53,8 @@ const AnimatedPageShell = ({ children, maxWidth = "md" }) => {
         </Box>
 
         <Footer />
-      </ThemeProvider>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
 };
 

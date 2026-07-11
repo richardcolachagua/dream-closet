@@ -31,6 +31,7 @@ function PageSection({
               fontSize: { xs: "1.8rem", md: "2.35rem" },
               lineHeight: 1.05,
               letterSpacing: "-0.02em",
+              maxWidth: 820,
             }}
           >
             {title}
@@ -53,7 +54,14 @@ function PageSection({
         {actions}
       </Stack>
 
-      <Box sx={contentSx}>{children}</Box>
+      <Box
+        sx={{
+          width: "100%",
+          ...contentSx,
+        }}
+      >
+        {children}
+      </Box>
     </Box>
   );
 }
