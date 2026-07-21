@@ -7,10 +7,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useNavigate } from "react-router-dom";
 import { httpsCallable } from "firebase/functions";
 import { deleteUser } from "firebase/auth";
@@ -21,7 +23,7 @@ import { colors, radius } from "../../../shared/ui/theme/designTokens";
 const cardSx = {
   borderRadius: radius.xl,
   backgroundColor: "rgba(161,53,68,0.08)",
-  border: "1px solid rgba(161,53,68,0.22)",
+  border: "1px solid rgba(161,53,68,0.24)",
   boxShadow: "0 16px 40px rgba(0,0,0,0.22)",
   px: { xs: 2.25, sm: 3 },
   py: { xs: 2.25, sm: 3 },
@@ -67,7 +69,7 @@ function DeleteAccountCard() {
       const deleteAccount = httpsCallable(functions, "deleteAccount");
       await deleteAccount();
       await deleteUser(user);
-      navigate(ROUTES.HOMEPAGE, { replace: true });
+      navigate(ROUTES.HOME, { replace: true });
     } catch (err) {
       setError(
         err?.message ||
@@ -81,23 +83,42 @@ function DeleteAccountCard() {
   return (
     <>
       <Box sx={cardSx}>
-        <Stack spacing={2}>
-          <Box>
-            <Typography
+        <Stack spacing={2.25}>
+          <Stack direction="row" spacing={1.5} alignItems="flex-start">
+            <Box
               sx={{
-                color: "white",
-                fontWeight: 800,
-                fontSize: "1.1rem",
-                mb: 0.5,
+                width: 46,
+                height: 46,
+                borderRadius: "14px",
+                display: "grid",
+                placeItems: "center",
+                bgcolor: "rgba(161,53,68,0.18)",
+                color: "#ffb8c0",
+                flexShrink: 0,
               }}
             >
-              Delete account
-            </Typography>
-            <Typography sx={{ color: "rgba(255,255,255,0.72)" }}>
-              Permanently delete your Dream Closet account, saved items, saved
-              searches, and account data.
-            </Typography>
-          </Box>
+              <WarningAmberRoundedIcon />
+            </Box>
+
+            <Box>
+              <Typography
+                sx={{
+                  color: colors.textPrimary,
+                  fontWeight: 800,
+                  fontSize: "1.18rem",
+                  mb: 0.5,
+                }}
+              >
+                Danger zone
+              </Typography>
+
+              <Typography sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>
+                Permanently delete your Dream Closet account, saved items, saved
+                searches, onboarding preferences, and access tied to the
+                account.
+              </Typography>
+            </Box>
+          </Stack>
 
           {error ? (
             <Alert severity="error" sx={{ borderRadius: radius.md }}>
@@ -136,24 +157,31 @@ function DeleteAccountCard() {
         PaperProps={{
           sx: {
             borderRadius: radius.xl,
-            backgroundColor: "#111",
-            color: "white",
+            backgroundColor: colors.surface,
+            color: colors.textPrimary,
+            border: `1px solid ${colors.border}`,
+            backgroundImage: "none",
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800 }}>
+        <DialogTitle sx={{ fontWeight: 800, pb: 1.25 }}>
           Confirm account deletion
         </DialogTitle>
 
         <DialogContent>
           <Stack spacing={2}>
-            <Typography sx={{ color: "rgba(255,255,255,0.72)" }}>
+            <Typography sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>
               Deleting your account will permanently remove:
             </Typography>
 
             <Box
               component="ul"
-              sx={{ pl: 2.5, m: 0, color: "rgba(255,255,255,0.86)" }}
+              sx={{
+                pl: 2.5,
+                m: 0,
+                color: colors.textPrimary,
+                "& li": { mb: 0.7 },
+              }}
             >
               <li>Your profile and onboarding preferences</li>
               <li>Your saved searches and saved items</li>
@@ -164,6 +192,8 @@ function DeleteAccountCard() {
               This action cannot be undone.
             </Typography>
 
+            <Divider sx={{ borderColor: colors.border }} />
+
             <TextField
               fullWidth
               label='Type "DELETE" to confirm'
@@ -173,7 +203,7 @@ function DeleteAccountCard() {
                 "& .MuiOutlinedInput-root": {
                   borderRadius: radius.md,
                   backgroundColor: "rgba(255,255,255,0.04)",
-                  color: "white",
+                  color: colors.textPrimary,
                   "& fieldset": {
                     borderColor: "rgba(255,255,255,0.12)",
                   },
@@ -192,17 +222,23 @@ function DeleteAccountCard() {
                 },
               }}
             />
+
+            {error ? (
+              <Alert severity="error" sx={{ borderRadius: radius.md }}>
+                {error}
+              </Alert>
+            ) : null}
           </Stack>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 3 }}>
+        <DialogActions sx={{ px: 3, pb: 3, pt: 0 }}>
           <Button
             onClick={handleClose}
             disabled={deleting}
             sx={{
               textTransform: "none",
               fontWeight: 700,
-              color: "rgba(255,255,255,0.8)",
+              color: colors.textSecondary,
             }}
           >
             Keep my account

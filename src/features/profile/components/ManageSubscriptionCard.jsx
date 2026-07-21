@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Alert, Box, Button, Chip, Stack, Typography } from "@mui/material";
+import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import {
   createCheckoutSession,
   createCustomerPortalSession,
@@ -10,12 +12,19 @@ import {
   getSubscriptionCallout,
   hasActiveSubscription,
 } from "../../billing/utils/subscriptionHelpers";
+import { ROUTES } from "../../../app/routes/routePaths";
 import { colors, radius } from "../../../shared/ui/theme/designTokens";
+import {
+  primaryButtonSx,
+  secondaryButtonSx,
+  sectionEyebrowSx,
+} from "../../../shared/ui/theme/componentStyles";
 
 const cardSx = {
   borderRadius: radius.xl,
-  backgroundColor: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: `1px solid ${colors.border}`,
+  background:
+    "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.025))",
   boxShadow: "0 16px 40px rgba(0,0,0,0.22)",
   px: { xs: 2.25, sm: 3 },
   py: { xs: 2.25, sm: 3 },
@@ -47,7 +56,7 @@ function ManageSubscriptionCard({ subscription }) {
 
     try {
       const url = await createCustomerPortalSession({
-        returnPath: "/settingspage",
+        returnPath: ROUTES.SETTINGS,
       });
       window.location.assign(url);
     } catch (err) {
@@ -66,7 +75,7 @@ function ManageSubscriptionCard({ subscription }) {
 
     try {
       const url = await createCheckoutSession({
-        returnPath: "/settingspage",
+        returnPath: ROUTES.SETTINGS,
       });
       window.location.assign(url);
     } catch (err) {
@@ -81,39 +90,61 @@ function ManageSubscriptionCard({ subscription }) {
 
   return (
     <Box sx={cardSx}>
-      <Stack spacing={2}>
+      <Stack spacing={2.25}>
+        <Box sx={sectionEyebrowSx}>Subscription</Box>
+
         <Stack
           direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
-          alignItems={{ xs: "flex-start", sm: "center" }}
+          alignItems={{ xs: "flex-start", sm: "flex-start" }}
           spacing={1.5}
         >
-          <Box>
-            <Typography
+          <Stack direction="row" spacing={1.5} alignItems="flex-start">
+            <Box
               sx={{
-                color: "white",
-                fontWeight: 800,
-                fontSize: "1.1rem",
-                mb: 0.5,
+                width: 46,
+                height: 46,
+                borderRadius: "14px",
+                display: "grid",
+                placeItems: "center",
+                bgcolor: colors.accentSoft,
+                color: colors.accent,
+                flexShrink: 0,
               }}
             >
-              Subscription
-            </Typography>
-            <Typography sx={{ color: "rgba(255,255,255,0.72)" }}>
-              Manage your Dream Closet plan, billing details, and cancellation
-              flow.
-            </Typography>
-          </Box>
+              {active ? <AutoAwesomeRoundedIcon /> : <CreditCardRoundedIcon />}
+            </Box>
+
+            <Box>
+              <Typography
+                sx={{
+                  color: colors.textPrimary,
+                  fontWeight: 800,
+                  fontSize: "1.18rem",
+                  mb: 0.5,
+                }}
+              >
+                {active ? "Dream Closet Pro" : "Current plan"}
+              </Typography>
+
+              <Typography
+                sx={{ color: colors.textSecondary, lineHeight: 1.72 }}
+              >
+                Manage your Dream Closet plan, billing details, and subscription
+                changes in one place.
+              </Typography>
+            </Box>
+          </Stack>
 
           <Chip
             label={statusLabel}
             sx={{
-              backgroundColor: active
-                ? "rgba(89,230,219,0.16)"
-                : "rgba(255,255,255,0.08)",
-              color: active ? colors.accent : "white",
-              fontWeight: 700,
-              border: `1px solid ${active ? "rgba(89,230,219,0.3)" : "rgba(255,255,255,0.08)"}`,
+              bgcolor: active ? colors.accentSoft : colors.surface2,
+              color: active ? colors.accent : colors.textPrimary,
+              fontWeight: 800,
+              border: `1px solid ${
+                active ? colors.accentBorder : colors.border
+              }`,
             }}
           />
         </Stack>
@@ -122,14 +153,16 @@ function ManageSubscriptionCard({ subscription }) {
           sx={{
             p: 2,
             borderRadius: radius.lg,
-            backgroundColor: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            bgcolor: colors.surface2,
+            border: `1px solid ${colors.border}`,
           }}
         >
-          <Typography sx={{ color: "white", fontWeight: 700, mb: 0.5 }}>
-            Current plan
+          <Typography
+            sx={{ color: colors.textPrimary, fontWeight: 700, mb: 0.5 }}
+          >
+            Plan details
           </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.72)" }}>
+          <Typography sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>
             {callout}
           </Typography>
         </Box>
@@ -146,23 +179,13 @@ function ManageSubscriptionCard({ subscription }) {
           </Alert>
         ) : null}
 
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
           {active ? (
             <Button
               variant="contained"
               onClick={handleManageBilling}
               disabled={loadingPortal || !ENABLE_BILLING}
-              sx={{
-                minHeight: 46,
-                borderRadius: radius.md,
-                textTransform: "none",
-                fontWeight: 800,
-                backgroundColor: colors.accent,
-                color: "#000",
-                "&:hover": {
-                  backgroundColor: colors.accentHover,
-                },
-              }}
+              sx={primaryButtonSx}
             >
               {loadingPortal ? "Opening billing..." : "Manage subscription"}
             </Button>
@@ -171,17 +194,7 @@ function ManageSubscriptionCard({ subscription }) {
               variant="contained"
               onClick={handleUpgrade}
               disabled={loadingCheckout || !ENABLE_BILLING}
-              sx={{
-                minHeight: 46,
-                borderRadius: radius.md,
-                textTransform: "none",
-                fontWeight: 800,
-                backgroundColor: colors.accent,
-                color: "#000",
-                "&:hover": {
-                  backgroundColor: colors.accentHover,
-                },
-              }}
+              sx={primaryButtonSx}
             >
               {loadingCheckout ? "Starting checkout..." : "Upgrade to Pro"}
             </Button>
@@ -189,19 +202,8 @@ function ManageSubscriptionCard({ subscription }) {
 
           <Button
             variant="outlined"
-            href="/pricing"
-            sx={{
-              minHeight: 46,
-              borderRadius: radius.md,
-              textTransform: "none",
-              fontWeight: 800,
-              color: "white",
-              borderColor: "rgba(255,255,255,0.18)",
-              "&:hover": {
-                borderColor: colors.accent,
-                backgroundColor: "rgba(89,230,219,0.06)",
-              },
-            }}
+            href={ROUTES.PRICING}
+            sx={secondaryButtonSx}
           >
             View pricing
           </Button>

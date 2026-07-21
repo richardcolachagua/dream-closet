@@ -79,9 +79,17 @@ function SavedSearchCard({
     0,
   );
 
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <Box
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
       aria-label={`Saved search ${query}`}
@@ -173,7 +181,9 @@ function SavedSearchCard({
           {filterChips.length > 0 ? (
             <Chip
               size="small"
-              label={`${filterChips.length} filter${filterChips.length === 1 ? "" : "s"}`}
+              label={`${filterChips.length} filter${
+                filterChips.length === 1 ? "" : "s"
+              }`}
               sx={{
                 bgcolor: "rgba(255,255,255,0.04)",
                 color: colors.textPrimary,
@@ -230,7 +240,11 @@ function SavedSearchCard({
           <Stack direction="row" spacing={0.75} alignItems="center">
             <ArrowOutwardIcon sx={{ color: colors.accent, fontSize: 18 }} />
             <Typography
-              sx={{ color: colors.textSecondary, fontSize: "0.9rem" }}
+              sx={{
+                color: colors.textSecondary,
+                fontSize: "0.9rem",
+                fontWeight: 600,
+              }}
             >
               Run this search again
             </Typography>

@@ -3,11 +3,27 @@ import {
   Alert,
   Box,
   Button,
-  FormControlLabel,
+  Divider,
   Stack,
   Switch,
   Typography,
 } from "@mui/material";
+import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
+import {
+  primaryButtonSx,
+  sectionEyebrowSx,
+} from "../../../shared/ui/theme/componentStyles";
+
+const cardSx = {
+  borderRadius: radius.xl,
+  border: `1px solid ${colors.border}`,
+  background:
+    "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.025))",
+  boxShadow: "0 16px 40px rgba(0,0,0,0.22)",
+  px: { xs: 2.25, sm: 3 },
+  py: { xs: 2.25, sm: 3 },
+};
 
 function AccountPreferencesCard({ initialEmailOptIn = true, onSave }) {
   const [emailOptIn, setEmailOptIn] = useState(initialEmailOptIn);
@@ -33,55 +49,119 @@ function AccountPreferencesCard({ initialEmailOptIn = true, onSave }) {
   };
 
   return (
-    <Box
-      sx={{
-        borderRadius: 3,
-        border: "1px solid rgba(255,255,255,0.12)",
-        backgroundColor: "rgba(255,255,255,0.03)",
-        p: 3,
-      }}
-    >
-      <Stack spacing={1.5}>
-        <Typography variant="h5" sx={{ color: "white", fontWeight: 800 }}>
-          Preferences
-        </Typography>
-        <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
-          Control communication and account-level choices. Unsubscribing from
-          emails should be simple and reversible. [web:95][web:104]
-        </Typography>
+    <Box sx={cardSx}>
+      <Stack spacing={2.25}>
+        <Box sx={sectionEyebrowSx}>Preferences</Box>
 
-        <FormControlLabel
-          control={
+        <Box>
+          <Typography
+            sx={{
+              color: colors.textPrimary,
+              fontWeight: 800,
+              fontSize: "1.18rem",
+              mb: 0.75,
+            }}
+          >
+            Communication settings
+          </Typography>
+
+          <Typography
+            sx={{
+              color: colors.textSecondary,
+              lineHeight: 1.72,
+              maxWidth: 720,
+            }}
+          >
+            Choose whether Dream Closet can send you product updates, feature
+            news, and occasional account-related email communication.
+          </Typography>
+        </Box>
+
+        <Divider sx={{ borderColor: colors.border }} />
+
+        <Box
+          sx={{
+            borderRadius: radius.lg,
+            border: `1px solid ${colors.border}`,
+            bgcolor: colors.surface2,
+            px: 2,
+            py: 1.75,
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: "14px",
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: colors.accentSoft,
+                  color: colors.accent,
+                  flexShrink: 0,
+                }}
+              >
+                <MailOutlineRoundedIcon fontSize="small" />
+              </Box>
+
+              <Box>
+                <Typography
+                  sx={{
+                    color: colors.textPrimary,
+                    fontWeight: 700,
+                    mb: 0.25,
+                  }}
+                >
+                  Email updates
+                </Typography>
+                <Typography
+                  sx={{
+                    color: colors.textMuted,
+                    fontSize: "0.92rem",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  Receive occasional product news and account-related updates.
+                </Typography>
+              </Box>
+            </Stack>
+
             <Switch
               checked={emailOptIn}
               onChange={(event) => setEmailOptIn(event.target.checked)}
               color="primary"
             />
-          }
-          sx={{ color: "white", mt: 1 }}
-          label="Receive Dream Closet email updates"
-        />
+          </Stack>
+        </Box>
 
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
+        {error ? (
+          <Alert severity="error" sx={{ borderRadius: radius.md }}>
+            {error}
+          </Alert>
+        ) : null}
 
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={saving}
-          sx={{
-            alignSelf: "flex-start",
-            mt: 1,
-            bgcolor: "turquoise",
-            color: "black",
-            fontWeight: 800,
-            textTransform: "none",
-            borderRadius: "16px",
-            "&:hover": { bgcolor: "#35d8cb" },
-          }}
-        >
-          {saving ? "Saving..." : "Save preferences"}
-        </Button>
+        {success ? (
+          <Alert severity="success" sx={{ borderRadius: radius.md }}>
+            {success}
+          </Alert>
+        ) : null}
+
+        <Box>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={saving}
+            sx={primaryButtonSx}
+          >
+            {saving ? "Saving..." : "Save preferences"}
+          </Button>
+        </Box>
       </Stack>
     </Box>
   );

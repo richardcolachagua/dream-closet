@@ -9,6 +9,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import { Link as RouterLink } from "react-router-dom";
 import {
   collection,
@@ -22,11 +23,12 @@ import {
 import { db } from "../../../backend/firebase/firebase";
 import SavedItemCard from "./SavedItemCard";
 import PageSection from "../../../shared/ui/layout/PageSection";
-import { colors } from "../../../shared/ui/theme/designTokens";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
+import { ROUTES } from "../../../app/routes/routePaths";
 
 function SavedItemsList({ userId }) {
   const [savedItems, setSavedItems] = useState([]);
@@ -93,7 +95,7 @@ function SavedItemsList({ userId }) {
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
               <Button
                 component={RouterLink}
-                to="/searchpage"
+                to={ROUTES.SEARCH}
                 variant="contained"
                 sx={primaryButtonSx}
               >
@@ -131,8 +133,30 @@ function SavedItemsList({ userId }) {
             ))}
           </Grid>
         ) : error ? (
-          <Stack spacing={2} alignItems="flex-start">
-            <Typography sx={{ color: colors.textPrimary }}>{error}</Typography>
+          <Stack
+            spacing={2}
+            alignItems="flex-start"
+            sx={{
+              border: `1px solid ${colors.border}`,
+              bgcolor: colors.surfaceSoft,
+              borderRadius: 4,
+              p: { xs: 2.5, md: 3.5 },
+            }}
+          >
+            <Typography
+              sx={{
+                color: colors.textPrimary,
+                fontWeight: 800,
+                fontSize: "1.05rem",
+              }}
+            >
+              We hit a problem loading your saved items.
+            </Typography>
+
+            <Typography sx={{ color: colors.textSecondary, lineHeight: 1.75 }}>
+              {error}
+            </Typography>
+
             <Button
               onClick={() => fetchSavedItems(userId)}
               variant="outlined"
@@ -152,6 +176,20 @@ function SavedItemsList({ userId }) {
               p: { xs: 2.5, md: 3.5 },
             }}
           >
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: "14px",
+                display: "grid",
+                placeItems: "center",
+                bgcolor: colors.accentSoft,
+                color: colors.accent,
+              }}
+            >
+              <Inventory2OutlinedIcon />
+            </Box>
+
             <Typography
               sx={{
                 color: colors.textPrimary,
@@ -161,6 +199,7 @@ function SavedItemsList({ userId }) {
             >
               You haven’t saved any items yet.
             </Typography>
+
             <Typography
               sx={{
                 color: colors.textSecondary,
@@ -171,9 +210,10 @@ function SavedItemsList({ userId }) {
               Save products while browsing search results and they’ll appear
               here, ready for comparison and later review.
             </Typography>
+
             <Button
               component={RouterLink}
-              to="/searchpage"
+              to={ROUTES.SEARCH}
               variant="contained"
               sx={primaryButtonSx}
             >
@@ -214,7 +254,10 @@ function SavedItemsList({ userId }) {
         <Alert
           severity="success"
           onClose={() => setSuccessMessage("")}
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            borderRadius: radius.md,
+          }}
         >
           {successMessage}
         </Alert>

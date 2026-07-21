@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Fade,
@@ -8,6 +9,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
 import {
   collection,
   deleteDoc,
@@ -30,20 +32,24 @@ import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
+import { ROUTES } from "../../../app/routes/routePaths";
 
 const useSavedSearches = (userId) => {
   const [savedSearches, setSavedSearches] = useState([]);
   const [isLoadingSearches, setIsLoadingSearches] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchSavedSearches = useCallback(async () => {
     if (!userId) {
       setSavedSearches([]);
       setIsLoadingSearches(false);
+      setError("");
       return;
     }
 
     try {
       setIsLoadingSearches(true);
+      setError("");
 
       const q = query(
         collection(db, "saved-searches"),
@@ -57,8 +63,9 @@ const useSavedSearches = (userId) => {
       }));
 
       setSavedSearches(searches);
-    } catch (error) {
-      console.error("Error fetching saved searches", error);
+    } catch (fetchError) {
+      console.error("Error fetching saved searches", fetchError);
+      setError("We couldn’t load your saved searches right now.");
     } finally {
       setIsLoadingSearches(false);
     }
@@ -71,8 +78,10 @@ const useSavedSearches = (userId) => {
   return {
     savedSearches,
     isLoadingSearches,
+    error,
     setSavedSearches,
     fetchSavedSearches,
+    setError,
   };
 };
 
@@ -91,8 +100,14 @@ function SavedSearchesList() {
   }, []);
 
   const userId = currentUser?.uid;
-  const { savedSearches, isLoadingSearches, setSavedSearches } =
-    useSavedSearches(userId);
+  const {
+    savedSearches,
+    isLoadingSearches,
+    error,
+    setSavedSearches,
+    fetchSavedSearches,
+    setError,
+  } = useSavedSearches(userId);
 
   const hasSavedSearches = useMemo(
     () => savedSearches.length > 0,
@@ -108,8 +123,9 @@ function SavedSearchesList() {
       setSelected((prev) => prev.filter((id) => id !== searchId));
       setJustDeleted(searchId);
       window.setTimeout(() => setJustDeleted(null), 700);
-    } catch (error) {
-      console.error("Error deleting saved search", error);
+    } catch (deleteError) {
+      console.error("Error deleting saved search", deleteError);
+      setError("We couldn’t remove that saved search.");
     }
   };
 
@@ -134,7 +150,9 @@ function SavedSearchesList() {
       page: search.page || DEFAULT_PAGE,
     });
 
-    navigate(`/searchpage${searchQueryString ? `?${searchQueryString}` : ""}`);
+    navigate(
+      `${ROUTES.SEARCH}${searchQueryString ? `?${searchQueryString}` : ""}`,
+    );
   };
 
   return (
@@ -146,7 +164,7 @@ function SavedSearchesList() {
         hasSavedSearches ? (
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
             <Button
-              onClick={() => navigate("/searchpage")}
+              onClick={() => navigate(ROUTES.SEARCH)}
               variant="contained"
               sx={primaryButtonSx}
             >
@@ -196,7 +214,7 @@ function SavedSearchesList() {
             </Grid>
           ))}
         </Grid>
-      ) : !hasSavedSearches ? (
+      ) : error ? (
         <Stack
           spacing={2}
           alignItems="flex-start"
@@ -211,11 +229,59 @@ function SavedSearchesList() {
             sx={{
               color: colors.textPrimary,
               fontWeight: 800,
+              fontSize: "1.05rem",
+            }}
+          >
+            We hit a problem loading your saved searches.
+          </Typography>
+
+          <Typography sx={{ color: colors.textSecondary, lineHeight: 1.75 }}>
+            {error}
+          </Typography>
+
+          <Button
+            onClick={fetchSavedSearches}
+            variant="outlined"
+            sx={secondaryButtonSx}
+          >
+            Try again
+          </Button>
+        </Stack>
+      ) : !hasSavedSearches ? (
+        <Stack
+          spacing={2}
+          alignItems="flex-start"
+          sx={{
+            border: `1px solid ${colors.border}`,
+            bgcolor: colors.surfaceSoft,
+            borderRadius: 4,
+            p: { xs: 2.5, md: 3.5 },
+          }}
+        >
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "14px",
+              display: "grid",
+              placeItems: "center",
+              bgcolor: colors.accentSoft,
+              color: colors.accent,
+            }}
+          >
+            <ManageSearchRoundedIcon />
+          </Box>
+
+          <Typography
+            sx={{
+              color: colors.textPrimary,
+              fontWeight: 800,
               fontSize: "1.1rem",
             }}
           >
             No saved searches yet.
           </Typography>
+
           <Typography
             sx={{
               color: colors.textSecondary,
@@ -226,8 +292,9 @@ function SavedSearchesList() {
             When you save a promising search from the results page, it will
             appear here for quick reruns and comparison.
           </Typography>
+
           <Button
-            onClick={() => navigate("/searchpage")}
+            onClick={() => navigate(ROUTES.SEARCH)}
             variant="contained"
             sx={primaryButtonSx}
           >

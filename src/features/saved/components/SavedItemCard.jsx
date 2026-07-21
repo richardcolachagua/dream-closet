@@ -14,6 +14,7 @@ import {
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import {
@@ -24,7 +25,9 @@ import {
 
 const buildSourceLabel = (source) => {
   if (!source) return "Unknown retailer";
-  return String(source).replace(/[_-]/g, " ");
+  return String(source)
+    .replace(/[_-]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 function SavedItemCard({
@@ -46,6 +49,8 @@ function SavedItemCard({
       "Saved from your Dream Closet results so you can revisit it later."
     );
   }, [savedItem]);
+
+  const hasProductUrl = Boolean(productUrl);
 
   const handleCopyLink = async () => {
     if (!productUrl) return;
@@ -125,7 +130,7 @@ function SavedItemCard({
           )}
         </Box>
 
-        <Stack spacing={1.1} sx={{ p: 2.25, flex: 1 }}>
+        <Stack spacing={1.15} sx={{ p: 2.25, flex: 1 }}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -182,15 +187,20 @@ function SavedItemCard({
             </Tooltip>
           </Stack>
 
-          <Typography
-            sx={{
-              color: colors.textMuted,
-              fontSize: "0.92rem",
-              lineHeight: 1.65,
-            }}
-          >
-            {buildSourceLabel(source)}
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <StorefrontRoundedIcon
+              sx={{ color: colors.textMuted, fontSize: 17 }}
+            />
+            <Typography
+              sx={{
+                color: colors.textMuted,
+                fontSize: "0.92rem",
+                lineHeight: 1.6,
+              }}
+            >
+              {buildSourceLabel(source)}
+            </Typography>
+          </Stack>
 
           <Typography
             sx={{
@@ -208,32 +218,44 @@ function SavedItemCard({
 
           <Stack direction="row" spacing={1} sx={{ pt: 1.2, mt: "auto" }}>
             <Button
-              component="a"
-              href={productUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              component={hasProductUrl ? "a" : "button"}
+              href={hasProductUrl ? productUrl : undefined}
+              target={hasProductUrl ? "_blank" : undefined}
+              rel={hasProductUrl ? "noopener noreferrer" : undefined}
               variant="contained"
               endIcon={<OpenInNewIcon />}
+              disabled={!hasProductUrl}
               sx={{ ...primaryButtonSx, flex: 1, minHeight: 44 }}
             >
               View item
             </Button>
 
-            <Tooltip title={copied ? "Copied" : "Copy link"}>
-              <IconButton
-                onClick={handleCopyLink}
-                aria-label="Copy item link"
-                sx={{
-                  minWidth: 44,
-                  minHeight: 44,
-                  borderRadius: radius.md,
-                  border: `1px solid ${colors.borderStrong}`,
-                  color: copied ? colors.accent : colors.textPrimary,
-                  bgcolor: copied ? colors.accentSoft : "transparent",
-                }}
-              >
-                <ContentCopyIcon fontSize="small" />
-              </IconButton>
+            <Tooltip
+              title={
+                !hasProductUrl
+                  ? "No product link available"
+                  : copied
+                    ? "Copied"
+                    : "Copy link"
+              }
+            >
+              <span>
+                <IconButton
+                  onClick={handleCopyLink}
+                  aria-label="Copy item link"
+                  disabled={!hasProductUrl}
+                  sx={{
+                    minWidth: 44,
+                    minHeight: 44,
+                    borderRadius: radius.md,
+                    border: `1px solid ${colors.borderStrong}`,
+                    color: copied ? colors.accent : colors.textPrimary,
+                    bgcolor: copied ? colors.accentSoft : "transparent",
+                  }}
+                >
+                  <ContentCopyIcon fontSize="small" />
+                </IconButton>
+              </span>
             </Tooltip>
           </Stack>
         </Stack>
@@ -257,6 +279,7 @@ function SavedItemCard({
         <DialogTitle sx={{ fontWeight: 800 }}>
           {title || "Saved item"}
         </DialogTitle>
+
         <DialogContent>
           {imageUrl ? (
             <Box
@@ -280,18 +303,21 @@ function SavedItemCard({
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
             <Button
-              component="a"
-              href={productUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              component={hasProductUrl ? "a" : "button"}
+              href={hasProductUrl ? productUrl : undefined}
+              target={hasProductUrl ? "_blank" : undefined}
+              rel={hasProductUrl ? "noopener noreferrer" : undefined}
               variant="contained"
+              disabled={!hasProductUrl}
               sx={primaryButtonSx}
             >
               Open retailer page
             </Button>
+
             <Button
               variant="outlined"
               onClick={handleCopyLink}
+              disabled={!hasProductUrl}
               sx={secondaryButtonSx}
             >
               {copied ? "Copied" : "Copy link"}

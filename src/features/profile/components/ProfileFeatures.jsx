@@ -1,159 +1,140 @@
-import Grid2 from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import AccountBoxIcon from "@mui/icons-material/AccountBox";
-import Card from "@mui/material/Card";
-import { Button } from "@mui/material";
+import React from "react";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import BookmarkBorderRoundedIcon from "@mui/icons-material/BookmarkBorderRounded";
+import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
+import { Link as RouterLink } from "react-router-dom";
+import { ROUTES } from "../../../app/routes/routePaths";
+import { colors } from "../../../shared/ui/theme/designTokens";
+import {
+  interactiveCardSx,
+  sectionEyebrowSx,
+  secondaryButtonSx,
+} from "../../../shared/ui/theme/componentStyles";
+
+const featureCards = [
+  {
+    title: "Saved items",
+    description:
+      "Keep track of products you want to revisit, compare later, or return to when you're ready to buy.",
+    icon: <BookmarkBorderRoundedIcon />,
+    cta: "View saved items",
+    to: ROUTES.SAVED,
+  },
+  {
+    title: "Saved searches",
+    description:
+      "Come back to strong search ideas without rebuilding filters and prompts from scratch.",
+    icon: <ManageSearchRoundedIcon />,
+    cta: "Open saved searches",
+    to: ROUTES.SAVED,
+  },
+  {
+    title: "Style settings",
+    description:
+      "Refine the preferences Dream Closet uses to tailor results and future recommendations.",
+    icon: <TuneRoundedIcon />,
+    cta: "Go to settings",
+    to: ROUTES.SETTINGS,
+  },
+];
 
 export default function ProfileFeatures() {
   return (
-    <Box
-      sx={{
-        // backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.8)),url(/assets/HD-wallpaper-black-vgradient.jpg)`,
-        backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        py: 6,
-      }}
-    >
-      <Grid2
-        container
-        spacing={3}
-        justifyContent="center" // centers the row
-        alignItems="stretch" // makes all cards same height
-      >
-        <Grid2>
-          <Card
-            sx={{
-              width: 300,
-              height: "100%",
-              backgroundColor: "black",
-              border: "0.5px solid white",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-              p: 6,
-            }}
-          >
-            <Button
-              disabled
-              sx={{
-                backgroundColor: "black",
-                border: "1px solid white",
-                borderRadius: "40px",
-                p: 2,
-                mb: 2,
-              }}
-            >
-              <BookmarkIcon fontSize="large" sx={{ color: "white" }} />
-            </Button>
-            <Typography
-              gutterBottom
-              variant="h5"
-              component="div"
-              align="center"
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-              }}
-            >
-              Save Clothes
-            </Typography>
-            <Typography
-              variant="body2"
-              align="center"
-              sx={{ color: "lightgray" }}
-            >
-              Save individual clothes from any search to refer back to.
-            </Typography>
-          </Card>
-        </Grid2>
+    <Box sx={{ py: { xs: 4, md: 5 } }}>
+      <Stack spacing={2.5} sx={{ mb: 3 }}>
+        <Box sx={sectionEyebrowSx}>Account tools</Box>
 
-        <Grid2>
-          <Card
+        <Box>
+          <Typography
             sx={{
-              width: 300,
-              height: "100%",
-              backgroundColor: "black",
-              border: "0.5px solid white",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-              p: 6,
+              color: colors.textPrimary,
+              fontWeight: 850,
+              fontSize: { xs: "1.8rem", md: "2.2rem" },
+              lineHeight: 1.08,
+              mb: 1,
             }}
           >
-            <Button
-              disabled
-              sx={{
-                backgroundColor: "black",
-                border: "1px solid white",
-                borderRadius: "50%",
-                p: 2,
-                mb: 2,
-              }}
-            >
-              <ManageSearchIcon fontSize="large" sx={{ color: "white" }} />
-            </Button>
-            <Typography
-              gutterBottom
-              variant="h6"
-              sx={{ color: "white", fontWeight: "bold" }}
-            >
-              Save Searches
-            </Typography>
-            <Typography variant="body2" sx={{ color: "lightgray" }}>
-              Go back down the rabbit hole of those flare pants you were
-              thinking about three weeks ago? We also save your searches, not
-              just individual clothes.
-            </Typography>
-          </Card>
-        </Grid2>
+            Everything tied to your Dream Closet profile
+          </Typography>
 
-        <Grid2>
-          <Card
+          <Typography
             sx={{
-              width: 300,
-              height: "100%",
-              backgroundColor: "black",
-              border: "0.5px solid white",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-              p: 6,
+              color: colors.textSecondary,
+              lineHeight: 1.75,
+              maxWidth: 760,
             }}
           >
-            <Button
-              disabled
+            Manage your saved ideas, revisit shopping directions, and update the
+            preferences that shape your experience.
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Grid container spacing={2.25}>
+        {featureCards.map((card) => (
+          <Grid key={card.title} item xs={12} md={4}>
+            <Box
               sx={{
-                backgroundColor: "black",
-                border: "1px solid white",
-                borderRadius: "50%",
-                p: 2,
-                mb: 2,
+                ...interactiveCardSx,
+                height: "100%",
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
               }}
             >
-              <AccountBoxIcon fontSize="large" sx={{ color: "white" }} />
-            </Button>
-            <Typography
-              gutterBottom
-              variant="h6"
-              sx={{ color: "white", fontWeight: "bold" }}
-            >
-              Profile Customization
-            </Typography>
-            <Typography variant="body2" sx={{ color: "lightgray" }}>
-              Customize your profile, including uploading a profile picture and
-              personal information.
-            </Typography>
-          </Card>
-        </Grid2>
-      </Grid2>
+              <Box
+                sx={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: "16px",
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: colors.accentSoft,
+                  color: colors.accent,
+                  mb: 2,
+                }}
+              >
+                {card.icon}
+              </Box>
+
+              <Typography
+                sx={{
+                  color: colors.textPrimary,
+                  fontWeight: 800,
+                  fontSize: "1.08rem",
+                  mb: 1,
+                }}
+              >
+                {card.title}
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: colors.textSecondary,
+                  lineHeight: 1.72,
+                  mb: 2.5,
+                }}
+              >
+                {card.description}
+              </Typography>
+
+              <Box sx={{ mt: "auto" }}>
+                <Button
+                  component={RouterLink}
+                  to={card.to}
+                  variant="outlined"
+                  endIcon={<ArrowOutwardRoundedIcon />}
+                  sx={secondaryButtonSx}
+                >
+                  {card.cta}
+                </Button>
+              </Box>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }

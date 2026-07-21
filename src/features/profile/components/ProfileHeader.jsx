@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Box,
@@ -11,13 +11,20 @@ import {
   Stack,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link as RouterLink } from "react-router-dom";
-import LogoutButton from "../../../shared/ui/buttons/LogoutButton";
-import { navButtonSx } from "../../../shared/ui/buttons/buttonStyles";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../backend/firebase/firebase";
 import { ROUTES } from "../../../app/routes/routePaths";
+import { colors } from "../../../shared/ui/theme/designTokens";
+import {
+  ghostButtonSx,
+  primaryButtonSx,
+  secondaryButtonSx,
+} from "../../../shared/ui/theme/componentStyles";
 
 function ProfileHeader() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -25,6 +32,16 @@ function ProfileHeader() {
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      handleCloseNavMenu();
+      navigate(ROUTES.HOME, { replace: true });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   const navButtons = [
@@ -38,8 +55,9 @@ function ProfileHeader() {
       position="static"
       elevation={0}
       sx={{
-        backgroundColor: "black",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: colors.background,
+        borderBottom: `1px solid ${colors.border}`,
+        backgroundImage: "none",
       }}
     >
       <Container maxWidth="xl">
@@ -77,13 +95,20 @@ function ProfileHeader() {
                 key={btn.label}
                 component={RouterLink}
                 to={btn.to}
-                variant="contained"
-                sx={navButtonSx}
+                variant="text"
+                sx={ghostButtonSx}
               >
                 {btn.label}
               </Button>
             ))}
-            <LogoutButton />
+
+            <Button
+              onClick={handleLogout}
+              variant="outlined"
+              sx={secondaryButtonSx}
+            >
+              Log out
+            </Button>
           </Stack>
 
           <Box sx={{ display: { xs: "flex", md: "none" }, ml: "auto" }}>
@@ -93,7 +118,7 @@ function ProfileHeader() {
               aria-controls="profile-mobile-menu"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
+              sx={{ color: colors.textPrimary }}
             >
               <MenuIcon />
             </IconButton>
@@ -108,11 +133,12 @@ function ProfileHeader() {
               transformOrigin={{ vertical: "top", horizontal: "right" }}
               sx={{
                 "& .MuiPaper-root": {
-                  backgroundColor: "#0f0f0f",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  backgroundColor: colors.surface,
+                  color: colors.textPrimary,
+                  border: `1px solid ${colors.border}`,
                   minWidth: 240,
                   mt: 1,
+                  backgroundImage: "none",
                 },
               }}
             >
@@ -122,16 +148,22 @@ function ProfileHeader() {
                     component={RouterLink}
                     to={btn.to}
                     fullWidth
-                    variant="contained"
-                    sx={navButtonSx}
+                    variant="text"
+                    sx={{ ...ghostButtonSx, justifyContent: "flex-start" }}
                   >
                     {btn.label}
                   </Button>
                 </MenuItem>
               ))}
 
-              <MenuItem onClick={handleCloseNavMenu}>
-                <LogoutButton fullWidth />
+              <MenuItem onClick={handleLogout}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  sx={{ ...primaryButtonSx, minHeight: 42 }}
+                >
+                  Log out
+                </Button>
               </MenuItem>
             </Menu>
           </Box>
