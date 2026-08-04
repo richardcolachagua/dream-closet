@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   Drawer,
+  IconButton,
   Stack,
   TextField,
   Typography,
@@ -11,12 +12,14 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import DoneIcon from "@mui/icons-material/Done";
-import { colors } from "../../../shared/ui/theme/designTokens";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
 import { FILTER_OPTIONS } from "../utils/filterOptions";
+import { getActiveFilterCount } from "../utils/filterHelpers";
 import FilterSection from "./FilterSection";
 import ColorFilterGroup from "./ColorFilterGroup";
 
@@ -29,6 +32,30 @@ const sectionTitleSx = {
 const helperTextSx = {
   color: colors.textMuted,
   fontSize: "0.9rem",
+  lineHeight: 1.6,
+};
+
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    bgcolor: colors.surface2,
+    color: colors.textPrimary,
+    borderRadius: radius.md,
+    "& fieldset": {
+      borderColor: colors.border,
+    },
+    "&:hover fieldset": {
+      borderColor: colors.accent,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: colors.accent,
+    },
+  },
+  "& .MuiInputBase-input": {
+    color: colors.textPrimary,
+  },
+  "& .MuiInputLabel-root": {
+    color: colors.textMuted,
+  },
 };
 
 function FilterDrawer({
@@ -42,6 +69,7 @@ function FilterDrawer({
   onApply,
 }) {
   const safeFilters = filters || {};
+  const activeFilterCount = getActiveFilterCount(safeFilters);
 
   return (
     <Drawer
@@ -51,101 +79,127 @@ function FilterDrawer({
       PaperProps={{
         sx: {
           width: { xs: "100%", sm: 440 },
-          bgcolor: colors.background,
+          bgcolor: colors.surface,
           color: colors.textPrimary,
-          backgroundImage:
-            "radial-gradient(circle at top, rgba(89,230,219,0.05), transparent 25%)",
+          backgroundImage: "none",
         },
       }}
     >
-      <Box
-        sx={{
-          height: "100%",
-          display: "grid",
-          gridTemplateRows: "auto 1fr auto",
-        }}
-      >
-        {/* Header */}
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
+      <Stack sx={{ height: "100%" }}>
+        <Box
           sx={{
-            px: 2.25,
+            px: 2.5,
             py: 2,
             borderBottom: `1px solid ${colors.border}`,
-            bgcolor: colors.background,
+            position: "sticky",
+            top: 0,
+            zIndex: 2,
+            bgcolor: colors.surface,
           }}
         >
-          <Box>
-            <Typography
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack direction="row" spacing={1.25} alignItems="center">
+              <Box
+                sx={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: colors.accentSoft,
+                  color: colors.accent,
+                  border: `1px solid ${colors.accentBorder}`,
+                }}
+              >
+                <TuneRoundedIcon fontSize="small" />
+              </Box>
+
+              <Box>
+                <Typography
+                  sx={{
+                    color: colors.textPrimary,
+                    fontWeight: 800,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Filters
+                </Typography>
+                <Typography
+                  sx={{
+                    color: colors.textMuted,
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {activeFilterCount > 0
+                    ? `${activeFilterCount} active filter${
+                        activeFilterCount === 1 ? "" : "s"
+                      }`
+                    : "Narrow by category, size, color, store, and price."}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <IconButton
+              onClick={onClose}
+              aria-label="Close filters"
               sx={{
                 color: colors.textPrimary,
-                fontWeight: 850,
-                fontSize: "1.2rem",
+                border: `1px solid ${colors.border}`,
+                bgcolor: colors.surface2,
               }}
             >
-              Filters
-            </Typography>
-            <Typography sx={{ color: colors.textMuted, fontSize: "0.92rem" }}>
-              Narrow results by category, size, color, availability, and price.
-            </Typography>
-          </Box>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </Box>
 
-          <Button
-            onClick={onClose}
-            sx={{
-              color: colors.textSecondary,
-              minWidth: "auto",
-              p: 0.75,
-            }}
-            aria-label="Close filters"
-          >
-            <CloseIcon />
-          </Button>
-        </Stack>
-
-        {/* Body */}
         <Stack
           spacing={3}
           sx={{
+            flex: 1,
             overflowY: "auto",
-            px: 2.25,
-            py: 2.25,
+            px: 2.5,
+            py: 2.5,
           }}
         >
           <FilterSection
             title="Gender"
-            options={FILTER_OPTIONS.gender || []}
+            subtitle="Choose the shopper or fit focus."
+            options={FILTER_OPTIONS.gender}
             selectedValues={safeFilters.gender || []}
             onToggle={(value) => onToggleFilter("gender", value)}
             onClear={() => onClearGroup("gender")}
           />
 
-          <Divider sx={{ borderColor: colors.border }} />
+          <Divider sx={{ borderColor: colors.divider }} />
 
           <FilterSection
             title="Category"
-            options={FILTER_OPTIONS.category || []}
+            subtitle="Pick one or more clothing categories."
+            options={FILTER_OPTIONS.category}
             selectedValues={safeFilters.category || []}
             onToggle={(value) => onToggleFilter("category", value)}
             onClear={() => onClearGroup("category")}
           />
 
-          <Divider sx={{ borderColor: colors.border }} />
+          <Divider sx={{ borderColor: colors.divider }} />
 
           <FilterSection
             title="Size"
-            options={FILTER_OPTIONS.size || []}
+            subtitle="Refine by size availability."
+            options={FILTER_OPTIONS.size}
             selectedValues={safeFilters.size || []}
             onToggle={(value) => onToggleFilter("size", value)}
             onClear={() => onClearGroup("size")}
           />
 
-          <Divider sx={{ borderColor: colors.border }} />
+          <Divider sx={{ borderColor: colors.divider }} />
 
-          {/* Color using ColorFilterGroup */}
-          <Stack spacing={1.25}>
+          <Stack spacing={1.4}>
             <Box>
               <Typography sx={sectionTitleSx}>Color</Typography>
               <Typography sx={helperTextSx}>
@@ -154,12 +208,12 @@ function FilterDrawer({
             </Box>
 
             <ColorFilterGroup
-              options={FILTER_OPTIONS.color || []}
+              options={FILTER_OPTIONS.color}
               selectedColors={safeFilters.color || []}
               onToggleColor={(value) => onToggleFilter("color", value)}
             />
 
-            {safeFilters.color?.length > 0 && (
+            {(safeFilters.color || []).length > 0 ? (
               <Button
                 onClick={() => onClearGroup("color")}
                 sx={{
@@ -169,37 +223,42 @@ function FilterDrawer({
                   textTransform: "none",
                   minWidth: "auto",
                   px: 0,
+                  "&:hover": {
+                    bgcolor: "transparent",
+                    opacity: 0.9,
+                  },
                 }}
               >
                 Clear colors
               </Button>
-            )}
+            ) : null}
           </Stack>
 
-          <Divider sx={{ borderColor: colors.border }} />
+          <Divider sx={{ borderColor: colors.divider }} />
 
           <FilterSection
             title="Store"
-            options={FILTER_OPTIONS.store || []}
+            subtitle="Limit results to selected retailers."
+            options={FILTER_OPTIONS.store}
             selectedValues={safeFilters.store || []}
             onToggle={(value) => onToggleFilter("store", value)}
             onClear={() => onClearGroup("store")}
           />
 
-          <Divider sx={{ borderColor: colors.border }} />
+          <Divider sx={{ borderColor: colors.divider }} />
 
           <FilterSection
             title="Availability"
-            options={FILTER_OPTIONS.availability || []}
+            subtitle="See what is currently in stock or available."
+            options={FILTER_OPTIONS.availability}
             selectedValues={safeFilters.availability || []}
             onToggle={(value) => onToggleFilter("availability", value)}
             onClear={() => onClearGroup("availability")}
           />
 
-          <Divider sx={{ borderColor: colors.border }} />
+          <Divider sx={{ borderColor: colors.divider }} />
 
-          {/* Price range */}
-          <Stack spacing={1.5}>
+          <Stack spacing={1.4}>
             <Box>
               <Typography sx={sectionTitleSx}>Price range</Typography>
               <Typography sx={helperTextSx}>
@@ -217,27 +276,7 @@ function FilterDrawer({
                 }
                 fullWidth
                 InputLabelProps={{ shrink: true }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: colors.surface2,
-                    color: colors.textPrimary,
-                    "& fieldset": {
-                      borderColor: colors.border,
-                    },
-                    "&:hover fieldset": {
-                      borderColor: colors.accent,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: colors.accent,
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    color: colors.textPrimary,
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: colors.textMuted,
-                  },
-                }}
+                sx={fieldSx}
               />
 
               <TextField
@@ -249,43 +288,24 @@ function FilterDrawer({
                 }
                 fullWidth
                 InputLabelProps={{ shrink: true }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: colors.surface2,
-                    color: colors.textPrimary,
-                    "& fieldset": {
-                      borderColor: colors.border,
-                    },
-                    "&:hover fieldset": {
-                      borderColor: colors.accent,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: colors.accent,
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    color: colors.textPrimary,
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: colors.textMuted,
-                  },
-                }}
+                sx={fieldSx}
               />
             </Stack>
           </Stack>
         </Stack>
 
-        {/* Footer actions */}
         <Box
           sx={{
-            p: 2.25,
+            px: 2.5,
+            py: 2,
             borderTop: `1px solid ${colors.border}`,
-            bgcolor: colors.background,
+            position: "sticky",
+            bottom: 0,
+            bgcolor: colors.surface,
           }}
         >
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+          <Stack direction="row" spacing={1.25}>
             <Button
-              variant="outlined"
               startIcon={<RestartAltIcon />}
               onClick={onClearAll}
               sx={{
@@ -298,7 +318,6 @@ function FilterDrawer({
             </Button>
 
             <Button
-              variant="contained"
               endIcon={<DoneIcon />}
               onClick={onApply}
               sx={{
@@ -311,7 +330,7 @@ function FilterDrawer({
             </Button>
           </Stack>
         </Box>
-      </Box>
+      </Stack>
     </Drawer>
   );
 }

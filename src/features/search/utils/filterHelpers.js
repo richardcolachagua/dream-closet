@@ -1,4 +1,31 @@
-import { DEFAULT_FILTERS } from "./filterOptions";
+import { DEFAULT_FILTERS, FILTER_OPTIONS } from "./filterOptions";
+
+const FILTER_LABELS = {
+  gender: "Gender",
+  category: "Category",
+  size: "Size",
+  color: "Color",
+  brand: "Brand",
+  store: "Store",
+  availability: "Availability",
+  price: "Price",
+};
+
+const FILTER_OPTION_LABEL_MAP = Object.entries(FILTER_OPTIONS || {}).reduce(
+  (accumulator, [key, options]) => {
+    if (!Array.isArray(options)) return accumulator;
+
+    accumulator[key] = options.reduce((map, option) => {
+      if (option?.value !== undefined) {
+        map[String(option.value)] = option.label || String(option.value);
+      }
+      return map;
+    }, {});
+
+    return accumulator;
+  },
+  {},
+);
 
 export const createDefaultFilters = () => ({
   ...DEFAULT_FILTERS,
@@ -57,6 +84,14 @@ export const clearFilterGroup = (filters, key) => {
     return {
       ...filters,
       [key]: "",
+    };
+  }
+
+  if (key === "price") {
+    return {
+      ...filters,
+      priceMin: "",
+      priceMax: "",
     };
   }
 
@@ -139,6 +174,32 @@ export const getActiveFilterCount = (filters) => {
   return count;
 };
 
+export const getFilterGroupLabel = (key) => FILTER_LABELS[key] || key;
+
+export const getFilterValueLabel = (key, value) => {
+  if (key === "price") return String(value || "");
+  if (!key) return String(value || "");
+
+  const optionLabel = FILTER_OPTION_LABEL_MAP[key]?.[String(value)];
+  if (optionLabel) return optionLabel;
+
+  return String(value || "")
+    .replace(/[_-]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+export const formatChipLabel = (chip) => {
+  if (!chip) return "";
+
+  const groupLabel = getFilterGroupLabel(chip.key);
+
+  if (chip.key === "price") {
+    return `${groupLabel}: ${chip.label}`;
+  }
+
+  return `${groupLabel}: ${getFilterValueLabel(chip.key, chip.value)}`;
+};
+
 export const buildFilterChips = (filters) => {
   if (!filters) return [];
 
@@ -150,7 +211,7 @@ export const buildFilterChips = (filters) => {
         chips.push({
           key,
           value: item,
-          label: item,
+          label: getFilterValueLabel(key, item),
         });
       });
     }

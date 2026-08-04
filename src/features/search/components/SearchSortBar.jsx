@@ -15,8 +15,8 @@ import { colors, radius } from "../../../shared/ui/theme/designTokens";
 
 const SORT_OPTIONS = [
   { value: "relevance", label: "Relevance" },
-  { value: "priceasc", label: "Price: Low to High" },
-  { value: "pricedesc", label: "Price: High to Low" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
   { value: "newest", label: "Newest" },
 ];
 
@@ -28,20 +28,40 @@ function SearchSortBar({
   viewMode = "grid",
   onViewChange,
 }) {
+  const safeVisibleCount = Number.isFinite(visibleCount) ? visibleCount : 0;
+  const safeTotal = Number.isFinite(total) ? total : 0;
+
   return (
     <Stack
-      direction={{ xs: "column", lg: "row" }}
-      spacing={1.5}
-      alignItems={{ xs: "stretch", lg: "center" }}
+      direction={{ xs: "column", md: "row" }}
+      spacing={2}
       justifyContent="space-between"
-      sx={{ width: "100%" }}
+      alignItems={{ xs: "stretch", md: "center" }}
+      sx={{
+        border: `1px solid ${colors.border}`,
+        bgcolor: colors.surfaceSoft,
+        borderRadius: radius.lg,
+        px: { xs: 2, sm: 2.5 },
+        py: { xs: 2, sm: 2.25 },
+      }}
     >
       <Box>
-        <Typography sx={{ color: colors.textPrimary, fontWeight: 750 }}>
-          {visibleCount} of {total} result{total === 1 ? "" : "s"}
-        </Typography>
         <Typography
-          sx={{ color: colors.textMuted, mt: 0.4, fontSize: "0.92rem" }}
+          sx={{
+            color: colors.textPrimary,
+            fontWeight: 800,
+            fontSize: "1rem",
+          }}
+        >
+          {safeVisibleCount} of {safeTotal} result{safeTotal === 1 ? "" : "s"}
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: 0.5,
+            color: colors.textSecondary,
+            fontSize: "0.95rem",
+          }}
         >
           Refine results, switch layouts, and keep exploring.
         </Typography>
@@ -52,7 +72,7 @@ function SearchSortBar({
         spacing={1.25}
         alignItems={{ xs: "stretch", sm: "center" }}
       >
-        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 240 } }}>
+        <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 210 } }}>
           <Select
             value={value}
             onChange={(event) => onChange?.(event.target.value)}
@@ -60,7 +80,7 @@ function SearchSortBar({
             sx={{
               color: colors.textPrimary,
               borderRadius: radius.md,
-              bgcolor: colors.surfaceSoft,
+              bgcolor: colors.surface2,
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: colors.border,
               },
@@ -84,9 +104,9 @@ function SearchSortBar({
         </FormControl>
 
         <ToggleButtonGroup
-          exclusive
           value={viewMode}
-          onChange={(event, nextView) => {
+          exclusive
+          onChange={(_, nextView) => {
             if (nextView) onViewChange?.(nextView);
           }}
           aria-label="Search result view"
@@ -96,7 +116,7 @@ function SearchSortBar({
               px: 1.5,
               borderColor: colors.border,
               color: colors.textSecondary,
-              bgcolor: colors.surfaceSoft,
+              bgcolor: colors.surface2,
               "&.Mui-selected": {
                 color: colors.accent,
                 bgcolor: colors.accentSoft,
@@ -105,11 +125,11 @@ function SearchSortBar({
             },
           }}
         >
-          <ToggleButton value="list" aria-label="List view">
-            <ViewListIcon />
-          </ToggleButton>
           <ToggleButton value="grid" aria-label="Grid view">
-            <ViewModuleIcon />
+            <ViewModuleIcon fontSize="small" />
+          </ToggleButton>
+          <ToggleButton value="list" aria-label="List view">
+            <ViewListIcon fontSize="small" />
           </ToggleButton>
         </ToggleButtonGroup>
       </Stack>

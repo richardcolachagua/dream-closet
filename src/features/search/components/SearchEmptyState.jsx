@@ -3,7 +3,7 @@ import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import { colors } from "../../../shared/ui/theme/designTokens";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import { primaryButtonSx } from "../../../shared/ui/theme/componentStyles";
 
 const defaultSuggestions = [
@@ -36,36 +36,36 @@ function SearchEmptyState({
   return (
     <Box
       sx={{
-        width: "100%",
-        borderRadius: 5,
-        border: `1px dashed ${colors.borderStrong}`,
+        border: `1px solid ${colors.border}`,
         bgcolor: colors.surfaceSoft,
-        color: colors.textPrimary,
-        px: { xs: 2.5, sm: 5 },
-        py: { xs: 4.5, sm: 6.5 },
+        borderRadius: radius.lg,
+        px: { xs: 2.5, sm: 4 },
+        py: { xs: 4, sm: 5 },
+        textAlign: "center",
       }}
     >
-      <Stack spacing={2.5} alignItems="center" textAlign="center">
+      <Stack spacing={2.2} alignItems="center">
         <Box
           sx={{
-            width: 68,
-            height: 68,
+            width: 64,
+            height: 64,
             borderRadius: "50%",
             display: "grid",
             placeItems: "center",
             bgcolor: colors.accentSoft,
             color: colors.accent,
+            border: `1px solid ${colors.accentBorder}`,
           }}
         >
-          <SearchOffIcon sx={{ fontSize: 34 }} />
+          <SearchOffIcon sx={{ fontSize: 30 }} />
         </Box>
 
-        <Box>
+        <Stack spacing={1} alignItems="center">
           <Typography
             sx={{
-              fontWeight: 850,
-              fontSize: { xs: "1.5rem", md: "1.9rem" },
-              mb: 1,
+              color: colors.textPrimary,
+              fontWeight: 800,
+              fontSize: "1.3rem",
             }}
           >
             {title}
@@ -74,20 +74,20 @@ function SearchEmptyState({
           <Typography
             sx={{
               color: colors.textSecondary,
-              maxWidth: 660,
-              mx: "auto",
+              maxWidth: 640,
               lineHeight: 1.75,
+              fontSize: "0.98rem",
             }}
           >
             {description}
           </Typography>
-        </Box>
+        </Stack>
 
         <Stack
           direction="row"
           spacing={1}
-          useFlexGap
           flexWrap="wrap"
+          useFlexGap
           justifyContent="center"
         >
           {suggestions.map((suggestion, index) => (
@@ -99,6 +99,9 @@ function SearchEmptyState({
                 color: colors.textPrimary,
                 border: `1px solid ${colors.border}`,
                 bgcolor: colors.surface2,
+                "& .MuiChip-icon": {
+                  color: colors.accent,
+                },
               }}
             />
           ))}
@@ -106,7 +109,6 @@ function SearchEmptyState({
 
         {isFilteredEmpty && onClearAllFilters ? (
           <Button
-            variant="contained"
             startIcon={<RestartAltIcon />}
             onClick={onClearAllFilters}
             sx={primaryButtonSx}

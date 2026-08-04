@@ -1,4 +1,7 @@
-import { Box, Tooltip, Typography } from "@mui/material";
+import React from "react";
+import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import { colors } from "../../../shared/ui/theme/designTokens";
 
 function ColorFilterGroup({
   options = [],
@@ -6,84 +9,92 @@ function ColorFilterGroup({
   onToggleColor,
 }) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 1.25,
-      }}
-    >
-      {options.map((option) => {
-        const isSelected = selectedColors.includes(option.value);
-        const isWhite = option.value === "white";
+    <Stack spacing={1.2}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(42px, 1fr))",
+          gap: 1,
+          maxWidth: 320,
+        }}
+      >
+        {options.map((option) => {
+          const isSelected = selectedColors.includes(option.value);
+          const isWhite = option.value === "white";
 
-        return (
-          <Tooltip key={option.value} title={option.label} arrow>
-            <Box
-              component="button"
-              type="button"
-              onClick={() => onToggleColor(option.value)}
-              aria-label={`Filter by ${option.label}`}
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: "999px",
-                border: isSelected
-                  ? "2px solid turquoise"
-                  : isWhite
-                    ? "1px solid rgba(255,255,255,0.35)"
-                    : "1px solid transparent",
-                outline: "none",
-                cursor: "pointer",
-                background: option.hex,
-                boxShadow: isSelected
-                  ? "0 0 0 3px rgba(64, 224, 208, 0.2)"
-                  : "none",
-                transition: "all 0.2s ease",
-                position: "relative",
-                "&:hover": {
-                  transform: "scale(1.06)",
-                },
-                "&:focus-visible": {
-                  boxShadow: "0 0 0 3px rgba(64, 224, 208, 0.35)",
-                },
-              }}
-            >
-              {isSelected && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color:
-                      isWhite || option.value === "yellow" ? "black" : "white",
-                    fontSize: "0.9rem",
-                    fontWeight: "bold",
-                  }}
-                >
-                  ✓
-                </Box>
-              )}
-            </Box>
-          </Tooltip>
-        );
-      })}
+          return (
+            <Tooltip key={option.value} title={option.label} arrow>
+              <Box
+                component="button"
+                type="button"
+                onClick={() => onToggleColor(option.value)}
+                aria-pressed={isSelected}
+                aria-label={`Filter by ${option.label}`}
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: "999px",
+                  border: isSelected
+                    ? `2px solid ${colors.accent}`
+                    : isWhite
+                      ? `1px solid ${colors.border}`
+                      : "1px solid transparent",
+                  outline: "none",
+                  cursor: "pointer",
+                  background: option.hex,
+                  boxShadow: isSelected
+                    ? `0 0 0 4px ${colors.accentSoft}`
+                    : "none",
+                  transition:
+                    "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+                  position: "relative",
+                  "&:hover": {
+                    transform: "scale(1.06)",
+                  },
+                  "&:focus-visible": {
+                    boxShadow: `0 0 0 4px ${colors.accentSoft}`,
+                    borderColor: colors.accent,
+                  },
+                }}
+              >
+                {isSelected ? (
+                  <CheckRoundedIcon
+                    sx={{
+                      fontSize: 18,
+                      color: isWhite ? colors.textPrimary : "#ffffff",
+                      position: "absolute",
+                      inset: 0,
+                      m: "auto",
+                    }}
+                  />
+                ) : null}
+              </Box>
+            </Tooltip>
+          );
+        })}
+      </Box>
 
-      {selectedColors.length === 0 && (
+      {selectedColors.length === 0 ? (
         <Typography
-          variant="body2"
           sx={{
-            width: "100%",
-            mt: 1,
-            color: "rgba(255,255,255,0.65)",
+            color: colors.textMuted,
+            fontSize: "0.88rem",
           }}
         >
-          No colors selected.
+          No colors selected yet.
+        </Typography>
+      ) : (
+        <Typography
+          sx={{
+            color: colors.textSecondary,
+            fontSize: "0.88rem",
+          }}
+        >
+          {selectedColors.length} color
+          {selectedColors.length === 1 ? "" : "s"} selected.
         </Typography>
       )}
-    </Box>
+    </Stack>
   );
 }
 

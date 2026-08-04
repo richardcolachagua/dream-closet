@@ -501,84 +501,81 @@ function SearchPage() {
                     onOpenFilters={() => setIsFilterDrawerOpen(true)}
                     activeFilterCount={activeFilterCount}
                   />
+                </Stack>
 
+                <Stack spacing={1.5}>
                   <Stack
-                    direction={{ xs: "column", lg: "row" }}
-                    spacing={1.5}
-                    alignItems={{ xs: "flex-start", lg: "center" }}
-                    justifyContent="space-between"
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
+                    flexWrap="wrap"
+                    useFlexGap
+                    alignItems={{ xs: "flex-start", sm: "center" }}
                   >
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      useFlexGap
-                      flexWrap="wrap"
-                    >
-                      <Chip
-                        icon={<TuneIcon />}
-                        label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
-                        sx={{
-                          color: colors.textPrimary,
-                          bgcolor: colors.surface2,
-                          border: `1px solid ${colors.border}`,
-                        }}
-                      />
+                    <Chip
+                      label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
+                      sx={{
+                        color: colors.textPrimary,
+                        bgcolor: colors.surface2,
+                        border: `1px solid ${colors.border}`,
+                        fontWeight: 700,
+                      }}
+                    />
 
-                      <Chip
-                        icon={<AutoAwesomeRoundedIcon />}
-                        label={
-                          personalizationActive
-                            ? "Prioritizing your onboarding preference"
-                            : "Showing all gender results"
-                        }
-                        sx={{
-                          color: personalizationActive
-                            ? colors.accent
-                            : colors.textSecondary,
-                          bgcolor: personalizationActive
-                            ? colors.accentSoft
-                            : colors.surface2,
-                          border: `1px solid ${
-                            personalizationActive
-                              ? colors.accentBorder
-                              : colors.border
-                          }`,
-                        }}
-                      />
-                    </Stack>
-
-                    <FormControlLabel
-                      sx={{ color: colors.textPrimary, ml: 0 }}
-                      control={
-                        <Switch
-                          checked={showAllGenders}
-                          onChange={(event) =>
-                            setShowAllGenders(event.target.checked)
-                          }
-                          color="primary"
+                    <Chip
+                      icon={
+                        <AutoAwesomeRoundedIcon
+                          sx={{ color: "inherit !important" }}
                         />
                       }
-                      label="Show all genders"
+                      label={
+                        personalizationActive
+                          ? "Prioritizing your onboarding preference"
+                          : "Showing all gender results"
+                      }
+                      sx={{
+                        color: personalizationActive
+                          ? colors.accent
+                          : colors.textSecondary,
+                        bgcolor: personalizationActive
+                          ? colors.accentSoft
+                          : colors.surface2,
+                        border: `1px solid ${
+                          personalizationActive
+                            ? colors.accentBorder
+                            : colors.border
+                        }`,
+                        fontWeight: 700,
+                      }}
                     />
                   </Stack>
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={showAllGenders}
+                        onChange={(event) =>
+                          setShowAllGenders(event.target.checked)
+                        }
+                        color="primary"
+                      />
+                    }
+                    label="Show all genders"
+                    sx={{
+                      m: 0,
+                      color: colors.textSecondary,
+                    }}
+                  />
 
                   {personalizationActive ? (
                     <Typography
                       sx={{
                         color: colors.textMuted,
                         fontSize: "0.92rem",
+                        lineHeight: 1.7,
                       }}
                     >
                       Results are being prioritized using your onboarding
                       preference, but you can broaden them anytime.
-                    </Typography>
-                  ) : null}
-
-                  {searchMeta.warnings.length > 0 ? (
-                    <Typography
-                      sx={{ color: colors.textMuted, fontSize: "0.92rem" }}
-                    >
-                      {searchMeta.warnings.join(" ")}
                     </Typography>
                   ) : null}
                 </Stack>
@@ -613,23 +610,25 @@ function SearchPage() {
                 onClearAllFilters={handleClearAll}
               />
 
-              {searchMeta.hasMore && searchResults.length > 0 ? (
+              {searchMeta.warnings.length > 0 ? (
                 <Box
                   sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    mt: 1,
+                    border: `1px solid ${colors.border}`,
+                    bgcolor: colors.surfaceSoft,
+                    borderRadius: 3,
+                    px: 2,
+                    py: 1.5,
                   }}
                 >
-                  <Button
-                    variant="contained"
-                    onClick={handleLoadMore}
-                    disabled={isLoading}
-                    sx={primaryButtonSx}
+                  <Typography
+                    sx={{
+                      color: colors.textSecondary,
+                      fontSize: "0.93rem",
+                      lineHeight: 1.7,
+                    }}
                   >
-                    {isLoading ? "Loading more..." : "Load more"}
-                  </Button>
+                    {searchMeta.warnings.join(" ")}
+                  </Typography>
                 </Box>
               ) : null}
             </Stack>

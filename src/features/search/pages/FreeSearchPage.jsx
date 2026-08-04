@@ -139,8 +139,11 @@ const FreeSearchPage = () => {
 
     return timeRemaining ? (
       <Typography
-        variant="body2"
-        sx={{ color: colors.textSecondary, textAlign: "center", mt: 0.5 }}
+        sx={{
+          mt: 0.5,
+          color: colors.textMuted,
+          fontSize: "0.9rem",
+        }}
       >
         Resets in: {timeRemaining}
       </Typography>
@@ -166,6 +169,7 @@ const FreeSearchPage = () => {
       });
       setIsLoading(false);
 
+      // Log analytics for free searches
       logEvent(analytics, "free_search", {
         search_term: searchInputValue || "unknown",
         result_count: results.length || 0,
@@ -365,219 +369,178 @@ const FreeSearchPage = () => {
   return (
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
+
+      <Header />
+
       <Box
+        component="main"
         sx={{
           minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
           bgcolor: colors.background,
           color: colors.textPrimary,
-          overflowX: "hidden",
-          backgroundImage:
-            "radial-gradient(circle at top, rgba(89,230,219,0.06), transparent 30%)",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <Header />
+        <Container
+          maxWidth="lg"
+          sx={{
+            flex: 1,
+            py: { xs: 4, md: 6 },
+            px: { xs: 2, md: 3 },
+          }}
+        >
+          <Box sx={{ mb: 3 }}>
+            <Box sx={heroPanelSx}>
+              <Box sx={{ maxWidth: layout.contentNarrow }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    mb: 1,
+                    color: colors.textPrimary,
+                  }}
+                >
+                  Try Dream Closet
+                </Typography>
 
-        <Box component="main" sx={{ flex: 1 }}>
-          <Container maxWidth={layout.pageMax} sx={{ py: { xs: 4, md: 6 } }}>
-            <Box
-              sx={{
-                ...heroPanelSx,
-                px: { xs: 2.25, md: 3.5 },
-                py: { xs: 2.5, md: 3.5 },
-                mb: 4,
-              }}
-            >
-              <Typography
-                sx={{
-                  color: colors.textPrimary,
-                  fontWeight: 850,
-                  fontSize: { xs: "1.7rem", md: "2.2rem" },
-                  lineHeight: 1.08,
-                  mb: 1,
-                  textAlign: { xs: "left", md: "left" },
-                }}
-              >
-                Try Dream Closet
-              </Typography>
+                <Typography
+                  sx={{
+                    color: colors.textSecondary,
+                    mb: 1,
+                  }}
+                >
+                  {remainingSearches} free searches remaining
+                </Typography>
 
-              <Typography
-                sx={{
-                  color: colors.textSecondary,
-                  mb: 1.5,
-                  textAlign: { xs: "left", md: "left" },
-                }}
-              >
-                {remainingSearches} free searches remaining
-              </Typography>
-
-              <Timer />
-
-              <Box sx={{ mt: 3 }}>
-                <UserDescriptionInput
-                  value={searchInputValue}
-                  onChange={(e) => setSearchInputValue(e.target.value)}
-                  onSearchStart={handleSearchStart}
-                  onSearchError={handleSearchError}
-                  onSearchResults={(response) =>
-                    handleSearchResults(response, false)
-                  }
-                  onSearchSubmit={handleSearchSubmit}
-                  onSaveSearch={null} // no saving in free tier
-                  onOpenFilters={() => setIsFilterDrawerOpen(true)}
-                  activeFilterCount={activeFilterCount}
-                  saveDisabled // ensures SaveSearchButton is hidden/disabled
-                />
+                <Timer />
               </Box>
             </Box>
+          </Box>
 
-            {isLoading && searchResults.length === 0 && (
-              <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-                <CircularProgress />
-              </Box>
-            )}
+          <Box sx={{ mb: 3 }}>
+            <UserDescriptionInput
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              onSearchStart={handleSearchStart}
+              onSearchError={handleSearchError}
+              onSearchResults={(response) =>
+                handleSearchResults(response, false)
+              }
+              onSearchSubmit={handleSearchSubmit}
+              onSaveSearch={null} // no saving in free tier
+              onOpenFilters={() => setIsFilterDrawerOpen(true)}
+              activeFilterCount={activeFilterCount}
+              saveDisabled // ensures SaveSearchButton is hidden/disabled
+            />
+          </Box>
 
-            {!isLoading || searchResults.length > 0 ? (
-              <>
-                {searchInputValue.trim().length > 0 && (
+          {isLoading && searchResults.length === 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                py: 4,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          )}
+
+          {!isLoading || searchResults.length > 0 ? (
+            <>
+              {searchInputValue.trim().length > 0 && (
+                <Box sx={{ mb: 2 }}>
                   <SearchSortControls
                     value={sortBy}
                     onChange={handleSortChange}
                     total={searchMeta.total}
+                    visibleCount={searchResults.length}
+                    viewMode={viewMode}
+                    onViewChange={handleViewChange}
                   />
-                )}
+                </Box>
+              )}
 
-                {searchResults.length > 0 && (
-                  <Box
+              {searchResults.length > 0 && (
+                <Box sx={{ mb: 1.5 }}>
+                  <Typography
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: { xs: "flex-start", md: "center" },
-                      flexDirection: { xs: "column", md: "row" },
-                      gap: 1,
-                      width: "100%",
-                      mb: 2,
+                      color: colors.textSecondary,
+                      fontSize: "0.95rem",
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      sx={{ color: colors.textSecondary }}
-                    >
-                      Showing {searchResults.length} of {searchMeta.total}{" "}
-                      results
-                    </Typography>
+                    Showing {searchResults.length} of {searchMeta.total} results
+                  </Typography>
+                </Box>
+              )}
 
-                    <ToggleButtonGroup
-                      value={viewMode}
-                      exclusive
-                      onChange={handleViewChange}
-                      aria-label="view-mode"
-                    >
-                      <ToggleButton value="list" aria-label="list view">
-                        <span>
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke={colors.textPrimary}
-                            strokeWidth="2"
-                          >
-                            <path d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        </span>
-                      </ToggleButton>
-                      <ToggleButton value="grid" aria-label="grid view">
-                        <span>
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke={colors.textPrimary}
-                            strokeWidth="2"
-                          >
-                            <rect x="4" y="4" width="6" height="6" />
-                            <rect x="14" y="4" width="6" height="6" />
-                            <rect x="4" y="14" width="6" height="6" />
-                            <rect x="14" y="14" width="6" height="6" />
-                          </svg>
-                        </span>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                )}
+              <SearchResults
+                isLoading={isLoading}
+                results={searchResults}
+                hasSearched={searchInputValue.trim().length > 0}
+                query={searchInputValue}
+                suggestions={[
+                  "Try a broader search like 'black dress' or 'oversized blazer'",
+                  "Remove one or two filters",
+                  "Search by occasion, color, or item type",
+                ]}
+                onSaveItem={null} // disable save items for free users
+                viewMode={viewMode}
+                userId={null}
+                filters={filters}
+                onRemoveFilter={handleRemoveFilter}
+                onClearAllFilters={handleClearAll}
+              />
 
-                <SearchResults
-                  results={searchResults}
-                  isLoading={isLoading && searchResults.length === 0}
-                  hasSearched={searchInputValue.trim().length > 0}
-                  query={searchInputValue}
-                  suggestions={[
-                    "Try a broader search like 'black dress' or 'oversized blazer'",
-                    "Remove one or two filters",
-                    "Search by occasion, color, or item type",
-                  ]}
-                  onSaveItem={null} // disable save items for free users
-                  viewMode={viewMode}
-                  userId={null}
-                  filters={filters}
-                  onRemoveFilter={handleRemoveFilter}
-                  onClearAllFilters={handleClearAll}
-                />
-
-                {searchMeta.hasMore && searchResults.length > 0 && (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      mt: 3,
-                    }}
+              {searchMeta.hasMore && searchResults.length > 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    py: 3,
+                  }}
+                >
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={isLoading}
+                    sx={primaryButtonSx}
                   >
-                    <Button
-                      variant="contained"
-                      onClick={handleLoadMore}
-                      disabled={isLoading}
-                      sx={primaryButtonSx}
-                    >
-                      {isLoading ? "Loading more..." : "Load more"}
-                    </Button>
-                  </Box>
-                )}
-              </>
-            ) : null}
+                    {isLoading ? "Loading more..." : "Load more"}
+                  </Button>
+                </Box>
+              )}
+            </>
+          ) : null}
 
-            <FilterDrawer
-              open={isFilterDrawerOpen}
-              onClose={() => setIsFilterDrawerOpen(false)}
-              filters={filters}
-              onToggleFilter={handleToggleFilter}
-              onPriceChange={handlePriceChange}
-              onClearGroup={handleClearGroup}
-              onClearAll={handleClearAll}
-              onApply={handleApplyFilters}
-            />
-
-            <Snackbar
-              open={!!error}
-              autoHideDuration={6000}
-              onClose={() => setError(null)}
-            >
-              <Alert
-                onClose={() => setError(null)}
-                severity="error"
-                sx={{ width: "100%" }}
-              >
-                {error}
-              </Alert>
-            </Snackbar>
-          </Container>
-        </Box>
+          <FilterDrawer
+            open={isFilterDrawerOpen}
+            onClose={() => setIsFilterDrawerOpen(false)}
+            filters={filters}
+            onToggleFilter={handleToggleFilter}
+            onPriceChange={handlePriceChange}
+            onClearGroup={handleClearGroup}
+            onClearAll={handleClearAll}
+            onApply={handleApplyFilters}
+          />
+        </Container>
 
         <Footer />
       </Box>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
 
       <Dialog
         open={showSignUpDialog}
@@ -594,11 +557,11 @@ const FreeSearchPage = () => {
         <DialogActions>
           <Button onClick={() => setShowSignUpDialog(false)}>Close</Button>
           <Button
-            variant="contained"
             onClick={() => {
               setShowSignUpDialog(false);
               navigate(ROUTES.SIGN_UP);
             }}
+            sx={primaryButtonSx}
           >
             Sign up
           </Button>

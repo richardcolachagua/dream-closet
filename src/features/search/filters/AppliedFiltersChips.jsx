@@ -1,4 +1,6 @@
-import { Box, Chip, Button, Typography } from "@mui/material";
+import React from "react";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import { buildFilterChips, formatChipLabel } from "../utils/filterHelpers";
 
 function AppliedFiltersChips({
@@ -14,87 +16,88 @@ function AppliedFiltersChips({
   return (
     <Box
       sx={{
-        width: "100%",
-        mb: 2.5,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.5,
+        border: `1px solid ${colors.border}`,
+        bgcolor: colors.surfaceSoft,
+        borderRadius: radius.lg,
+        px: { xs: 2, sm: 2.5 },
+        py: { xs: 2, sm: 2.25 },
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 1,
-        }}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        sx={{ mb: 1.5 }}
       >
-        <Typography
-          variant="body2"
-          sx={{
-            color: "white",
-            fontWeight: "bold",
-            mr: 0.5,
-          }}
-        >
-          Active filters
-        </Typography>
-
-        {typeof resultCount === "number" && (
+        <Box>
           <Typography
-            variant="body2"
             sx={{
-              color: "rgba(255,255,255,0.7)",
-              mr: 1,
+              color: colors.textPrimary,
+              fontWeight: 800,
+              fontSize: "0.98rem",
             }}
           >
-            ({resultCount} results)
+            Active filters
           </Typography>
-        )}
+
+          {typeof resultCount === "number" ? (
+            <Typography
+              sx={{
+                mt: 0.35,
+                color: colors.textSecondary,
+                fontSize: "0.9rem",
+              }}
+            >
+              Narrowing {resultCount} result{resultCount === 1 ? "" : "s"}
+            </Typography>
+          ) : null}
+        </Box>
 
         <Button
-          size="small"
           onClick={onClearAll}
           sx={{
-            color: "turquoise",
+            color: colors.accent,
+            fontWeight: 700,
             textTransform: "none",
-            fontWeight: "bold",
             minWidth: "auto",
-            px: 1,
+            px: 0,
+            "&:hover": {
+              bgcolor: "transparent",
+              opacity: 0.9,
+            },
           }}
         >
           Clear all
         </Button>
-      </Box>
+      </Stack>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 1,
-        }}
-      >
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
         {chips.map((chip) => (
           <Chip
             key={`${chip.key}-${chip.value}`}
             label={formatChipLabel(chip)}
-            onDelete={() => onRemoveFilter(chip.key, chip.value)}
+            onDelete={
+              onRemoveFilter
+                ? () => onRemoveFilter(chip.key, chip.value)
+                : undefined
+            }
             sx={{
-              bgcolor: "rgba(255,255,255,0.08)",
-              color: "white",
-              border: "1px solid rgba(255,255,255,0.14)",
-              fontWeight: 500,
+              bgcolor: colors.surface2,
+              color: colors.textPrimary,
+              border: `1px solid ${colors.border}`,
+              fontWeight: 600,
               height: 34,
               "& .MuiChip-deleteIcon": {
-                color: "rgba(255,255,255,0.8)",
-                "&:hover": {
-                  color: "turquoise",
-                },
+                color: colors.textMuted,
+              },
+              "& .MuiChip-deleteIcon:hover": {
+                color: colors.accent,
               },
             }}
           />
         ))}
-      </Box>
+      </Stack>
     </Box>
   );
 }
