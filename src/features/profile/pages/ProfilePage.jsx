@@ -3,7 +3,6 @@ import Footer from "../../../shared/ui/navigation/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getAuth,
   updatePassword,
@@ -29,7 +28,9 @@ import ProfilePageHeader from "../../profile/components/ProfileHeader.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db, app } from "../../../backend/firebase/firebase";
+import { db } from "../../../backend/firebase/firebase";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../../app/routes/routePaths";
 import { useAuth } from "../../auth/AuthContext.js";
 import GenderSelectStep from "../../onboarding/components/GenderStep.jsx";
 import CategoryMultiSelectStep from "../../onboarding/components/CategoryStep.jsx";
@@ -361,6 +362,7 @@ const ProfilePage = () => {
       </Box>
     );
   }
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -592,6 +594,54 @@ const ProfilePage = () => {
                 </Button>
               </Grid>
             </Grid>
+          </Box>
+          <Box
+            sx={{
+              mt: 4,
+              p: 3,
+              borderRadius: 2,
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              bgcolor: "black",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                color: "turquoise",
+                fontWeight: "bold",
+                mb: 1,
+              }}
+            >
+              Account settings
+            </Typography>
+
+            <Typography
+              sx={{
+                color: "rgba(255,255,255,0.72)",
+                mb: 2.5,
+                lineHeight: 1.7,
+              }}
+            >
+              Manage communication preferences, billing, subscription options,
+              and account-level actions in one place.
+            </Typography>
+
+            <Button
+              variant="outlined"
+              onClick={() => navigate(ROUTES.SETTINGS)}
+              sx={{
+                color: "turquoise",
+                borderColor: "rgba(64, 224, 208, 0.45)",
+                textTransform: "none",
+                fontWeight: "bold",
+                "&:hover": {
+                  borderColor: "turquoise",
+                  bgcolor: "rgba(64, 224, 208, 0.08)",
+                },
+              }}
+            >
+              Open account settings
+            </Button>
           </Box>
 
           <Box

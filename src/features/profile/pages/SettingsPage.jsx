@@ -9,71 +9,112 @@ import {
   Typography,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import ProfileHeader from "../components/ProfileHeader.jsx";
 import AccountPreferencesCard from "../components/AccountPreferencesCard.jsx";
 import ManageSubscriptionCard from "../components/ManageSubscriptionCard.jsx";
 import DeleteAccountCard from "../components/DeleteAccountCard.jsx";
 import Footer from "../../../shared/ui/navigation/Footer.jsx";
-import { auth, db } from "../../../backend/firebase/firebase";
+import { db } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext.js";
 import {
   colors,
-  layout,
-  spacing,
+  radius,
   typography,
 } from "../../../shared/ui/theme/designTokens";
 
 const theme = createTheme();
 
+const DEFAULT_USER_DATA = {
+  preferences: {
+    emailNotifications: true,
+  },
+  subscription: null,
+};
+
 function SettingsPage() {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+
+  const [userData, setUserData] = useState(DEFAULT_USER_DATA);
+  const [loadingSettings, setLoadingSettings] = useState(true);
   const [pageError, setPageError] = useState("");
 
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
-
-    if (!uid) {
-      setLoading(false);
-      setPageError("You must be signed in to access settings.");
+    if (authLoading) {
       return undefined;
     }
 
-    const userRef = doc(db, "users", uid);
+    if (!user?.uid) {
+      setUserData(DEFAULT_USER_DATA);
+      setLoadingSettings(false);
+      setPageError("You must be signed in to access account settings.");
+
+      return undefined;
+    }
+
+    setLoadingSettings(true);
+    setPageError("");
+
+    const userRef = doc(db, "users", user.uid);
 
     const unsubscribe = onSnapshot(
       userRef,
       (snapshot) => {
-        setUserData(snapshot.exists() ? snapshot.data() : null);
-        setLoading(false);
+        setUserData(
+          snapshot.exists()
+            ? {
+                ...DEFAULT_USER_DATA,
+                ...snapshot.data(),
+                preferences: {
+                  ...DEFAULT_USER_DATA.preferences,
+                  ...(snapshot.data()?.preferences || {}),
+                },
+              }
+            : DEFAULT_USER_DATA,
+        );
+
+        setLoadingSettings(false);
       },
-      () => {
+      (error) => {
+        console.error("Failed to load account settings:", error);
+
+        setUserData(DEFAULT_USER_DATA);
         setPageError("We couldn’t load your settings right now.");
-        setLoading(false);
+        setLoadingSettings(false);
       },
     );
 
-    return () => unsubscribe();
-  }, []);
+    return unsubscribe;
+  }, [authLoading, user?.uid]);
 
-  const emailOptIn = useMemo(() => {
-    return userData?.preferences?.emailNotifications ?? true;
-  }, [userData]);
+  const emailOptIn = useMemo(
+    () => userData?.preferences?.emailNotifications ?? true,
+    [userData],
+  );
 
-  const subscription = useMemo(() => {
-    return userData?.subscription || null;
-  }, [userData]);
+  const subscription = useMemo(
+    () => userData?.subscription || null,
+    [userData],
+  );
 
   const handleSavePreferences = async ({ emailOptIn: nextValue }) => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) {
-      throw new Error("Not signed in.");
+    if (!user?.uid) {
+      throw new Error("You must be signed in to save preferences.");
     }
 
-    await updateDoc(doc(db, "users", uid), {
-      "preferences.emailNotifications": nextValue,
-    });
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        preferences: {
+          emailNotifications: Boolean(nextValue),
+        },
+      },
+      { merge: true },
+    );
   };
+
+  const isLoading = authLoading || loadingSettings;
+  const canRenderSettings = Boolean(user?.uid) && !pageError;
 
   return (
     <ThemeProvider theme={theme}>
@@ -90,7 +131,13 @@ function SettingsPage() {
       >
         <ProfileHeader />
 
-        <Box component="main" sx={{ flex: 1, py: { xs: 5, md: 8 } }}>
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            py: { xs: 5, md: 8 },
+          }}
+        >
           <Container maxWidth="md">
             <Stack spacing={3}>
               <Box>
@@ -108,11 +155,15 @@ function SettingsPage() {
                 </Typography>
 
                 <Typography
-                  variant="h3"
+                  component="h1"
                   sx={{
-                    color: "white",
+                    color: colors.textPrimary,
                     fontWeight: 800,
-                    fontSize: { xs: "2rem", md: "2.5rem" },
+                    fontSize: {
+                      xs: "2rem",
+                      md: "2.5rem",
+                    },
+                    lineHeight: 1.12,
                     mb: 1,
                   }}
                 >
@@ -121,9 +172,13 @@ function SettingsPage() {
 
                 <Typography
                   sx={{
-                    color: "rgba(255,255,255,0.72)",
+                    color: colors.textSecondary,
                     maxWidth: 760,
-                    fontSize: { xs: "0.98rem", md: "1.02rem" },
+                    fontSize: {
+                      xs: "0.98rem",
+                      md: "1.02rem",
+                    },
+                    lineHeight: 1.72,
                   }}
                 >
                   Update communication preferences, manage billing, and control
@@ -132,23 +187,30 @@ function SettingsPage() {
               </Box>
 
               {pageError ? (
-                <Alert severity="error" sx={{ borderRadius: 3 }}>
+                <Alert
+                  severity="error"
+                  sx={{
+                    borderRadius: radius.lg,
+                  }}
+                >
                   {pageError}
                 </Alert>
               ) : null}
 
-              {loading ? (
+              {isLoading ? (
                 <Box
                   sx={{
+                    minHeight: 240,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    minHeight: 240,
                   }}
                 >
                   <CircularProgress sx={{ color: colors.accent }} />
                 </Box>
-              ) : (
+              ) : null}
+
+              {canRenderSettings ? (
                 <Stack spacing={3}>
                   <AccountPreferencesCard
                     initialEmailOptIn={emailOptIn}
@@ -159,7 +221,7 @@ function SettingsPage() {
 
                   <DeleteAccountCard />
                 </Stack>
-              )}
+              ) : null}
             </Stack>
           </Container>
         </Box>

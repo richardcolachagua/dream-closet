@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -15,7 +15,13 @@ import {
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useNavigate } from "react-router-dom";
 import { httpsCallable } from "firebase/functions";
-import { deleteUser } from "firebase/auth";
+import {
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  reauthenticateWithPopup,
+  reauthenticateWithCredential,
+  signOut,
+} from "firebase/auth";
 import { auth, functions } from "../../../backend/firebase/firebase";
 import { ROUTES } from "../../../app/routes/routePaths";
 import { colors, radius } from "../../../shared/ui/theme/designTokens";
@@ -32,15 +38,27 @@ const cardSx = {
 function DeleteAccountCard() {
   const [open, setOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const user = auth.currentUser;
+
+  const usesPasswordProvider = useMemo(
+    () =>
+      user?.providerData?.some(
+        (provider) => provider.providerId === "password",
+      ) ?? false,
+    [user],
+  );
 
   const isValidConfirmation = confirmText.trim() === "DELETE";
 
   const handleOpen = () => {
     setError("");
     setConfirmText("");
+    setCurrentPassword("");
     setOpen(true);
   };
 
@@ -49,10 +67,34 @@ function DeleteAccountCard() {
     setOpen(false);
   };
 
+  const reauthenticateUser = async () => {
+    if (!user) {
+      throw new Error("You need to be signed in to delete your account.");
+    }
+
+    if (usesPasswordProvider) {
+      if (!currentPassword) {
+        throw new Error(
+          "Enter your current password before deleting your account.",
+        );
+      }
+
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        currentPassword,
+      );
+
+      await reauthenticateWithCredential(user, credential);
+      return;
+    }
+
+    const provider = new GoogleAuthProvider();
+    await reauthenticateWithPopup(user, provider);
+  };
+
   const handleConfirmDelete = async () => {
     setError("");
 
-    const user = auth.currentUser;
     if (!user) {
       setError("You need to be signed in to delete your account.");
       return;
@@ -66,15 +108,35 @@ function DeleteAccountCard() {
     setDeleting(true);
 
     try {
+      await reauthenticateUser();
+
+      // Refreshes the ID token after reauthentication so the callable can
+      // verify a recent sign-in before performing an irreversible deletion.
+      await user.getIdToken(true);
+
       const deleteAccount = httpsCallable(functions, "deleteAccount");
       await deleteAccount();
-      await deleteUser(user);
+
+      await signOut(auth);
       navigate(ROUTES.HOME, { replace: true });
     } catch (err) {
-      setError(
-        err?.message ||
-          "We couldn’t delete your account right now. Please try again or contact support.",
-      );
+      console.error("Account deletion failed:", err);
+
+      if (err?.code === "auth/wrong-password") {
+        setError("That password is incorrect. Please try again.");
+      } else if (err?.code === "auth/popup-closed-by-user") {
+        setError("Google sign-in was canceled. Your account was not deleted.");
+      } else if (err?.code === "functions/failed-precondition") {
+        setError(
+          err.message ||
+            "Your subscription could not be closed. Please contact support.",
+        );
+      } else {
+        setError(
+          err?.message ||
+            "We couldn’t delete your account right now. Please try again or contact support.",
+        );
+      }
     } finally {
       setDeleting(false);
     }
@@ -113,18 +175,11 @@ function DeleteAccountCard() {
               </Typography>
 
               <Typography sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>
-                Permanently delete your Dream Closet account, saved items, saved
-                searches, onboarding preferences, and access tied to the
-                account.
+                Permanently delete your Dream Closet account, preferences, saved
+                items, saved searches, and account access.
               </Typography>
             </Box>
           </Stack>
-
-          {error ? (
-            <Alert severity="error" sx={{ borderRadius: radius.md }}>
-              {error}
-            </Alert>
-          ) : null}
 
           <Box>
             <Button
@@ -171,7 +226,7 @@ function DeleteAccountCard() {
         <DialogContent>
           <Stack spacing={2}>
             <Typography sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>
-              Deleting your account will permanently remove:
+              Deleting your account permanently removes:
             </Typography>
 
             <Box
@@ -185,7 +240,7 @@ function DeleteAccountCard() {
             >
               <li>Your profile and onboarding preferences</li>
               <li>Your saved searches and saved items</li>
-              <li>Your active subscription access</li>
+              <li>Your subscription access and billing connection</li>
             </Box>
 
             <Typography sx={{ color: "#ffb8c0", fontWeight: 700 }}>
@@ -194,8 +249,48 @@ function DeleteAccountCard() {
 
             <Divider sx={{ borderColor: colors.border }} />
 
+            {usesPasswordProvider ? (
+              <TextField
+                fullWidth
+                required
+                label="Current password"
+                type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: radius.md,
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    color: colors.textPrimary,
+                    "& fieldset": {
+                      borderColor: "rgba(255,255,255,0.12)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255,255,255,0.22)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: colors.accent,
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "rgba(255,255,255,0.62)",
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: colors.accent,
+                  },
+                }}
+              />
+            ) : (
+              <Alert severity="info" sx={{ borderRadius: radius.md }}>
+                You will be asked to confirm with Google before your account is
+                deleted.
+              </Alert>
+            )}
+
             <TextField
               fullWidth
+              required
               label='Type "DELETE" to confirm'
               value={confirmText}
               onChange={(event) => setConfirmText(event.target.value)}
@@ -246,7 +341,11 @@ function DeleteAccountCard() {
 
           <Button
             onClick={handleConfirmDelete}
-            disabled={deleting || !isValidConfirmation}
+            disabled={
+              deleting ||
+              !isValidConfirmation ||
+              (usesPasswordProvider && !currentPassword)
+            }
             variant="contained"
             sx={{
               textTransform: "none",

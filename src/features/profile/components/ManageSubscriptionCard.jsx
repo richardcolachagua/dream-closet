@@ -19,6 +19,7 @@ import {
   secondaryButtonSx,
   sectionEyebrowSx,
 } from "../../../shared/ui/theme/componentStyles";
+import { Link as RouterLink } from "react-router-dom";
 
 const cardSx = {
   borderRadius: radius.xl,
@@ -201,8 +202,9 @@ function ManageSubscriptionCard({ subscription }) {
           )}
 
           <Button
+            component={RouterLink}
+            to={ROUTES.PRICING}
             variant="outlined"
-            href={ROUTES.PRICING}
             sx={secondaryButtonSx}
           >
             View pricing

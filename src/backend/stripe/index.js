@@ -4,12 +4,18 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-const { createCheckoutSession } = require("./src/stripe/createCheckoutSession");
+const {
+  createCheckoutSession,
+} = require("./pricing/services/createCheckoutSession");
+
 const {
   createCustomerPortalSession,
-} = require("./src/stripe/createCustomerPortalSession");
-const { stripeWebhook } = require("./src/stripe/stripeWebhook");
+} = require("./pricing/services/createCustomerPortalSession");
 
+const { stripeWebhook } = require("./pricing/services/stripeWebhook");
+const { deleteAccount } = require("./pricing/services/deleteAccount");
+
+exports.deleteAccount = deleteAccount;
 exports.createCheckoutSession = createCheckoutSession;
 exports.createCustomerPortalSession = createCustomerPortalSession;
 exports.stripeWebhook = stripeWebhook;
