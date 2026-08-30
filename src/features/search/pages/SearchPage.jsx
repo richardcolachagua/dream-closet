@@ -22,7 +22,13 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import TuneIcon from "@mui/icons-material/Tune";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import UserDescriptionInput from "../components/SearchInputBar";
 import SearchResults from "../components/SearchResults";
 import SearchSortBar from "../components/SearchSortBar";
@@ -215,7 +221,7 @@ function SearchPage() {
         filters,
         sort: sortBy,
         page: currentPage,
-        createdAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
       });
 
       setSuccessMessage("Search saved successfully.");

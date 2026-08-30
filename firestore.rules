@@ -2,7 +2,6 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function isSignedIn() {
       return request.auth != null;
     }
@@ -19,7 +18,7 @@ service cloud.firestore {
       return data is map
         && hasOnlyKeys(data, ["gender", "categories", "brands", "completed"])
         && (
-          !('gender' in data)
+          !("gender" in data)
           || data.gender == null
           || data.gender is string
         )
@@ -50,7 +49,7 @@ service cloud.firestore {
         && request.resource.data.email is string
         && onboardingIsValid(request.resource.data.onboarding)
         && (
-          !('preferences' in request.resource.data)
+          !("preferences" in request.resource.data)
           || preferencesIsValid(request.resource.data.preferences)
         )
         && request.resource.data.createdAt is timestamp
@@ -64,22 +63,20 @@ service cloud.firestore {
         && request.resource.data.email is string
         && onboardingIsValid(request.resource.data.onboarding)
         && (
-          !('preferences' in request.resource.data)
+          !("preferences" in request.resource.data)
           || preferencesIsValid(request.resource.data.preferences)
         )
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedAt is timestamp
         && (
-          !('subscription' in request.resource.data)
-          || !('subscription' in resource.data)
+          !("subscription" in request.resource.data)
+          || !("subscription" in resource.data)
           || request.resource.data.subscription == resource.data.subscription
         );
     }
 
-    function savedItemIsValid() {
+    function savedItemIsValid(userId) {
       return hasOnlyKeys(request.resource.data, [
-        "userId",
-        "itemId",
         "name",
         "imageUrl",
         "price",
@@ -90,13 +87,11 @@ service cloud.firestore {
         "description",
         "createdAt"
       ])
-      && request.resource.data.userId is string
-      && request.resource.data.itemId is string
       && request.resource.data.name is string
       && request.resource.data.imageUrl is string
       && request.resource.data.price is string
       && (
-        !('numericPrice' in request.resource.data)
+        !("numericPrice" in request.resource.data)
         || request.resource.data.numericPrice == null
         || request.resource.data.numericPrice is int
         || request.resource.data.numericPrice is float
@@ -110,14 +105,12 @@ service cloud.firestore {
 
     function savedSearchIsValid() {
       return hasOnlyKeys(request.resource.data, [
-        "userId",
         "query",
         "filters",
         "sort",
         "page",
         "createdAt"
       ])
-      && request.resource.data.userId is string
       && request.resource.data.query is string
       && request.resource.data.filters is map
       && request.resource.data.sort is string
@@ -128,37 +121,36 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
+
       allow create: if userCreateIsValid(userId);
       allow update: if userUpdateIsValid(userId);
       allow delete: if isOwner(userId);
-    }
 
-    match /saved-items/{docId} {
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow list: if isSignedIn();
-      allow create: if isSignedIn()
-        && request.resource.data.userId == request.auth.uid
-        && savedItemIsValid();
-      allow update: if isSignedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.createdAt == resource.data.createdAt
-        && savedItemIsValid();
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
-    }
+      match /savedItems/{itemId} {
+        allow get, list: if isOwner(userId);
 
-    match /saved-searches/{docId} {
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow list: if isSignedIn();
-      allow create: if isSignedIn()
-        && request.resource.data.userId == request.auth.uid
-        && savedSearchIsValid();
-      allow update: if isSignedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.createdAt == resource.data.createdAt
-        && savedSearchIsValid();
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isOwner(userId)
+          && savedItemIsValid(userId);
+
+        allow update: if isOwner(userId)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && savedItemIsValid(userId);
+
+        allow delete: if isOwner(userId);
+      }
+
+      match /savedSearches/{searchId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId)
+          && savedSearchIsValid();
+
+        allow update: if isOwner(userId)
+          && request.resource.data.createdAt == resource.data.createdAt
+          && savedSearchIsValid();
+
+        allow delete: if isOwner(userId);
+      }
     }
   }
 }

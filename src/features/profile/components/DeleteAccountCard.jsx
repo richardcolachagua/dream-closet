@@ -117,10 +117,16 @@ function DeleteAccountCard() {
       const deleteAccount = httpsCallable(functions, "deleteAccount");
       await deleteAccount();
 
-      await signOut(auth);
-      navigate(ROUTES.HOME, { replace: true });
-    } catch (err) {
-      console.error("Account deletion failed:", err);
+      try {
+        await signOut(auth);
+      } catch (signOutError) {
+        console.warn(
+          "Local sign-out after deletion was skipped:",
+          signOutError,
+        );
+      } finally {
+        navigate(ROUTES.HOME, { replace: true });
+      }
 
       if (err?.code === "auth/wrong-password") {
         setError("That password is incorrect. Please try again.");
