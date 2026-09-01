@@ -3,7 +3,7 @@ import { Grid, Stack, Typography } from "@mui/material";
 import SearchResultCard from "./SearchResultCard";
 import SearchEmptyState from "./SearchEmptyState";
 import SearchResultsSkeleton from "./SearchResultsSkeleton";
-import AppliedFiltersChips from "./AppliedFiltersChips";
+import AppliedFiltersChips from "../filters/AppliedFiltersChips";
 import { colors } from "../../../shared/ui/theme/designTokens";
 import { getActiveFilterCount } from "../utils/filterHelpers";
 
