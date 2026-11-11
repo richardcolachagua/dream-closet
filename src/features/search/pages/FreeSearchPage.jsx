@@ -61,6 +61,76 @@ const DEFAULT_SEARCH_META = {
   sources: [],
 };
 
+const SearchResetTimer = ({ resetTime, onRefreshLimit }) => {
+  const [timeRemaining, setTimeRemaining] = useState("");
+
+  useEffect(() => {
+    if (!resetTime) {
+      setTimeRemaining("");
+      return undefined;
+    }
+
+    const resetAt = new Date(resetTime).getTime();
+
+    if (!Number.isFinite(resetAt)) {
+      setTimeRemaining("");
+      return undefined;
+    }
+
+    let refreshed = false;
+
+    const updateTimer = () => {
+      const difference = resetAt - Date.now();
+
+      if (difference <= 0) {
+        setTimeRemaining("");
+
+        if (!refreshed) {
+          refreshed = true;
+
+          Promise.resolve()
+            .then(() => onRefreshLimit())
+            .catch((error) => {
+              console.error("Could not refresh the search limit:", error);
+            });
+        }
+
+        return;
+      }
+
+      const totalMinutes = Math.ceil(difference / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      setTimeRemaining(`${hours}h ${minutes}m`);
+    };
+
+    updateTimer();
+
+    const intervalId = window.setInterval(updateTimer, 60000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [resetTime, onRefreshLimit]);
+
+  if (!timeRemaining) {
+    return null;
+  }
+
+  return (
+    <Typography
+      sx={{
+        mt: 0.5,
+        color: colors.textMuted,
+        fontSize: "0.9rem",
+      }}
+    >
+      Resets in: {timeRemaining}
+    </Typography>
+  );
+};
+
 const FreeSearchPage = () => {
   const navigate = useNavigate();
 
@@ -106,44 +176,6 @@ const FreeSearchPage = () => {
     initializedRef.current = true;
     checkSearchLimit();
   }, [checkSearchLimit]);
-
-  const Timer = () => {
-    const [timeRemaining, setTimeRemaining] = useState("");
-
-    useEffect(() => {
-      const updateTimer = () => {
-        if (resetTime) {
-          const now = new Date();
-          const diff = new Date(resetTime) - now;
-
-          if (diff > 0) {
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            setTimeRemaining(`${hours}h ${minutes}m`);
-          } else {
-            setTimeRemaining("");
-            checkSearchLimit();
-          }
-        }
-      };
-
-      updateTimer();
-      const interval = setInterval(updateTimer, 60000);
-      return () => clearInterval(interval);
-    }, [resetTime, checkSearchLimit]);
-
-    return timeRemaining ? (
-      <Typography
-        sx={{
-          mt: 0.5,
-          color: colors.textMuted,
-          fontSize: "0.9rem",
-        }}
-      >
-        Resets in: {timeRemaining}
-      </Typography>
-    ) : null;
-  };
 
   // ---------- Shared search orchestration (aligned with paid page) ----------
 
@@ -399,7 +431,6 @@ const FreeSearchPage = () => {
                 >
                   Try Dream Closet
                 </Typography>
-
                 <Typography
                   sx={{
                     color: colors.textSecondary,
@@ -408,8 +439,10 @@ const FreeSearchPage = () => {
                 >
                   {remainingSearches} free searches remaining
                 </Typography>
-
-                <Timer />
+                <SearchResetTimer
+                  resetTime={resetTime}
+                  onRefreshLimit={checkSearchLimit}
+                />
               </Box>
             </Box>
           </Box>

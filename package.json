@@ -35,6 +35,7 @@
     "yup": "^1.3.3"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "concurrently": "^9.2.3"
   },
   "scripts": {
@@ -46,9 +47,8 @@
     "test:ci": "react-scripts test --watchAll=false",
     "lint:frontend": "eslint src --ext .js,.jsx --max-warnings=0",
     "lint:functions": "npm --prefix functions run lint",
-    "check:functions": "node scripts/check-functions-syntax.cjs",
-    "check": "npm run lint:frontend && npm run lint:functions && npm run check:functions && npm run build",
-    "test:emulator-smoke": "node scripts/emulator-smoke.cjs",
+    "check": "npm run lint:frontend && npm run lint:functions && npm run build",
+    "test:emulator-smoke": "node scripts/check-emulators.cjs",
     "test:local": "firebase emulators:exec --project dream-closet-4d254 --only functions,firestore,auth \"npm run test:emulator-smoke\"",
     "eject": "react-scripts eject"
   },

@@ -4,7 +4,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
-import { colors, radius } from "../../../shared/ui/theme/designTokens";
+import { colors } from "../../../shared/ui/theme/designTokens";
 import {
   interactiveCardSx,
   primaryButtonSx,

@@ -109,9 +109,6 @@ function DeleteAccountCard() {
 
     try {
       await reauthenticateUser();
-
-      // Refreshes the ID token after reauthentication so the callable can
-      // verify a recent sign-in before performing an irreversible deletion.
       await user.getIdToken(true);
 
       const deleteAccount = httpsCallable(functions, "deleteAccount");
@@ -124,18 +121,23 @@ function DeleteAccountCard() {
           "Local sign-out after deletion was skipped:",
           signOutError,
         );
-      } finally {
-        navigate(ROUTES.HOME, { replace: true });
       }
 
-      if (err?.code === "auth/wrong-password") {
-        setError("That password is incorrect. Please try again.");
+      navigate(ROUTES.HOME, { replace: true });
+    } catch (err) {
+      console.error("Account deletion failed:", err);
+
+      if (
+        err?.code === "auth/wrong-password" ||
+        err?.code === "auth/invalid-credential"
+      ) {
+        setError("Your credentials could not be verified. Please try again.");
       } else if (err?.code === "auth/popup-closed-by-user") {
         setError("Google sign-in was canceled. Your account was not deleted.");
       } else if (err?.code === "functions/failed-precondition") {
         setError(
           err.message ||
-            "Your subscription could not be closed. Please contact support.",
+            "Account deletion could not proceed. Please sign in again or contact support.",
         );
       } else {
         setError(

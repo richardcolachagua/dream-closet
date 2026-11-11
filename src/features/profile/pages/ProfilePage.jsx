@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Footer from "../../../shared/ui/navigation/Footer.jsx";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
-  getAuth,
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
@@ -28,7 +27,8 @@ import ProfilePageHeader from "../../profile/components/ProfileHeader.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../../../backend/firebase/firebase";
+import { db, functions } from "../../../backend/firebase/firebase";
+import { httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../app/routes/routePaths";
 import { useAuth } from "../../auth/AuthContext.js";
@@ -67,7 +67,8 @@ const DEFAULT_ONBOARDING = {
 const defaultTheme = createTheme();
 
 const ProfilePage = () => {
-  const auth = getAuth();
+  const navigate = useNavigate();
+
   const { user, loading: authLoading } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -152,7 +153,6 @@ const ProfilePage = () => {
         }
 
         if (Object.keys(updatedValues).length > 0) {
-          const functions = getFunctions(app);
           const updateProfile = httpsCallable(functions, "updateUserProfile");
           await updateProfile(updatedValues);
 
@@ -362,7 +362,6 @@ const ProfilePage = () => {
       </Box>
     );
   }
-  const navigate = useNavigate();
 
   return (
     <Box
