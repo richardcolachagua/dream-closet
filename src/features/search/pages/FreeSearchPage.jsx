@@ -7,8 +7,6 @@ import {
   Snackbar,
   Alert,
   Container,
-  ToggleButtonGroup,
-  ToggleButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,11 +24,11 @@ import UserDescriptionInput from "../../search/components/SearchInputBar";
 import SearchResults from "../../search/components/SearchResults";
 import SearchSortControls from "../../search/components/SearchSortBar";
 import FilterDrawer from "../../search/filters/FilterDrawer";
-
 import {
   functions,
-  analytics as analyticsExport,
+  logAnalyticsEvent,
 } from "../../../backend/firebase/firebase";
+
 import { fetchCombinedResults } from "../../search/services/fetchSearchResults";
 import {
   createDefaultFilters,
@@ -54,7 +52,6 @@ import {
 } from "../../../shared/ui/theme/componentStyles";
 
 // Use provided analytics instance if available, else getAnalytics
-const analytics = analyticsExport || getAnalytics();
 const defaultTheme = createTheme();
 
 const DEFAULT_SEARCH_META = {
@@ -170,9 +167,8 @@ const FreeSearchPage = () => {
       setIsLoading(false);
 
       // Log analytics for free searches
-      logEvent(analytics, "free_search", {
-        search_term: searchInputValue || "unknown",
-        result_count: results.length || 0,
+      logAnalyticsEvent("search_error", {
+        error_message: errorMessage,
       });
     },
     [searchInputValue],

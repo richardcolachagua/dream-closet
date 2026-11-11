@@ -1,31 +1,52 @@
 import { httpsCallable } from "firebase/functions";
-import { auth, functions } from "../../../backend/firebase/firebase";
+import { auth, authReady, functions } from "../../../backend/firebase/firebase";
 
-const readEnv = (viteKey, craKey, fallback = "") => {
-  if (
-    typeof import.meta !== "undefined" &&
-    import.meta.env &&
-    viteKey in import.meta.env
-  ) {
-    return import.meta.env[viteKey];
+const rawEnableBilling = process.env.REACT_APP_ENABLE_BILLING || "false";
+
+export const ENABLE_BILLING =
+  String(rawEnableBilling).trim().toLowerCase() === "true";
+
+const requireBillingUser = async () => {
+  if (!ENABLE_BILLING) {
+    throw new Error("Billing is currently disabled in this environment.");
   }
 
-  if (typeof process !== "undefined" && process.env && craKey in process.env) {
-    return process.env[craKey];
+  await authReady;
+
+  const user = auth.currentUser;
+
+  if (!user || user.isAnonymous) {
+    throw new Error("Sign in to a registered account to manage billing.");
   }
 
-  return fallback;
+  return user;
 };
 
-const rawEnableBilling = readEnv(
-  "VITE_ENABLE_BILLING",
-  "REACT_APP_ENABLE_BILLING",
-  "false",
-);
+const readSessionUrl = (result, label) => {
+  const value = result?.data?.url;
 
-export const ENABLE_BILLING = String(rawEnableBilling).toLowerCase() === "true";
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`Missing ${label} URL.`);
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`Invalid ${label} URL.`);
+  }
+
+  if (parsed.protocol !== "https:") {
+    throw new Error(`Invalid ${label} URL protocol.`);
+  }
+
+  return parsed.href;
+};
 
 export const getIdToken = async () => {
+  await authReady;
+
   if (!auth.currentUser) {
     return null;
   }
@@ -35,37 +56,30 @@ export const getIdToken = async () => {
 
 export const createCheckoutSession = async ({
   returnPath = "/settingspage",
+  cancelPath = "/pricing",
 } = {}) => {
+  await requireBillingUser();
+
   const createSession = httpsCallable(functions, "createCheckoutSession");
 
   const result = await createSession({
-    returnUrl: `${window.location.origin}${returnPath}`,
-    cancelUrl: `${window.location.origin}/pricing`,
+    returnPath,
+    cancelPath,
   });
 
-  const checkoutUrl = result?.data?.url;
-
-  if (!checkoutUrl || typeof checkoutUrl !== "string") {
-    throw new Error("Missing checkout URL.");
-  }
-
-  return checkoutUrl;
+  return readSessionUrl(result, "checkout");
 };
 
 export const createCustomerPortalSession = async ({
   returnPath = "/settingspage",
 } = {}) => {
+  await requireBillingUser();
+
   const createPortal = httpsCallable(functions, "createCustomerPortalSession");
 
   const result = await createPortal({
-    returnUrl: `${window.location.origin}${returnPath}`,
+    returnPath,
   });
 
-  const portalUrl = result?.data?.url;
-
-  if (!portalUrl || typeof portalUrl !== "string") {
-    throw new Error("Missing portal URL.");
-  }
-
-  return portalUrl;
+  return readSessionUrl(result, "billing portal");
 };
