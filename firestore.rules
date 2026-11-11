@@ -2,12 +2,13 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
+    function isRegistered() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != "anonymous";
     }
 
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return isRegistered() && request.auth.uid == userId;
     }
 
     function hasOnlyKeys(data, allowed) {
@@ -16,26 +17,105 @@ service cloud.firestore {
 
     function onboardingIsValid(data) {
       return data is map
-        && hasOnlyKeys(data, ["gender", "categories", "brands", "completed"])
-        && (
-          !("gender" in data)
-          || data.gender == null
-          || data.gender is string
-        )
+        && data.keys().hasAll([
+          "gender",
+          "categories",
+          "brands",
+          "completed"
+        ])
+        && data.keys().hasOnly([
+          "gender",
+          "categories",
+          "brands",
+          "completed"
+        ])
+        && data.gender in [null, "female", "male"]
         && data.categories is list
+        && data.categories.size() <= 60
+        && data.categories.toSet().size() == data.categories.size()
+        && data.categories.hasOnly([
+          "Tops",
+          "Blouses",
+          "Tank Tops",
+          "Crop Tops",
+          "Bodysuits",
+          "Sweaters",
+          "Cardigans",
+          "Hoodies",
+          "Blazers",
+          "Dresses",
+          "Mini Dresses",
+          "Midi Dresses",
+          "Maxi Dresses",
+          "Skirts",
+          "Mini Skirts",
+          "Midi Skirts",
+          "Jeans",
+          "Pants",
+          "Trousers",
+          "Leggings",
+          "Shorts",
+          "Jumpsuits",
+          "Rompers",
+          "Matching Sets",
+          "Activewear",
+          "Loungewear",
+          "Sleepwear",
+          "Swimwear",
+          "Outerwear",
+          "Jackets",
+          "Coats",
+          "Heels",
+          "Sandals",
+          "Sneakers",
+          "Boots",
+          "Flats",
+          "Loafers",
+          "Bags",
+          "Jewelry",
+          "Accessories",
+          "Sunglasses",
+          "Hats",
+          "T-Shirts",
+          "Graphic Tees",
+          "Button-Ups",
+          "Polos",
+          "Crewnecks",
+          "Suits",
+          "Chinos",
+          "Cargo Pants",
+          "Joggers",
+          "Denim Shorts",
+          "Vests",
+          "Dress Shoes",
+          "Watches"
+        ])
         && data.brands is list
-        && data.completed is bool;
+        && data.brands.size() <= 100
+        && data.brands.toSet().size() == data.brands.size()
+        && data.completed is bool
+        && (
+          !data.completed
+          || (
+            data.gender != null
+            && data.categories.size() > 0
+          )
+        );
     }
 
     function preferencesIsValid(data) {
       return data is map
-        && hasOnlyKeys(data, ["emailNotifications"])
+        && data.keys().hasAll([
+          "emailNotifications"
+        ])
+        && data.keys().hasOnly([
+          "emailNotifications"
+        ])
         && data.emailNotifications is bool;
     }
 
-    function userCreateIsValid(userId) {
-      return isOwner(userId)
-        && hasOnlyKeys(request.resource.data, [
+    function profileFieldsAreValid(data) {
+      return data.keys().hasAll([
           "firstName",
           "lastName",
           "email",
@@ -44,78 +124,92 @@ service cloud.firestore {
           "createdAt",
           "updatedAt"
         ])
-        && request.resource.data.firstName is string
-        && request.resource.data.lastName is string
-        && request.resource.data.email is string
-        && onboardingIsValid(request.resource.data.onboarding)
-        && (
-          !("preferences" in request.resource.data)
-          || preferencesIsValid(request.resource.data.preferences)
-        )
-        && request.resource.data.createdAt is timestamp
-        && request.resource.data.updatedAt is timestamp;
+        && data.firstName is string
+        && data.firstName.size() <= 60
+        && data.lastName is string
+        && data.lastName.size() <= 60
+        && data.email is string
+        && data.email.size() > 0
+        && data.email.size() <= 320
+        && onboardingIsValid(data.onboarding)
+        && preferencesIsValid(data.preferences)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function userCreateIsValid(userId) {
+      return isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          "firstName",
+          "lastName",
+          "email",
+          "onboarding",
+          "preferences",
+          "createdAt",
+          "updatedAt"
+        ])
+        && profileFieldsAreValid(request.resource.data)
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
     }
 
     function userUpdateIsValid(userId) {
       return isOwner(userId)
-        && request.resource.data.firstName is string
-        && request.resource.data.lastName is string
-        && request.resource.data.email is string
-        && onboardingIsValid(request.resource.data.onboarding)
-        && (
-          !("preferences" in request.resource.data)
-          || preferencesIsValid(request.resource.data.preferences)
-        )
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "firstName",
+          "lastName",
+          "onboarding",
+          "preferences",
+          "updatedAt"
+        ])
+        && profileFieldsAreValid(request.resource.data)
         && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.updatedAt is timestamp
-        && (
-          !("subscription" in request.resource.data)
-          || !("subscription" in resource.data)
-          || request.resource.data.subscription == resource.data.subscription
-        );
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.updatedAt == request.time;
     }
 
-    function savedItemIsValid(userId) {
+    function savedItemIsValid() {
       return hasOnlyKeys(request.resource.data, [
-        "name",
-        "imageUrl",
-        "price",
-        "numericPrice",
-        "productUrl",
-        "brand",
-        "source",
-        "description",
-        "createdAt"
-      ])
-      && request.resource.data.name is string
-      && request.resource.data.imageUrl is string
-      && request.resource.data.price is string
-      && (
-        !("numericPrice" in request.resource.data)
-        || request.resource.data.numericPrice == null
-        || request.resource.data.numericPrice is int
-        || request.resource.data.numericPrice is float
-      )
-      && request.resource.data.productUrl is string
-      && request.resource.data.brand is string
-      && request.resource.data.source is string
-      && request.resource.data.description is string
-      && request.resource.data.createdAt is timestamp;
+          "name",
+          "imageUrl",
+          "price",
+          "numericPrice",
+          "productUrl",
+          "brand",
+          "source",
+          "description",
+          "createdAt"
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.imageUrl is string
+        && request.resource.data.price is string
+        && (
+          !("numericPrice" in request.resource.data)
+          || request.resource.data.numericPrice == null
+          || request.resource.data.numericPrice is int
+          || request.resource.data.numericPrice is float
+        )
+        && request.resource.data.productUrl is string
+        && request.resource.data.brand is string
+        && request.resource.data.source is string
+        && request.resource.data.description is string
+        && request.resource.data.createdAt is timestamp;
     }
 
     function savedSearchIsValid() {
       return hasOnlyKeys(request.resource.data, [
-        "query",
-        "filters",
-        "sort",
-        "page",
-        "createdAt"
-      ])
-      && request.resource.data.query is string
-      && request.resource.data.filters is map
-      && request.resource.data.sort is string
-      && request.resource.data.page is int
-      && request.resource.data.createdAt is timestamp;
+          "query",
+          "filters",
+          "sort",
+          "page",
+          "createdAt"
+        ])
+        && request.resource.data.query is string
+        && request.resource.data.filters is map
+        && request.resource.data.sort is string
+        && request.resource.data.page is int
+        && request.resource.data.createdAt is timestamp;
     }
 
     match /users/{userId} {
@@ -124,17 +218,17 @@ service cloud.firestore {
 
       allow create: if userCreateIsValid(userId);
       allow update: if userUpdateIsValid(userId);
-      allow delete: if isOwner(userId);
+      allow delete: if false;
 
       match /savedItems/{itemId} {
         allow get, list: if isOwner(userId);
 
         allow create: if isOwner(userId)
-          && savedItemIsValid(userId);
+          && savedItemIsValid();
 
         allow update: if isOwner(userId)
           && request.resource.data.createdAt == resource.data.createdAt
-          && savedItemIsValid(userId);
+          && savedItemIsValid();
 
         allow delete: if isOwner(userId);
       }

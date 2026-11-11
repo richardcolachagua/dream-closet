@@ -1,12 +1,26 @@
 import React from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Alert, Box, CircularProgress } from "@mui/material";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "./AuthContext";
 import {
   DEFAULT_AUTHENTICATED_ROUTE,
-  DEFAULT_PUBLIC_ROUTE,
   buildCurrentPath,
+  ROUTES,
 } from "../../app/routes/routePaths";
+
+const LoadingRoute = () => (
+  <Box
+    sx={{
+      minHeight: "60vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "black",
+    }}
+  >
+    <CircularProgress />
+  </Box>
+);
 
 export const ProtectedRoute = ({
   children,
@@ -15,53 +29,73 @@ export const ProtectedRoute = ({
   roles = [],
 }) => {
   const location = useLocation();
-  const { user, role, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          minHeight: "60vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "black",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const {
+    loading,
+    isRegistered,
+    role,
+    claimsLoading,
+    claimsError,
+    hasProfile,
+    profileLoading,
+    profileError,
+  } = useAuth();
 
-  const isAuthenticated = !!user;
   const currentPath = buildCurrentPath(location);
 
+  if (loading || (isRegistered && profileLoading)) {
+    return <LoadingRoute />;
+  }
+
   if (inverse) {
-    if (isAuthenticated) {
+    if (isRegistered && hasProfile) {
       return (
-        <Navigate
-          to={redirectPath || DEFAULT_AUTHENTICATED_ROUTE}
-          replace
-          state={{ from: currentPath }}
-        />
+        <Navigate to={redirectPath || DEFAULT_AUTHENTICATED_ROUTE} replace />
       );
     }
 
     return <>{children}</>;
   }
 
-  if (!isAuthenticated) {
+  if (!isRegistered) {
     return (
       <Navigate
-        to={redirectPath || DEFAULT_PUBLIC_ROUTE}
+        to={redirectPath || ROUTES.LOGIN}
         replace
         state={{ from: currentPath }}
       />
     );
   }
 
-  if (roles.length > 0 && role && !roles.includes(role)) {
-    return <Navigate to={DEFAULT_AUTHENTICATED_ROUTE} replace />;
+  if (profileError) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">
+          Your profile could not be loaded. Please reload the page. If the
+          problem continues, sign out and sign in again.
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!hasProfile) {
+    return <Navigate to={ROUTES.LOGIN} replace state={{ from: currentPath }} />;
+  }
+
+  if (roles.length > 0) {
+    if (claimsLoading) {
+      return <LoadingRoute />;
+    }
+
+    if (claimsError || !role || !roles.includes(role)) {
+      return (
+        <Box sx={{ p: 3 }}>
+          <Alert severity="error">
+            You do not have permission to access this page.
+          </Alert>
+        </Box>
+      );
+    }
   }
 
   return <>{children}</>;

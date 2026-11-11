@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "concurrently": "^9.2.3"
   },
   "scripts": {
@@ -50,7 +51,9 @@
     "check": "npm run lint:frontend && npm run lint:functions && npm run build",
     "test:emulator-smoke": "node scripts/check-emulators.cjs",
     "test:local": "firebase emulators:exec --project dream-closet-4d254 --only functions,firestore,auth \"npm run test:emulator-smoke\"",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test:rules": "node --test tests/firestore/*.test.cjs",
+    "test:rules:local": "firebase emulators:exec --project demo-dream-closet-rules --only firestore \"npm run test:rules\""
   },
   "browserslist": {
     "production": [

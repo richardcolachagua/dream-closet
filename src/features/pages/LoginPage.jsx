@@ -23,14 +23,16 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../shared/ui/navigation/Footer";
 import { auth } from "../../backend/firebase/firebase";
 import {
-  setPersistence,
-  browserSessionPersistence,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
 import { colors, radius } from "../../shared/ui/theme/designTokens";
 import { ROUTES } from "../../app/routes/routePaths";
+import {
+  finishAccountSignIn,
+  prepareAccountSession,
+} from "../auth/profileService";
 
 const theme = createTheme();
 const MAX_ATTEMPTS = 5;
@@ -59,6 +61,11 @@ const getFriendlyAuthError = (code) => {
       return "Too many attempts. Please wait and try again.";
     default:
       return "Login failed. Please try again.";
+    case "profile/initialization-failed":
+      return (
+        "Your sign-in succeeded, but your profile could not be loaded. " +
+        "Please sign in again to retry."
+      );
   }
 };
 
@@ -190,12 +197,15 @@ function LoginPage() {
       setLoading(true);
 
       try {
-        await setPersistence(auth, browserSessionPersistence);
-        await signInWithEmailAndPassword(
+        await prepareAccountSession();
+
+        const credential = await signInWithEmailAndPassword(
           auth,
           values.email.trim(),
           values.password,
         );
+
+        await finishAccountSignIn(credential.user);
         resetAttemptState();
         handleRedirect();
       } catch (authError) {
@@ -218,14 +228,19 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      await setPersistence(auth, browserSessionPersistence);
+      await prepareAccountSession();
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+
+      await finishAccountSignIn(result.user);
       resetAttemptState();
       handleRedirect();
     } catch (authError) {
-      if (authError?.code !== "auth/popup-closed-by-user") {
+      if (
+        authError?.code?.startsWith("auth/") &&
+        authError.code !== "auth/popup-closed-by-user"
+      ) {
         registerFailure();
       }
       setError(getFriendlyAuthError(authError?.code));
