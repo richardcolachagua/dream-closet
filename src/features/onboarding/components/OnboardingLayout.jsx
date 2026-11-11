@@ -1,11 +1,6 @@
-import React from "react";
 import { Box, Container, CssBaseline, Stack, Typography } from "@mui/material";
 import OnboardingProgress from "./OnboardingProgress";
-import {
-  colors,
-  spacing,
-  typography,
-} from "../../../shared/ui/theme/designTokens";
+import { colors, typography } from "../../../shared/ui/theme/designTokens";
 
 const OnboardingLayout = ({
   children,

@@ -7,8 +7,6 @@ import {
   Snackbar,
   Alert,
   Container,
-  ToggleButtonGroup,
-  ToggleButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -16,7 +14,6 @@ import {
   Button,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { getAnalytics, logEvent } from "firebase/analytics";
 import { httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
 
@@ -26,11 +23,11 @@ import UserDescriptionInput from "../../search/components/SearchInputBar";
 import SearchResults from "../../search/components/SearchResults";
 import SearchSortControls from "../../search/components/SearchSortBar";
 import FilterDrawer from "../../search/filters/FilterDrawer";
-
 import {
   functions,
-  analytics as analyticsExport,
+  logAnalyticsEvent,
 } from "../../../backend/firebase/firebase";
+
 import { fetchCombinedResults } from "../../search/services/fetchSearchResults";
 import {
   createDefaultFilters,
@@ -53,8 +50,6 @@ import {
   primaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
 
-// Use provided analytics instance if available, else getAnalytics
-const analytics = analyticsExport || getAnalytics();
 const defaultTheme = createTheme();
 
 const DEFAULT_SEARCH_META = {
@@ -64,6 +59,76 @@ const DEFAULT_SEARCH_META = {
   hasMore: false,
   warnings: [],
   sources: [],
+};
+
+const SearchResetTimer = ({ resetTime, onRefreshLimit }) => {
+  const [timeRemaining, setTimeRemaining] = useState("");
+
+  useEffect(() => {
+    if (!resetTime) {
+      setTimeRemaining("");
+      return undefined;
+    }
+
+    const resetAt = new Date(resetTime).getTime();
+
+    if (!Number.isFinite(resetAt)) {
+      setTimeRemaining("");
+      return undefined;
+    }
+
+    let refreshed = false;
+
+    const updateTimer = () => {
+      const difference = resetAt - Date.now();
+
+      if (difference <= 0) {
+        setTimeRemaining("");
+
+        if (!refreshed) {
+          refreshed = true;
+
+          Promise.resolve()
+            .then(() => onRefreshLimit())
+            .catch((error) => {
+              console.error("Could not refresh the search limit:", error);
+            });
+        }
+
+        return;
+      }
+
+      const totalMinutes = Math.ceil(difference / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      setTimeRemaining(`${hours}h ${minutes}m`);
+    };
+
+    updateTimer();
+
+    const intervalId = window.setInterval(updateTimer, 60000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [resetTime, onRefreshLimit]);
+
+  if (!timeRemaining) {
+    return null;
+  }
+
+  return (
+    <Typography
+      sx={{
+        mt: 0.5,
+        color: colors.textMuted,
+        fontSize: "0.9rem",
+      }}
+    >
+      Resets in: {timeRemaining}
+    </Typography>
+  );
 };
 
 const FreeSearchPage = () => {
@@ -112,44 +177,6 @@ const FreeSearchPage = () => {
     checkSearchLimit();
   }, [checkSearchLimit]);
 
-  const Timer = () => {
-    const [timeRemaining, setTimeRemaining] = useState("");
-
-    useEffect(() => {
-      const updateTimer = () => {
-        if (resetTime) {
-          const now = new Date();
-          const diff = new Date(resetTime) - now;
-
-          if (diff > 0) {
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            setTimeRemaining(`${hours}h ${minutes}m`);
-          } else {
-            setTimeRemaining("");
-            checkSearchLimit();
-          }
-        }
-      };
-
-      updateTimer();
-      const interval = setInterval(updateTimer, 60000);
-      return () => clearInterval(interval);
-    }, [resetTime, checkSearchLimit]);
-
-    return timeRemaining ? (
-      <Typography
-        sx={{
-          mt: 0.5,
-          color: colors.textMuted,
-          fontSize: "0.9rem",
-        }}
-      >
-        Resets in: {timeRemaining}
-      </Typography>
-    ) : null;
-  };
-
   // ---------- Shared search orchestration (aligned with paid page) ----------
 
   const handleSearchResults = useCallback(
@@ -169,10 +196,9 @@ const FreeSearchPage = () => {
       });
       setIsLoading(false);
 
-      // Log analytics for free searches
-      logEvent(analytics, "free_search", {
+      logAnalyticsEvent("free_search", {
         search_term: searchInputValue || "unknown",
-        result_count: results.length || 0,
+        result_count: results.length,
       });
     },
     [searchInputValue],
@@ -250,9 +276,11 @@ const FreeSearchPage = () => {
   const handleSearchError = (errorMessage) => {
     setError(errorMessage);
     setIsLoading(false);
-    logEvent(analytics, "search_error", { error_message: errorMessage });
-  };
 
+    logAnalyticsEvent("search_error", {
+      error_message: errorMessage,
+    });
+  };
   const handleSearchSubmit = async (query) => {
     setSearchInputValue(query);
     setCurrentPage(DEFAULT_PAGE);
@@ -403,7 +431,6 @@ const FreeSearchPage = () => {
                 >
                   Try Dream Closet
                 </Typography>
-
                 <Typography
                   sx={{
                     color: colors.textSecondary,
@@ -412,8 +439,10 @@ const FreeSearchPage = () => {
                 >
                   {remainingSearches} free searches remaining
                 </Typography>
-
-                <Timer />
+                <SearchResetTimer
+                  resetTime={resetTime}
+                  onRefreshLimit={checkSearchLimit}
+                />
               </Box>
             </Box>
           </Box>
@@ -559,7 +588,8 @@ const FreeSearchPage = () => {
           <Button
             onClick={() => {
               setShowSignUpDialog(false);
-              navigate(ROUTES.SIGN_UP);
+              logAnalyticsEvent("free_search_sign_up", {});
+              navigate(ROUTES.SIGNUP);
             }}
             sx={primaryButtonSx}
           >

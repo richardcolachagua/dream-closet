@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Alert, Box, CircularProgress, CssBaseline } from "@mui/material";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  CssBaseline,
+  Typography,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "../../../backend/firebase/firebase";

@@ -33,6 +33,9 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Footer from "../../shared/ui/navigation/Footer";
 import { ROUTES } from "../../app/routes/routePaths";
 import { colors, radius } from "../../shared/ui/theme/designTokens";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+
 const theme = createTheme();
 
 const normalizeName = (value = "") => value.replace(/\s+/g, " ").trim();

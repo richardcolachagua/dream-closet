@@ -1,14 +1,7 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
-  Button,
   Chip,
   Container,
   CssBaseline,
@@ -17,9 +10,9 @@ import {
   Switch,
   Typography,
   FormControlLabel,
+  Button,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import TuneIcon from "@mui/icons-material/Tune";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -54,10 +47,7 @@ import {
 } from "../utils/searchStateHelpers";
 import { auth, db } from "../../../backend/firebase/firebase";
 import { colors, layout } from "../../../shared/ui/theme/designTokens";
-import {
-  primaryButtonSx,
-  heroPanelSx,
-} from "../../../shared/ui/theme/componentStyles";
+import { heroPanelSx } from "../../../shared/ui/theme/componentStyles";
 
 const defaultTheme = createTheme();
 
@@ -615,6 +605,38 @@ function SearchPage() {
                 onRemoveFilter={handleRemoveFilter}
                 onClearAllFilters={handleClearAll}
               />
+
+              {searchMeta.hasMore && searchResults.length > 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    py: 3,
+                  }}
+                >
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    onClick={handleLoadMore}
+                    disabled={isLoading}
+                    sx={{
+                      minHeight: 44,
+                      px: 3,
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 700,
+                      color: colors.accent,
+                      borderColor: colors.accent,
+                      "&:hover": {
+                        borderColor: colors.accent,
+                        backgroundColor: "rgba(89,230,219,0.08)",
+                      },
+                    }}
+                  >
+                    {isLoading ? "Loading more..." : "Load more"}
+                  </Button>
+                </Box>
+              )}
 
               {searchMeta.warnings.length > 0 ? (
                 <Box
