@@ -14,7 +14,6 @@ import {
   Button,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { getAnalytics, logEvent } from "firebase/analytics";
 import { httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
 
@@ -51,7 +50,6 @@ import {
   primaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
 
-// Use provided analytics instance if available, else getAnalytics
 const defaultTheme = createTheme();
 
 const DEFAULT_SEARCH_META = {
@@ -166,9 +164,9 @@ const FreeSearchPage = () => {
       });
       setIsLoading(false);
 
-      // Log analytics for free searches
-      logAnalyticsEvent("search_error", {
-        error_message: errorMessage,
+      logAnalyticsEvent("free_search", {
+        search_term: searchInputValue || "unknown",
+        result_count: results.length,
       });
     },
     [searchInputValue],
@@ -246,9 +244,11 @@ const FreeSearchPage = () => {
   const handleSearchError = (errorMessage) => {
     setError(errorMessage);
     setIsLoading(false);
-    logEvent(analytics, "search_error", { error_message: errorMessage });
-  };
 
+    logAnalyticsEvent("search_error", {
+      error_message: errorMessage,
+    });
+  };
   const handleSearchSubmit = async (query) => {
     setSearchInputValue(query);
     setCurrentPage(DEFAULT_PAGE);
@@ -555,7 +555,8 @@ const FreeSearchPage = () => {
           <Button
             onClick={() => {
               setShowSignUpDialog(false);
-              navigate(ROUTES.SIGN_UP);
+              logAnalyticsEvent("free_search_sign_up", {});
+              navigate(ROUTES.SIGNUP);
             }}
             sx={primaryButtonSx}
           >
