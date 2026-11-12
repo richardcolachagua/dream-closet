@@ -52,8 +52,12 @@
     "test:emulator-smoke": "node scripts/check-emulators.cjs",
     "test:local": "firebase emulators:exec --project dream-closet-4d254 --only functions,firestore,auth \"npm run test:emulator-smoke\"",
     "eject": "react-scripts eject",
-    "test:rules": "node --test tests/firestore/*.test.cjs",
-    "test:rules:local": "firebase emulators:exec --project demo-dream-closet-rules --only firestore \"npm run test:rules\""
+    "test:rules": "node --test --test-concurrency=1 tests/firestore/*.test.cjs",
+    "test:rules:local": "firebase emulators:exec --project demo-dream-closet-rules --only firestore \"npm run test:rules\"",
+    "rules:generate": "node scripts/generate-firestore-rules.cjs",
+    "rules:check": "node scripts/generate-firestore-rules.cjs --check",
+    "test:profile-backend": "node --test tests/unit/profileHandler.test.cjs",
+    "test:phase2:ui": "react-scripts test --watchAll=false --runInBand --runTestsByPath src/features/auth/profileService.test.js src/features/saved/savedDataService.test.js src/features/onboarding/utils/onboardingSchema.test.js"
   },
   "browserslist": {
     "production": [

@@ -1,49 +1,31 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { db } from "../backend/firebase";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  query,
-  where,
-  orderBy,
-} from "firebase/firestore";
-
-const SavedSearchesContext = createContext();
-
-export const useSavedSearches = () => useContext(SavedSearchesContext);
-
+import { createContext, useContext } from "react";
+import { useAuth } from "../auth/AuthContext";
+import { useSavedCollection } from "./useSavedCollection";
+const SavedSearchesContext = createContext(null);
+export const useSavedSearches = () => {
+  const value = useContext(SavedSearchesContext);
+  if (!value)
+    throw new Error("useSavedSearches requires SavedSearchesProvider.");
+  return value;
+};
 export function SavedSearchesProvider({ children }) {
-  const [savedSearches, setSavedSearches] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchSavedSearches = useCallback(async (userId) => {
-    setLoading(true);
-
-    try {
-      const userQuery = query(
-        collection(db, "saved-searches"),
-        where("userId", "==", userId),
-        orderBy("createdAt", "desc"),
-      );
-      const snapshot = await getDocs(userQuery);
-      setSavedSearches(
-        snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const deleteSavedSearch = useCallback(async (id) => {
-    await deleteDoc(doc(db, "saved-searches", id));
-    setSavedSearches((prev) => prev.filter((s) => s.id !== id));
-  }, []);
-
+  const { user } = useAuth();
+  const { records, loading, error, refresh, remove } =
+    useSavedCollection("savedSearches");
+  const fetchSavedSearches = (uid) => {
+    if (uid && uid !== user?.uid)
+      throw new Error("Cannot load another account’s saved searches.");
+    refresh();
+  };
   return (
     <SavedSearchesContext.Provider
-      value={{ savedSearches, loading, fetchSavedSearches, deleteSavedSearch }}
+      value={{
+        savedSearches: records,
+        loading,
+        error,
+        fetchSavedSearches,
+        deleteSavedSearch: remove,
+      }}
     >
       {children}
     </SavedSearchesContext.Provider>

@@ -1,74 +1,40 @@
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../backend/firebase/firebase";
 import { useAuth } from "../auth/AuthContext";
 
-const DEFAULT_ONBOARDING = {
+const EMPTY_ONBOARDING = {
   completed: false,
-  gender: "",
+  gender: null,
   categories: [],
   brands: [],
 };
 
-const normalizeOnboarding = (raw = {}) => ({
-  completed: Boolean(raw?.completed),
-  gender: raw?.gender || "",
-  categories: Array.isArray(raw?.categories) ? raw.categories : [],
-  brands: Array.isArray(raw?.brands) ? raw.brands : [],
-});
+const normalizeOnboarding = (raw) => {
+  if (!raw || typeof raw !== "object") {
+    return EMPTY_ONBOARDING;
+  }
+
+  return {
+    completed: raw.completed === true,
+    gender: raw.gender ?? null,
+    categories: Array.isArray(raw.categories) ? raw.categories : [],
+    brands: Array.isArray(raw.brands) ? raw.brands : [],
+  };
+};
 
 export const useOnboardingStatus = () => {
-  const { user, loading: authLoading } = useAuth();
-  const [onboarding, setOnboarding] = useState(DEFAULT_ONBOARDING);
-  const [loading, setLoading] = useState(true);
+  const {
+    loading: authLoading,
+    isRegistered,
+    profile,
+    profileLoading,
+    profileError,
+  } = useAuth();
 
-  useEffect(() => {
-    let active = true;
-
-    const run = async () => {
-      if (authLoading) return;
-
-      if (!user) {
-        if (active) {
-          setOnboarding(DEFAULT_ONBOARDING);
-          setLoading(false);
-        }
-        return;
-      }
-
-      if (active) {
-        setLoading(true);
-      }
-
-      try {
-        const ref = doc(db, "users", user.uid);
-        const snap = await getDoc(ref);
-
-        if (!active) return;
-
-        if (snap.exists()) {
-          const data = snap.data();
-          setOnboarding(normalizeOnboarding(data?.onboarding));
-        } else {
-          setOnboarding(DEFAULT_ONBOARDING);
-        }
-      } catch {
-        if (active) {
-          setOnboarding(DEFAULT_ONBOARDING);
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    };
-
-    run();
-
-    return () => {
-      active = false;
-    };
-  }, [user, authLoading]);
-
-  return { onboarding, loading };
+  return {
+    onboarding: isRegistered
+      ? normalizeOnboarding(profile?.onboarding)
+      : EMPTY_ONBOARDING,
+    loading: authLoading || (isRegistered && profileLoading),
+    error: isRegistered ? profileError : null,
+    hasProfile: isRegistered && Boolean(profile),
+  };
 };

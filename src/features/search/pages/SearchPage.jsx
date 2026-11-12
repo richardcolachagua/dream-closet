@@ -1,27 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Box,
+  Button,
   Chip,
   Container,
   CssBaseline,
+  FormControlLabel,
   Snackbar,
   Stack,
   Switch,
   Typography,
-  FormControlLabel,
-  Button,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  serverTimestamp,
-} from "firebase/firestore";
 import UserDescriptionInput from "../components/SearchInputBar";
 import SearchResults from "../components/SearchResults";
 import SearchSortBar from "../components/SearchSortBar";
@@ -45,13 +38,13 @@ import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_SORT,
 } from "../utils/searchStateHelpers";
-import { auth, db } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext";
+import { saveItem, saveSearch } from "../../saved/savedDataService";
 import { colors, layout } from "../../../shared/ui/theme/designTokens";
 import { heroPanelSx } from "../../../shared/ui/theme/componentStyles";
 
-const defaultTheme = createTheme();
-
-const DEFAULT_SEARCH_META = {
+const theme = createTheme();
+const EMPTY_META = {
   total: 0,
   page: DEFAULT_PAGE,
   pageSize: DEFAULT_PAGE_SIZE,
@@ -60,359 +53,196 @@ const DEFAULT_SEARCH_META = {
   sources: [],
 };
 
-function SearchPage() {
+export default function SearchPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const initializedFromUrl = useRef(false);
-  const suppressNextAutoSearch = useRef(false);
-
-  const parsedState = useMemo(
-    () => parseSearchState(location.search),
-    [location.search],
-  );
-
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchMeta, setSearchMeta] = useState(DEFAULT_SEARCH_META);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-  const [searchInputValue, setSearchInputValue] = useState(parsedState.query);
+  const { user, profile, profileLoading, isRegistered } = useAuth();
+  const [initial] = useState(() => parseSearchState(location.search));
+  const [searchInputValue, setSearchInputValue] = useState(initial.query);
   const [filters, setFilters] = useState(
-    parsedState.filters || createDefaultFilters(),
+    initial.filters || createDefaultFilters(),
   );
-  const [sortBy, setSortBy] = useState(parsedState.sort || DEFAULT_SORT);
-  const [currentPage, setCurrentPage] = useState(
-    parsedState.page || DEFAULT_PAGE,
-  );
+  const [sortBy, setSortBy] = useState(initial.sort || DEFAULT_SORT);
+  const [currentPage, setCurrentPage] = useState(initial.page || DEFAULT_PAGE);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchMeta, setSearchMeta] = useState(EMPTY_META);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [viewMode, setViewMode] = useState("grid");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [onboardingGender, setOnboardingGender] = useState("");
   const [showAllGenders, setShowAllGenders] = useState(false);
+  const initialized = useRef(false);
+  const requestId = useRef(0);
+  const currentUid = useRef(user?.uid);
+  currentUid.current = user?.uid;
+  const onboardingGender = profile?.onboarding?.gender || "";
 
-  const syncUrlState = useCallback(
-    (nextQuery, nextFilters, nextSort, nextPage = DEFAULT_PAGE) => {
+  useEffect(() => {
+    initialized.current = false;
+    requestId.current += 1;
+    setSearchResults([]);
+    setSearchMeta(EMPTY_META);
+    setIsLoading(false);
+    setHasSearched(false);
+    setError("");
+    setSuccessMessage("");
+    return () => {
+      requestId.current += 1;
+    };
+  }, [user?.uid]);
+
+  const syncUrl = useCallback(
+    (query, activeFilters, sort, page) => {
       const search = buildSearchStateQuery({
-        query: nextQuery,
-        filters: nextFilters,
-        sort: nextSort,
-        page: nextPage,
+        query,
+        filters: activeFilters,
+        sort,
+        page,
       });
-
       navigate(
-        {
-          pathname: location.pathname,
-          search: search ? `?${search}` : "",
-        },
+        { pathname: location.pathname, search: search ? `?${search}` : "" },
         { replace: true },
       );
     },
     [navigate, location.pathname],
   );
 
-  const handleSearchResults = useCallback((response, append = false) => {
-    const results = Array.isArray(response)
-      ? response
-      : response?.results || [];
-
-    const nextSources = Array.isArray(response?.sources)
-      ? response.sources
-      : response?.sources
-        ? Object.values(response.sources)
-        : [];
-
-    setSearchResults((prev) => (append ? [...prev, ...results] : results));
-    setSearchMeta({
-      total: response?.total ?? results.length,
-      page: response?.page ?? DEFAULT_PAGE,
-      pageSize: response?.pageSize ?? DEFAULT_PAGE_SIZE,
-      hasMore: response?.hasMore ?? false,
-      warnings: response?.warnings ?? [],
-      sources: nextSources,
-    });
-    setIsLoading(false);
-  }, []);
-
   const runSearch = useCallback(
     async ({
       query,
-      activeFilters = filters,
-      activeGender = showAllGenders ? undefined : onboardingGender,
-      sort = sortBy,
+      activeFilters,
+      sort,
       page = DEFAULT_PAGE,
       append = false,
-      shouldSyncUrl = true,
+      allGenders = showAllGenders,
+      sync = true,
     }) => {
+      const id = ++requestId.current;
+      const uid = user?.uid;
       if (!query?.trim()) {
         setSearchResults([]);
-        setSearchMeta(DEFAULT_SEARCH_META);
+        setSearchMeta(EMPTY_META);
         setIsLoading(false);
-
-        if (shouldSyncUrl) {
-          syncUrlState("", activeFilters, sort, DEFAULT_PAGE);
-        }
-
-        return DEFAULT_SEARCH_META;
+        if (sync) syncUrl("", activeFilters, sort, DEFAULT_PAGE);
+        return null;
       }
-
       setIsLoading(true);
-      setError(null);
-
+      setError("");
+      setHasSearched(true);
       try {
         const response = await fetchCombinedResults({
           query,
           filters: activeFilters,
-          onboardingGender: activeGender,
+          onboardingGender: allGenders ? undefined : onboardingGender,
           sort,
           page,
           pageSize: DEFAULT_PAGE_SIZE,
         });
-
-        handleSearchResults(response, append);
+        if (id !== requestId.current || uid !== currentUid.current) return null;
+        const results = Array.isArray(response)
+          ? response
+          : response?.results || [];
+        setSearchResults((previous) =>
+          append ? [...previous, ...results] : results,
+        );
+        setSearchMeta({
+          ...EMPTY_META,
+          total: response?.total ?? results.length,
+          page: response?.page ?? page,
+          pageSize: response?.pageSize ?? DEFAULT_PAGE_SIZE,
+          hasMore: response?.hasMore ?? false,
+          warnings: response?.warnings || [],
+          sources: Array.isArray(response?.sources)
+            ? response.sources
+            : Object.values(response?.sources || {}),
+        });
         setCurrentPage(page);
-
-        if (shouldSyncUrl) {
-          syncUrlState(query, activeFilters, sort, page);
-        }
-
+        if (sync) syncUrl(query, activeFilters, sort, page);
         return response;
-      } catch (searchError) {
-        console.error("Failed to fetch search results", searchError);
-
+      } catch (failure) {
+        if (id !== requestId.current || uid !== currentUid.current) return null;
         if (!append) {
           setSearchResults([]);
-          setSearchMeta(DEFAULT_SEARCH_META);
+          setSearchMeta(EMPTY_META);
         }
-
-        setIsLoading(false);
-        setError(searchError?.message || "Failed to fetch search results.");
-        throw searchError;
+        setError(failure.message || "Could not fetch search results.");
+        return null;
+      } finally {
+        if (id === requestId.current && uid === currentUid.current)
+          setIsLoading(false);
       }
     },
-    [
-      filters,
-      onboardingGender,
-      showAllGenders,
-      sortBy,
-      handleSearchResults,
-      syncUrlState,
-    ],
+    [user?.uid, showAllGenders, onboardingGender, syncUrl],
   );
 
-  const handleSaveSearch = async (searchQuery) => {
-    if (!currentUser) {
-      setError("You must be logged in to save searches.");
-      return;
+  useEffect(() => {
+    if (profileLoading || initialized.current) return;
+    initialized.current = true;
+    if (initial.query) {
+      void runSearch({
+        query: initial.query,
+        activeFilters: initial.filters,
+        sort: initial.sort,
+        page: initial.page,
+        sync: false,
+      });
     }
+  }, [profileLoading, initial, runSearch]);
 
+  const searchWith = (
+    nextFilters = filters,
+    nextSort = sortBy,
+    allGenders = showAllGenders,
+  ) =>
+    runSearch({
+      query: searchInputValue,
+      activeFilters: nextFilters,
+      sort: nextSort,
+      allGenders,
+    });
+
+  const handleSaveSearch = async (query) => {
+    const uid = user?.uid;
     try {
-      await addDoc(collection(db, "users", currentUser.uid, "savedSearches"), {
-        query: searchQuery,
+      await saveSearch(uid, {
+        query,
         filters,
         sort: sortBy,
         page: currentPage,
-        createdAt: serverTimestamp(),
       });
-
-      setSuccessMessage("Search saved successfully.");
-    } catch (saveError) {
-      console.error("Error saving search", saveError);
-      setError("Error saving search.");
+      if (currentUid.current === uid)
+        setSuccessMessage("Search saved successfully.");
+    } catch (failure) {
+      if (currentUid.current === uid) setError(failure.message);
     }
   };
-
   const handleSaveItem = async (item) => {
-    if (!currentUser) {
-      setError("You must be logged in to save items.");
-      return;
-    }
-
+    const uid = user?.uid;
     try {
-      await addDoc(collection(db, "users", currentUser.uid, "savedItems"), {
-        ...item,
-        createdAt: new Date().toISOString(),
-      });
-
-      setSuccessMessage("Item saved successfully.");
-    } catch (saveError) {
-      console.error("Error saving item", saveError);
-      setError("Error saving item.");
+      await saveItem(uid, item);
+      if (currentUid.current === uid)
+        setSuccessMessage("Item saved successfully.");
+    } catch (failure) {
+      if (currentUid.current === uid) setError(failure.message);
     }
   };
-
-  const handleToggleFilter = (key, value) => {
-    setFilters((prev) => toggleFilterValue(prev, key, value));
-  };
-
-  const handlePriceChange = (key, value) => {
-    setFilters((prev) => setPriceFilterValue(prev, key, value));
-  };
-
-  const handleClearGroup = (key) => {
-    setFilters((prev) => clearFilterGroup(prev, key));
-  };
-
   const handleClearAll = () => {
-    const clearedFilters = clearAllFilters();
-    suppressNextAutoSearch.current = true;
-    setFilters(clearedFilters);
-    setCurrentPage(DEFAULT_PAGE);
-
-    if (searchInputValue.trim()) {
-      runSearch({
-        query: searchInputValue,
-        activeFilters: clearedFilters,
-        sort: sortBy,
-        page: DEFAULT_PAGE,
-      });
-    } else {
-      syncUrlState(searchInputValue, clearedFilters, sortBy, DEFAULT_PAGE);
-    }
+    const next = clearAllFilters();
+    setFilters(next);
+    void searchWith(next);
   };
-
   const handleRemoveFilter = (key, value) => {
-    const updatedFilters = removeFilterValue(filters, key, value);
-    suppressNextAutoSearch.current = true;
-    setFilters(updatedFilters);
-    setCurrentPage(DEFAULT_PAGE);
-
-    if (searchInputValue.trim()) {
-      runSearch({
-        query: searchInputValue,
-        activeFilters: updatedFilters,
-        sort: sortBy,
-        page: DEFAULT_PAGE,
-      });
-    } else {
-      syncUrlState(searchInputValue, updatedFilters, sortBy, DEFAULT_PAGE);
-    }
+    const next = removeFilterValue(filters, key, value);
+    setFilters(next);
+    void searchWith(next);
   };
-
-  const handleApplyFilters = async () => {
-    setIsFilterDrawerOpen(false);
-
-    if (!searchInputValue.trim()) {
-      syncUrlState(searchInputValue, filters, sortBy, DEFAULT_PAGE);
-      return;
-    }
-
-    suppressNextAutoSearch.current = true;
-
-    await runSearch({
-      query: searchInputValue,
-      activeFilters: filters,
-      sort: sortBy,
-      page: DEFAULT_PAGE,
-    });
-  };
-
-  const handleSortChange = async (nextSort) => {
-    suppressNextAutoSearch.current = true;
-    setSortBy(nextSort);
-    setCurrentPage(DEFAULT_PAGE);
-
-    if (!searchInputValue.trim()) {
-      syncUrlState(searchInputValue, filters, nextSort, DEFAULT_PAGE);
-      return;
-    }
-
-    await runSearch({
-      query: searchInputValue,
-      activeFilters: filters,
-      sort: nextSort,
-      page: DEFAULT_PAGE,
-    });
-  };
-
-  const handleLoadMore = async () => {
-    if (!searchInputValue.trim() || !searchMeta.hasMore || isLoading) return;
-
-    const nextPage = currentPage + 1;
-
-    await runSearch({
-      query: searchInputValue,
-      activeFilters: filters,
-      sort: sortBy,
-      page: nextPage,
-      append: true,
-    });
-  };
-
-  useEffect(() => {
-    if (initializedFromUrl.current) return;
-
-    initializedFromUrl.current = true;
-    setSearchInputValue(parsedState.query);
-    setFilters(parsedState.filters || createDefaultFilters());
-    setSortBy(parsedState.sort || DEFAULT_SORT);
-    setCurrentPage(parsedState.page || DEFAULT_PAGE);
-
-    if (parsedState.query) {
-      runSearch({
-        query: parsedState.query,
-        activeFilters: parsedState.filters || createDefaultFilters(),
-        sort: parsedState.sort || DEFAULT_SORT,
-        page: parsedState.page || DEFAULT_PAGE,
-        shouldSyncUrl: false,
-      });
-    }
-  }, [parsedState, runSearch]);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setCurrentUser(user);
-
-      if (!user) {
-        setOnboardingGender("");
-        return;
-      }
-
-      try {
-        const userRef = doc(db, "users", user.uid);
-        const snap = await getDoc(userRef);
-
-        if (snap.exists()) {
-          const data = snap.data();
-          setOnboardingGender(data?.onboarding?.gender || "");
-        }
-      } catch (loadError) {
-        console.error("Error loading onboarding gender", loadError);
-      }
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (!initializedFromUrl.current) return;
-    if (!searchInputValue.trim()) return;
-
-    if (suppressNextAutoSearch.current) {
-      suppressNextAutoSearch.current = false;
-      return;
-    }
-
-    runSearch({
-      query: searchInputValue,
-      activeFilters: filters,
-      activeGender: showAllGenders ? undefined : onboardingGender,
-      sort: sortBy,
-      page: DEFAULT_PAGE,
-    });
-  }, [
-    showAllGenders,
-    onboardingGender,
-    runSearch,
-    searchInputValue,
-    filters,
-    sortBy,
-  ]);
-
   const activeFilterCount = getActiveFilterCount(filters);
   const personalizationActive = Boolean(onboardingGender) && !showAllGenders;
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box
         sx={{
@@ -422,49 +252,21 @@ function SearchPage() {
           bgcolor: colors.background,
           color: colors.textPrimary,
           overflowX: "hidden",
-          backgroundImage:
-            "radial-gradient(circle at top, rgba(89,230,219,0.06), transparent 30%)",
         }}
       >
         <ProfileSearchPageHeader />
-
         <Box component="main" sx={{ flex: 1 }}>
           <Container maxWidth={layout.pageMax} sx={{ py: { xs: 4, md: 6 } }}>
             <Stack spacing={3}>
-              <Box
-                sx={{
-                  ...heroPanelSx,
-                  px: { xs: 2.25, md: 3.5 },
-                  py: { xs: 2.5, md: 3.5 },
-                }}
-              >
+              <Box sx={{ ...heroPanelSx, px: { xs: 2.25, md: 3.5 }, py: 3 }}>
                 <Stack spacing={2.25}>
-                  <Box>
-                    <Typography
-                      sx={{
-                        color: colors.textPrimary,
-                        fontWeight: 850,
-                        fontSize: { xs: "1.7rem", md: "2.45rem" },
-                        lineHeight: 1.08,
-                        mb: 1,
-                      }}
-                    >
-                      Search for the exact look you have in mind
-                    </Typography>
-
-                    <Typography
-                      sx={{
-                        color: colors.textSecondary,
-                        maxWidth: 760,
-                        lineHeight: 1.75,
-                      }}
-                    >
-                      Describe what you want in natural language, refine the
-                      results with filters, and save the pieces worth coming
-                      back to.
-                    </Typography>
-                  </Box>
-
+                  <Typography variant="h4" sx={{ fontWeight: 850 }}>
+                    Search for the exact look you have in mind
+                  </Typography>
+                  <Typography sx={{ color: colors.textSecondary }}>
+                    Describe what you want, refine the results, and save pieces
+                    worth coming back to.
+                  </Typography>
                   <UserDescriptionInput
                     value={searchInputValue}
                     onChange={(event) =>
@@ -472,240 +274,145 @@ function SearchPage() {
                     }
                     onSearchStart={() => {
                       setIsLoading(true);
-                      setError(null);
+                      setError("");
                     }}
                     onSaveSearch={handleSaveSearch}
-                    onSearchError={(errorMessage) => {
-                      setError(errorMessage);
+                    onSearchError={(message) => {
+                      setError(message);
                       setIsLoading(false);
                     }}
-                    onSearchResults={(response) =>
-                      handleSearchResults(response, false)
-                    }
                     onSearchSubmit={(query) => {
-                      suppressNextAutoSearch.current = true;
                       setSearchInputValue(query);
-                      setCurrentPage(DEFAULT_PAGE);
-
                       return runSearch({
                         query,
                         activeFilters: filters,
                         sort: sortBy,
-                        page: DEFAULT_PAGE,
                       });
                     }}
                     onOpenFilters={() => setIsFilterDrawerOpen(true)}
                     activeFilterCount={activeFilterCount}
                   />
-                </Stack>
-
-                <Stack spacing={1.5}>
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={1}
-                    flexWrap="wrap"
-                    useFlexGap
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                  >
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    <Chip label={`${activeFilterCount} active filters`} />
                     <Chip
-                      label={`${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`}
-                      sx={{
-                        color: colors.textPrimary,
-                        bgcolor: colors.surface2,
-                        border: `1px solid ${colors.border}`,
-                        fontWeight: 700,
-                      }}
-                    />
-
-                    <Chip
-                      icon={
-                        <AutoAwesomeRoundedIcon
-                          sx={{ color: "inherit !important" }}
-                        />
-                      }
+                      icon={<AutoAwesomeRoundedIcon />}
                       label={
                         personalizationActive
                           ? "Prioritizing your onboarding preference"
                           : "Showing all gender results"
                       }
-                      sx={{
-                        color: personalizationActive
-                          ? colors.accent
-                          : colors.textSecondary,
-                        bgcolor: personalizationActive
-                          ? colors.accentSoft
-                          : colors.surface2,
-                        border: `1px solid ${
-                          personalizationActive
-                            ? colors.accentBorder
-                            : colors.border
-                        }`,
-                        fontWeight: 700,
-                      }}
                     />
                   </Stack>
-
                   <FormControlLabel
+                    label="Show all genders"
                     control={
                       <Switch
                         checked={showAllGenders}
-                        onChange={(event) =>
-                          setShowAllGenders(event.target.checked)
-                        }
-                        color="primary"
+                        onChange={(event) => {
+                          const next = event.target.checked;
+                          setShowAllGenders(next);
+                          if (hasSearched)
+                            void searchWith(filters, sortBy, next);
+                        }}
                       />
                     }
-                    label="Show all genders"
-                    sx={{
-                      m: 0,
-                      color: colors.textSecondary,
-                    }}
                   />
-
-                  {personalizationActive ? (
-                    <Typography
-                      sx={{
-                        color: colors.textMuted,
-                        fontSize: "0.92rem",
-                        lineHeight: 1.7,
-                      }}
-                    >
-                      Results are being prioritized using your onboarding
-                      preference, but you can broaden them anytime.
-                    </Typography>
-                  ) : null}
                 </Stack>
               </Box>
-
-              {searchResults.length > 0 || isLoading ? (
+              {(searchResults.length > 0 || isLoading) && (
                 <SearchSortBar
                   value={sortBy}
-                  onChange={handleSortChange}
+                  onChange={(next) => {
+                    setSortBy(next);
+                    void searchWith(filters, next);
+                  }}
                   total={searchMeta.total}
                   visibleCount={searchResults.length}
                   viewMode={viewMode}
                   onViewChange={setViewMode}
                 />
-              ) : null}
-
+              )}
               <SearchResults
                 results={searchResults}
                 isLoading={isLoading}
-                hasSearched={searchInputValue.trim().length > 0}
+                hasSearched={hasSearched}
                 query={searchInputValue}
                 suggestions={[
-                  "Try a broader search like black dress or oversized blazer",
+                  "Try a broader search",
                   "Remove one or two filters",
                   "Search by occasion, color, or item type",
                 ]}
                 onSaveItem={handleSaveItem}
                 viewMode={viewMode}
-                userId={currentUser?.uid}
+                userId={isRegistered ? user?.uid : undefined}
                 filters={filters}
                 onRemoveFilter={handleRemoveFilter}
                 onClearAllFilters={handleClearAll}
               />
-
               {searchMeta.hasMore && searchResults.length > 0 && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    py: 3,
-                  }}
-                >
+                <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
                   <Button
-                    type="button"
                     variant="outlined"
-                    onClick={handleLoadMore}
                     disabled={isLoading}
-                    sx={{
-                      minHeight: 44,
-                      px: 3,
-                      borderRadius: 2,
-                      textTransform: "none",
-                      fontWeight: 700,
-                      color: colors.accent,
-                      borderColor: colors.accent,
-                      "&:hover": {
-                        borderColor: colors.accent,
-                        backgroundColor: "rgba(89,230,219,0.08)",
-                      },
+                    onClick={() => {
+                      void runSearch({
+                        query: searchInputValue,
+                        activeFilters: filters,
+                        sort: sortBy,
+                        page: currentPage + 1,
+                        append: true,
+                      });
                     }}
                   >
                     {isLoading ? "Loading more..." : "Load more"}
                   </Button>
                 </Box>
               )}
-
-              {searchMeta.warnings.length > 0 ? (
-                <Box
-                  sx={{
-                    border: `1px solid ${colors.border}`,
-                    bgcolor: colors.surfaceSoft,
-                    borderRadius: 3,
-                    px: 2,
-                    py: 1.5,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: colors.textSecondary,
-                      fontSize: "0.93rem",
-                      lineHeight: 1.7,
-                    }}
-                  >
-                    {searchMeta.warnings.join(" ")}
-                  </Typography>
-                </Box>
-              ) : null}
+              {searchMeta.warnings.length > 0 && (
+                <Alert severity="info">{searchMeta.warnings.join(" ")}</Alert>
+              )}
             </Stack>
           </Container>
         </Box>
-
         <FilterDrawer
           open={isFilterDrawerOpen}
           onClose={() => setIsFilterDrawerOpen(false)}
           filters={filters}
-          onToggleFilter={handleToggleFilter}
-          onPriceChange={handlePriceChange}
-          onClearGroup={handleClearGroup}
+          onToggleFilter={(key, value) =>
+            setFilters((previous) => toggleFilterValue(previous, key, value))
+          }
+          onPriceChange={(key, value) =>
+            setFilters((previous) => setPriceFilterValue(previous, key, value))
+          }
+          onClearGroup={(key) =>
+            setFilters((previous) => clearFilterGroup(previous, key))
+          }
           onClearAll={handleClearAll}
-          onApply={handleApplyFilters}
+          onApply={() => {
+            setIsFilterDrawerOpen(false);
+            return searchWith();
+          }}
         />
-
         <Snackbar
-          open={!!successMessage}
+          open={Boolean(successMessage)}
           autoHideDuration={5000}
-          onClose={() => setSuccessMessage(null)}
+          onClose={() => setSuccessMessage("")}
         >
-          <Alert
-            onClose={() => setSuccessMessage(null)}
-            severity="success"
-            sx={{ width: "100%" }}
-          >
+          <Alert severity="success" onClose={() => setSuccessMessage("")}>
             {successMessage}
           </Alert>
         </Snackbar>
-
         <Snackbar
-          open={!!error}
+          open={Boolean(error)}
           autoHideDuration={6000}
-          onClose={() => setError(null)}
+          onClose={() => setError("")}
         >
-          <Alert
-            onClose={() => setError(null)}
-            severity="error"
-            sx={{ width: "100%" }}
-          >
+          <Alert severity="error" onClose={() => setError("")}>
             {error}
           </Alert>
         </Snackbar>
-
         <Footer />
       </Box>
     </ThemeProvider>
   );
 }
-
-export default SearchPage;

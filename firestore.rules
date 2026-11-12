@@ -1,249 +1,123 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isRegistered() {
+    function isOwner(uid) {
       return request.auth != null
+        && request.auth.uid == uid
         && request.auth.token.firebase.sign_in_provider != "anonymous";
     }
-
-    function isOwner(userId) {
-      return isRegistered() && request.auth.uid == userId;
+    function exactKeys(data, keys) {
+      return data is map && data.keys().hasAll(keys) && data.keys().hasOnly(keys);
     }
-
-    function hasOnlyKeys(data, allowed) {
-      return data.keys().hasOnly(allowed);
+    function text(value, maximum) {
+      return value is string && value.size() <= maximum;
     }
-
-    function onboardingIsValid(data) {
-      return data is map
-        && data.keys().hasAll([
-          "gender",
-          "categories",
-          "brands",
-          "completed"
-        ])
-        && data.keys().hasOnly([
-          "gender",
-          "categories",
-          "brands",
-          "completed"
-        ])
+    function selection(value, allowed, maximum) {
+      return value is list && value.size() <= maximum
+        && value.toSet().size() == value.size() && value.hasOnly(allowed);
+    }
+    function categories(gender) {
+      return gender == "female" ? ["Tops","Blouses","Tank Tops","Crop Tops","Bodysuits","Sweaters","Cardigans","Hoodies","Blazers","Dresses","Mini Dresses","Midi Dresses","Maxi Dresses","Skirts","Mini Skirts","Midi Skirts","Jeans","Pants","Trousers","Leggings","Shorts","Jumpsuits","Rompers","Matching Sets","Activewear","Loungewear","Sleepwear","Swimwear","Outerwear","Jackets","Coats","Heels","Sandals","Sneakers","Boots","Flats","Loafers","Bags","Jewelry","Accessories","Sunglasses","Hats"] : ["T-Shirts","Graphic Tees","Button-Ups","Polos","Sweaters","Cardigans","Hoodies","Crewnecks","Blazers","Suits","Jeans","Chinos","Trousers","Cargo Pants","Joggers","Shorts","Denim Shorts","Activewear","Loungewear","Sleepwear","Swimwear","Outerwear","Jackets","Coats","Vests","Sneakers","Boots","Dress Shoes","Loafers","Sandals","Hats","Bags","Watches","Accessories","Sunglasses"];
+    }
+    function brands(gender) {
+      return gender == "female" ? ["Louis Vuitton","Gucci","Prada","Dior","Balenciaga","Versace","Off-White","Fear of God","Bottega Veneta","Burberry","Givenchy","Valentino","Fendi","Rick Owens","Maison Margiela","Alexander McQueen","Loewe","Miu Miu","Chanel","Jacquemus","Zimmermann","Self-Portrait","Cult Gaia","Dolce & Gabbana","Sandy Liang","Supreme","Stüssy","Palace","Kith","Carhartt WIP","Essentials","Noah","Aimé Leon Dore","Rhude","Awake NY","Stone Island","Represent","I.Am.Gia","House of CB","Jaded London","Poster Girl","Junya Watanabe","Nike","Adidas","New Balance","Puma","Under Armour","Converse","Reebok","ASICS","Salomon","On","Hoka","Lululemon","Alo Yoga","Gymshark","Set Active","Outdoor Voices","Daily Paper","ERL","Martine Rose","Our Legacy","Marine Serre","ALO x collabs","SKIMS","With Jéan","Mirror Palais","Rat & Boa"] : ["Louis Vuitton","Gucci","Prada","Dior","Balenciaga","Versace","Off-White","Fear of God","Bottega Veneta","Burberry","Givenchy","Valentino","Fendi","Rick Owens","Maison Margiela","Alexander McQueen","Loewe","Amiri","Tom Ford","Saint Laurent","Brunello Cucinelli","Zegna","Bode","Moncler","Supreme","Stüssy","Palace","Kith","Carhartt WIP","Essentials","Noah","Aimé Leon Dore","Rhude","Awake NY","Stone Island","Represent","The Hundreds","BAPE","Corteiz","Pleasures","WTAPS","Human Made","Nike","Adidas","New Balance","Puma","Under Armour","Converse","Reebok","ASICS","Salomon","On","Hoka","Jordan Brand","The North Face","Patagonia","Arc'teryx","District Vision","Daily Paper","ERL","Martine Rose","Our Legacy","Marine Serre","La Familia Forever","Kidsuper","Who Decides War","PDF"];
+    }
+    function onboarding(data) {
+      return exactKeys(data, ["gender", "categories", "brands", "completed"])
         && data.gender in [null, "female", "male"]
-        && data.categories is list
-        && data.categories.size() <= 60
-        && data.categories.toSet().size() == data.categories.size()
-        && data.categories.hasOnly([
-          "Tops",
-          "Blouses",
-          "Tank Tops",
-          "Crop Tops",
-          "Bodysuits",
-          "Sweaters",
-          "Cardigans",
-          "Hoodies",
-          "Blazers",
-          "Dresses",
-          "Mini Dresses",
-          "Midi Dresses",
-          "Maxi Dresses",
-          "Skirts",
-          "Mini Skirts",
-          "Midi Skirts",
-          "Jeans",
-          "Pants",
-          "Trousers",
-          "Leggings",
-          "Shorts",
-          "Jumpsuits",
-          "Rompers",
-          "Matching Sets",
-          "Activewear",
-          "Loungewear",
-          "Sleepwear",
-          "Swimwear",
-          "Outerwear",
-          "Jackets",
-          "Coats",
-          "Heels",
-          "Sandals",
-          "Sneakers",
-          "Boots",
-          "Flats",
-          "Loafers",
-          "Bags",
-          "Jewelry",
-          "Accessories",
-          "Sunglasses",
-          "Hats",
-          "T-Shirts",
-          "Graphic Tees",
-          "Button-Ups",
-          "Polos",
-          "Crewnecks",
-          "Suits",
-          "Chinos",
-          "Cargo Pants",
-          "Joggers",
-          "Denim Shorts",
-          "Vests",
-          "Dress Shoes",
-          "Watches"
-        ])
-        && data.brands is list
-        && data.brands.size() <= 100
-        && data.brands.toSet().size() == data.brands.size()
         && data.completed is bool
         && (
-          !data.completed
-          || (
-            data.gender != null
-            && data.categories.size() > 0
-          )
+          (data.gender == null && data.categories == [] && data.brands == []
+            && data.completed == false)
+          || (data.gender != null
+            && selection(data.categories, categories(data.gender), 60)
+            && selection(data.brands, brands(data.gender), 100)
+            && (!data.completed || data.categories.size() > 0))
         );
     }
-
-    function preferencesIsValid(data) {
-      return data is map
-        && data.keys().hasAll([
-          "emailNotifications"
-        ])
-        && data.keys().hasOnly([
-          "emailNotifications"
-        ])
+    function preferences(data) {
+      return exactKeys(data, ["emailNotifications"])
         && data.emailNotifications is bool;
     }
-
-    function profileFieldsAreValid(data) {
-      return data.keys().hasAll([
-          "firstName",
-          "lastName",
-          "email",
-          "onboarding",
-          "preferences",
-          "createdAt",
-          "updatedAt"
-        ])
-        && data.firstName is string
-        && data.firstName.size() <= 60
-        && data.lastName is string
-        && data.lastName.size() <= 60
-        && data.email is string
-        && data.email.size() > 0
-        && data.email.size() <= 320
-        && onboardingIsValid(data.onboarding)
-        && preferencesIsValid(data.preferences)
-        && data.createdAt is timestamp
-        && data.updatedAt is timestamp;
+    function profile(data) {
+      return data.keys().hasAll(["firstName", "lastName", "email", "onboarding",
+          "preferences", "createdAt", "updatedAt"])
+        && text(data.firstName, 60) && text(data.lastName, 60)
+        && text(data.email, 320) && data.email.size() > 0
+        && onboarding(data.onboarding) && preferences(data.preferences)
+        && data.createdAt is timestamp && data.updatedAt is timestamp;
     }
-
-    function userCreateIsValid(userId) {
-      return isOwner(userId)
-        && request.resource.data.keys().hasOnly([
-          "firstName",
-          "lastName",
-          "email",
-          "onboarding",
-          "preferences",
-          "createdAt",
-          "updatedAt"
-        ])
-        && profileFieldsAreValid(request.resource.data)
+    function price(value) {
+      return value == null || (value is number && value >= 0 && value <= 1000000);
+    }
+    function url(value, optional) {
+      return text(value, 4096)
+        && ((optional && value == "") || value.matches('https?://[^\\s]+'));
+    }
+    function savedItem(data) {
+      return data.keys().hasAll(["name", "imageUrl", "price", "productUrl",
+          "brand", "source", "description", "createdAt"])
+        && data.keys().hasOnly(["name", "imageUrl", "price", "numericPrice",
+          "productUrl", "brand", "source", "description", "createdAt"])
+        && text(data.name, 300) && data.name.matches('.*[^\\s].*')
+        && url(data.imageUrl, true) && url(data.productUrl, false)
+        && text(data.price, 100) && text(data.brand, 100)
+        && text(data.source, 100) && data.source.size() > 0
+        && text(data.description, 4000)
+        && price(data.get("numericPrice", null))
+        && data.createdAt is timestamp;
+    }
+    function filters(data) {
+      return exactKeys(data, ["gender", "category", "size", "color", "brand",
+          "store", "availability", "priceMin", "priceMax"])
+        && selection(data.gender, ["female","male","unisex"], 3)
+        && selection(data.category, ["tops","bottoms","dresses","outerwear","shoes","accessories","activewear","swimwear","loungewear"], 9)
+        && selection(data.size, ["xxs","xs","s","m","l","xl","xxl","0","2","4","6","8","10","12","14","16"], 16)
+        && selection(data.color, ["black","white","gray","beige","brown","blue","navy","green","olive","yellow","orange","red","pink","purple","gold","silver","multi"], 17)
+        && selection(data.brand, ["Zara","Aritzia","Reformation","COS"], 4)
+        && selection(data.store, ["ASOS","Amazon","Depop","Unknown"], 4)
+        && selection(data.availability, ["in_stock","out_of_stock","unknown"], 3)
+        && price(data.priceMin) && price(data.priceMax)
+        && (data.priceMin == null || data.priceMax == null
+          || data.priceMin <= data.priceMax);
+    }
+    function savedSearch(data) {
+      return exactKeys(data, ["query", "filters", "sort", "page", "createdAt"])
+        && text(data.query, 500) && data.query.matches('.*[^\\s].*')
+        && filters(data.filters) && data.sort in ["relevance","price_asc","price_desc","newest"]
+        && data.page is int && data.page >= 1 && data.page <= 1000
+        && data.createdAt is timestamp;
+    }
+    match /users/{uid} {
+      allow get: if isOwner(uid);
+      allow list, delete: if false;
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(["firstName", "lastName", "email",
+          "onboarding", "preferences", "createdAt", "updatedAt"])
+        && profile(request.resource.data)
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
-    }
-
-    function userUpdateIsValid(userId) {
-      return isOwner(userId)
+      allow update: if isOwner(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          "firstName",
-          "lastName",
-          "onboarding",
-          "preferences",
-          "updatedAt"
-        ])
-        && profileFieldsAreValid(request.resource.data)
+          "firstName", "lastName", "onboarding", "preferences", "updatedAt"])
+        && profile(request.resource.data)
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.email == resource.data.email
         && request.resource.data.updatedAt == request.time;
-    }
-
-    function savedItemIsValid() {
-      return hasOnlyKeys(request.resource.data, [
-          "name",
-          "imageUrl",
-          "price",
-          "numericPrice",
-          "productUrl",
-          "brand",
-          "source",
-          "description",
-          "createdAt"
-        ])
-        && request.resource.data.name is string
-        && request.resource.data.imageUrl is string
-        && request.resource.data.price is string
-        && (
-          !("numericPrice" in request.resource.data)
-          || request.resource.data.numericPrice == null
-          || request.resource.data.numericPrice is int
-          || request.resource.data.numericPrice is float
-        )
-        && request.resource.data.productUrl is string
-        && request.resource.data.brand is string
-        && request.resource.data.source is string
-        && request.resource.data.description is string
-        && request.resource.data.createdAt is timestamp;
-    }
-
-    function savedSearchIsValid() {
-      return hasOnlyKeys(request.resource.data, [
-          "query",
-          "filters",
-          "sort",
-          "page",
-          "createdAt"
-        ])
-        && request.resource.data.query is string
-        && request.resource.data.filters is map
-        && request.resource.data.sort is string
-        && request.resource.data.page is int
-        && request.resource.data.createdAt is timestamp;
-    }
-
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-
-      allow create: if userCreateIsValid(userId);
-      allow update: if userUpdateIsValid(userId);
-      allow delete: if false;
-
-      match /savedItems/{itemId} {
-        allow get, list: if isOwner(userId);
-
-        allow create: if isOwner(userId)
-          && savedItemIsValid();
-
-        allow update: if isOwner(userId)
-          && request.resource.data.createdAt == resource.data.createdAt
-          && savedItemIsValid();
-
-        allow delete: if isOwner(userId);
+      match /savedItems/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && savedItem(request.resource.data)
+          && request.resource.data.createdAt == request.time;
+        allow update: if isOwner(uid) && savedItem(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt;
       }
-
-      match /savedSearches/{searchId} {
-        allow get, list: if isOwner(userId);
-
-        allow create: if isOwner(userId)
-          && savedSearchIsValid();
-
-        allow update: if isOwner(userId)
-          && request.resource.data.createdAt == resource.data.createdAt
-          && savedSearchIsValid();
-
-        allow delete: if isOwner(userId);
+      match /savedSearches/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && savedSearch(request.resource.data)
+          && request.resource.data.createdAt == request.time;
+        allow update: if isOwner(uid) && savedSearch(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt;
       }
     }
   }

@@ -1,335 +1,103 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Button,
-  Fade,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
-import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { Alert, Button, CircularProgress, Grid, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext";
 import SavedSearchCard from "./SavedSearchCard";
 import PageSection from "../../../shared/ui/layout/PageSection";
-import {
-  buildSearchStateQuery,
-  DEFAULT_PAGE,
-  DEFAULT_SORT,
-} from "../../search/utils/searchStateHelpers";
-import { colors } from "../../../shared/ui/theme/designTokens";
-import {
-  primaryButtonSx,
-  secondaryButtonSx,
-} from "../../../shared/ui/theme/componentStyles";
+import { buildSearchStateQuery } from "../../search/utils/searchStateHelpers";
 import { ROUTES } from "../../../app/routes/routePaths";
+import { useSavedCollection } from "../useSavedCollection";
 
-const useSavedSearches = (userId) => {
-  const [savedSearches, setSavedSearches] = useState([]);
-  const [isLoadingSearches, setIsLoadingSearches] = useState(true);
-  const [error, setError] = useState("");
-
-  const fetchSavedSearches = useCallback(async () => {
-    if (!userId) {
-      setSavedSearches([]);
-      setIsLoadingSearches(false);
-      setError("");
-      return;
-    }
-
-    try {
-      setIsLoadingSearches(true);
-      setError("");
-
-      const q = query(
-        collection(db, "saved-searches"),
-        where("userId", "==", userId),
-      );
-
-      const querySnapshot = await getDocs(q);
-      const searches = querySnapshot.docs.map((savedDoc) => ({
-        id: savedDoc.id,
-        ...savedDoc.data(),
-      }));
-
-      setSavedSearches(searches);
-    } catch (fetchError) {
-      console.error("Error fetching saved searches", fetchError);
-      setError("We couldn’t load your saved searches right now.");
-    } finally {
-      setIsLoadingSearches(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    fetchSavedSearches();
-  }, [fetchSavedSearches]);
-
-  return {
-    savedSearches,
-    isLoadingSearches,
-    error,
-    setSavedSearches,
-    fetchSavedSearches,
-    setError,
-  };
-};
-
-function SavedSearchesList() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [selected, setSelected] = useState([]);
-  const [justDeleted, setJustDeleted] = useState(null);
+export default function SavedSearchesList() {
+  const { user } = useAuth();
+  const { records, loading, error, remove, refresh } =
+    useSavedCollection("savedSearches");
   const navigate = useNavigate();
-
+  const [selection, setSelection] = useState({ uid: user?.uid, ids: [] });
+  const selected = selection.uid === user?.uid ? selection.ids : [];
+  const [deleteError, setDeleteError] = useState("");
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const userId = currentUser?.uid;
-  const {
-    savedSearches,
-    isLoadingSearches,
-    error,
-    setSavedSearches,
-    fetchSavedSearches,
-    setError,
-  } = useSavedSearches(userId);
-
-  const hasSavedSearches = useMemo(
-    () => savedSearches.length > 0,
-    [savedSearches],
-  );
-
-  const handleDeleteSearch = async (searchId) => {
-    try {
-      await deleteDoc(doc(db, "saved-searches", searchId));
-      setSavedSearches((prev) =>
-        prev.filter((search) => search.id !== searchId),
+    setSelection({ uid: user?.uid, ids: [] });
+    setDeleteError("");
+  }, [user?.uid]);
+  const deleteIds = async (ids) => {
+    setBusy(true);
+    setDeleteError("");
+    const outcomes = await Promise.allSettled(ids.map((id) => remove(id)));
+    const failed = ids.filter(
+      (_id, index) => outcomes[index].status === "rejected",
+    );
+    setSelection({ uid: user?.uid, ids: failed });
+    if (failed.length)
+      setDeleteError(
+        `${failed.length} saved searches could not be removed. Retry the selection.`,
       );
-      setSelected((prev) => prev.filter((id) => id !== searchId));
-      setJustDeleted(searchId);
-      window.setTimeout(() => setJustDeleted(null), 700);
-    } catch (deleteError) {
-      console.error("Error deleting saved search", deleteError);
-      setError("We couldn’t remove that saved search.");
-    }
+    setBusy(false);
   };
-
-  const handleBulkDelete = async () => {
-    await Promise.all(selected.map((searchId) => handleDeleteSearch(searchId)));
-    setSelected([]);
-  };
-
-  const handleToggleSelect = (id) => {
-    setSelected((prevSelected) =>
-      prevSelected.includes(id)
-        ? prevSelected.filter((savedId) => savedId !== id)
-        : [...prevSelected, id],
-    );
-  };
-
-  const handleRunSavedSearch = (search) => {
-    const searchQueryString = buildSearchStateQuery({
-      query: search.query || "",
-      filters: search.filters || {},
-      sort: search.sort || DEFAULT_SORT,
-      page: search.page || DEFAULT_PAGE,
+  const toggle = (id) =>
+    setSelection({
+      uid: user?.uid,
+      ids: selected.includes(id)
+        ? selected.filter((value) => value !== id)
+        : [...selected, id],
     });
-
-    navigate(
-      `${ROUTES.SEARCH}${searchQueryString ? `?${searchQueryString}` : ""}`,
-    );
+  const rerun = (search) => {
+    const query = buildSearchStateQuery({
+      query: search.query,
+      filters: search.filters,
+      sort: search.sort,
+      page: search.page,
+    });
+    navigate(`${ROUTES.SEARCH}?${query}`);
   };
-
   return (
     <PageSection
       eyebrow="Saved searches"
       title="Searches worth coming back to"
-      description="Saved searches make it easier to revisit strong ideas, compare directions, and continue shopping without starting over."
+      description="Rerun saved search ideas without starting over."
       actions={
-        hasSavedSearches ? (
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
-            <Button
-              onClick={() => navigate(ROUTES.SEARCH)}
-              variant="contained"
-              sx={primaryButtonSx}
-            >
-              New search
+        <Stack direction="row" spacing={1}>
+          <Button onClick={() => navigate(ROUTES.SEARCH)}>New search</Button>
+          {selected.length > 0 && (
+            <Button disabled={busy} onClick={() => deleteIds(selected)}>
+              Delete {selected.length} selected
             </Button>
-            {selected.length > 0 ? (
-              <Button
-                onClick={handleBulkDelete}
-                variant="outlined"
-                sx={secondaryButtonSx}
-              >
-                Delete {selected.length} selected
-              </Button>
-            ) : null}
-          </Stack>
-        ) : null
+          )}
+        </Stack>
       }
     >
-      {isLoadingSearches ? (
-        <Grid container spacing={3}>
-          {Array.from({ length: 6 }).map((_, idx) => (
-            <Grid item xs={12} md={6} lg={4} key={idx}>
-              <Box
-                sx={{
-                  borderRadius: 4,
-                  border: `1px solid ${colors.border}`,
-                  bgcolor: colors.surfaceSoft,
-                  p: 2.5,
-                }}
-              >
-                <Skeleton height={34} width="70%" animation="wave" />
-                <Skeleton height={24} width="35%" animation="wave" />
-                <Skeleton
-                  height={28}
-                  width="100%"
-                  animation="wave"
-                  sx={{ mt: 2 }}
-                />
-                <Skeleton height={28} width="80%" animation="wave" />
-                <Skeleton
-                  height={46}
-                  width="100%"
-                  animation="wave"
-                  sx={{ mt: 2 }}
-                />
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+      {deleteError && <Alert severity="error">{deleteError}</Alert>}
+      {loading ? (
+        <CircularProgress />
       ) : error ? (
-        <Stack
-          spacing={2}
-          alignItems="flex-start"
-          sx={{
-            border: `1px solid ${colors.border}`,
-            bgcolor: colors.surfaceSoft,
-            borderRadius: 4,
-            p: { xs: 2.5, md: 3.5 },
-          }}
+        <Alert
+          severity="error"
+          action={<Button onClick={refresh}>Retry</Button>}
         >
-          <Typography
-            sx={{
-              color: colors.textPrimary,
-              fontWeight: 800,
-              fontSize: "1.05rem",
-            }}
-          >
-            We hit a problem loading your saved searches.
-          </Typography>
-
-          <Typography sx={{ color: colors.textSecondary, lineHeight: 1.75 }}>
-            {error}
-          </Typography>
-
-          <Button
-            onClick={fetchSavedSearches}
-            variant="outlined"
-            sx={secondaryButtonSx}
-          >
-            Try again
-          </Button>
-        </Stack>
-      ) : !hasSavedSearches ? (
-        <Stack
-          spacing={2}
-          alignItems="flex-start"
-          sx={{
-            border: `1px solid ${colors.border}`,
-            bgcolor: colors.surfaceSoft,
-            borderRadius: 4,
-            p: { xs: 2.5, md: 3.5 },
-          }}
-        >
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: "14px",
-              display: "grid",
-              placeItems: "center",
-              bgcolor: colors.accentSoft,
-              color: colors.accent,
-            }}
-          >
-            <ManageSearchRoundedIcon />
-          </Box>
-
-          <Typography
-            sx={{
-              color: colors.textPrimary,
-              fontWeight: 800,
-              fontSize: "1.1rem",
-            }}
-          >
-            No saved searches yet.
-          </Typography>
-
-          <Typography
-            sx={{
-              color: colors.textSecondary,
-              maxWidth: 620,
-              lineHeight: 1.75,
-            }}
-          >
-            When you save a promising search from the results page, it will
-            appear here for quick reruns and comparison.
-          </Typography>
-
-          <Button
-            onClick={() => navigate(ROUTES.SEARCH)}
-            variant="contained"
-            sx={primaryButtonSx}
-          >
-            Start searching
-          </Button>
-        </Stack>
+          {error}
+        </Alert>
+      ) : !records.length ? (
+        <Alert severity="info">No saved searches yet.</Alert>
       ) : (
         <Grid container spacing={3}>
-          {savedSearches.map((search) => (
-            <Grid
-              item
-              xs={12}
-              md={6}
-              lg={4}
-              key={search.id}
-              sx={{ display: "flex" }}
-            >
-              <Fade in={justDeleted !== search.id}>
-                <Box sx={{ width: "100%" }}>
-                  <SavedSearchCard
-                    query={search.query}
-                    date={
-                      search.date
-                        ? new Date(search.date).toLocaleDateString()
-                        : null
-                    }
-                    filters={search.filters}
-                    sort={search.sort || "relevance"}
-                    page={search.page || 1}
-                    onDelete={() => handleDeleteSearch(search.id)}
-                    onClick={() => handleRunSavedSearch(search)}
-                    selected={selected.includes(search.id)}
-                    onSelect={() => handleToggleSelect(search.id)}
-                  />
-                </Box>
-              </Fade>
+          {records.map((search) => (
+            <Grid item xs={12} md={6} lg={4} key={search.id}>
+              <SavedSearchCard
+                query={search.query}
+                filters={search.filters}
+                sort={search.sort}
+                page={search.page}
+                date={search.createdAt?.toDate?.().toLocaleDateString() || null}
+                onDelete={() => {
+                  if (!busy) void deleteIds([search.id]);
+                }}
+                onClick={() => rerun(search)}
+                selected={selected.includes(search.id)}
+                onSelect={() => {
+                  if (!busy) toggle(search.id);
+                }}
+              />
             </Grid>
           ))}
         </Grid>
@@ -337,5 +105,3 @@ function SavedSearchesList() {
     </PageSection>
   );
 }
-
-export default SavedSearchesList;
