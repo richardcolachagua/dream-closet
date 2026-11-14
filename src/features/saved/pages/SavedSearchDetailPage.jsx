@@ -3,6 +3,7 @@ import { Box, Container, CssBaseline, Stack } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SavedSearchesList from "../components/SavedSearchesList";
 import SavedItemsList from "../components/SavedItemsList";
+import { SavedSearchesProvider } from "../SavedSearchesContext";
 import Footer from "../../../shared/ui/navigation/Footer";
 import SavedPageHeader from "../../../shared/ui/navigation/SavedHeader";
 import { colors, layout } from "../../../shared/ui/theme/designTokens";
@@ -29,7 +30,9 @@ function SavedItemsAndSearches() {
         <Box component="main" sx={{ flex: 1 }}>
           <Container maxWidth={layout.pageMax} sx={{ py: { xs: 4, md: 6 } }}>
             <Stack spacing={2}>
-              <SavedSearchesList />
+              <SavedSearchesProvider>
+                <SavedSearchesList />
+              </SavedSearchesProvider>
               <SavedItemsList />
             </Stack>
           </Container>

@@ -70,6 +70,7 @@ export default function SearchPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [savingSearch, setSavingSearch] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [showAllGenders, setShowAllGenders] = useState(false);
@@ -88,6 +89,7 @@ export default function SearchPage() {
     setHasSearched(false);
     setError("");
     setSuccessMessage("");
+    setSavingSearch(false);
     return () => {
       requestId.current += 1;
     };
@@ -205,6 +207,8 @@ export default function SearchPage() {
 
   const handleSaveSearch = async (query) => {
     const uid = user?.uid;
+    if (!isRegistered || !uid || savingSearch) return;
+    setSavingSearch(true);
     try {
       await saveSearch(uid, {
         query,
@@ -216,6 +220,8 @@ export default function SearchPage() {
         setSuccessMessage("Search saved successfully.");
     } catch (failure) {
       if (currentUid.current === uid) setError(failure.message);
+    } finally {
+      setSavingSearch(false);
     }
   };
   const handleSaveItem = async (item) => {
@@ -277,6 +283,8 @@ export default function SearchPage() {
                       setError("");
                     }}
                     onSaveSearch={handleSaveSearch}
+                    savingSearch={savingSearch}
+                    saveDisabled={!isRegistered}
                     onSearchError={(message) => {
                       setError(message);
                       setIsLoading(false);

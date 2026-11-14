@@ -10,13 +10,13 @@ import {
 } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
 import SearchIcon from "@mui/icons-material/Search";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
+import SaveSearchButton from "../../../shared/ui/buttons/SaveSearchButton";
 
 const EXAMPLES = [
   "oversized cream cardigan",
@@ -35,6 +35,7 @@ function SearchInputBar({
   onOpenFilters,
   activeFilterCount = 0,
   saveDisabled = false,
+  savingSearch = false,
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -68,7 +69,7 @@ function SearchInputBar({
   };
 
   const handleSaveSearch = () => {
-    if (saveDisabled || !onSaveSearch) return;
+    if (saveDisabled || savingSearch || isLoading || !onSaveSearch) return;
 
     if (!value || !value.trim()) {
       onSearchError?.("Cannot save an empty search.");
@@ -209,19 +210,16 @@ function SearchInputBar({
               </Button>
 
               {!saveDisabled && onSaveSearch ? (
-                <Button
-                  variant="outlined"
-                  startIcon={<BookmarkBorderIcon />}
-                  onClick={handleSaveSearch}
+                <SaveSearchButton
+                  onSave={handleSaveSearch}
+                  saving={savingSearch}
                   disabled={isLoading}
                   sx={{
                     ...secondaryButtonSx,
                     minHeight: 46,
                     width: { xs: "100%", sm: "auto" },
                   }}
-                >
-                  Save search
-                </Button>
+                />
               ) : null}
             </Stack>
           </Stack>

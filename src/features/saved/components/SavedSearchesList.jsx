@@ -6,12 +6,21 @@ import SavedSearchCard from "./SavedSearchCard";
 import PageSection from "../../../shared/ui/layout/PageSection";
 import { buildSearchStateQuery } from "../../search/utils/searchStateHelpers";
 import { ROUTES } from "../../../app/routes/routePaths";
-import { useSavedCollection } from "../useSavedCollection";
+import { useSavedSearches } from "../SavedSearchesContext";
 
 export default function SavedSearchesList() {
   const { user } = useAuth();
-  const { records, loading, error, remove, refresh } =
-    useSavedCollection("savedSearches");
+  const {
+    savedSearches: records,
+    loading,
+    error,
+    deleteSavedSearch: remove,
+    refresh,
+    hasMore,
+    loadingMore,
+    loadMoreError,
+    loadMore,
+  } = useSavedSearches();
   const navigate = useNavigate();
   const [selection, setSelection] = useState({ uid: user?.uid, ids: [] });
   const selected = selection.uid === user?.uid ? selection.ids : [];
@@ -51,6 +60,19 @@ export default function SavedSearchesList() {
     });
     navigate(`${ROUTES.SEARCH}?${query}`);
   };
+  const formatDate = (value) => {
+    const date =
+      typeof value?.toDate === "function"
+        ? value.toDate()
+        : value instanceof Date
+          ? value
+          : typeof value === "string" || typeof value === "number"
+            ? new Date(value)
+            : null;
+    return date && Number.isFinite(date.getTime())
+      ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date)
+      : null;
+  };
   return (
     <PageSection
       eyebrow="Saved searches"
@@ -80,27 +102,35 @@ export default function SavedSearchesList() {
       ) : !records.length ? (
         <Alert severity="info">No saved searches yet.</Alert>
       ) : (
-        <Grid container spacing={3}>
-          {records.map((search) => (
-            <Grid item xs={12} md={6} lg={4} key={search.id}>
-              <SavedSearchCard
-                query={search.query}
-                filters={search.filters}
-                sort={search.sort}
-                page={search.page}
-                date={search.createdAt?.toDate?.().toLocaleDateString() || null}
-                onDelete={() => {
-                  if (!busy) void deleteIds([search.id]);
-                }}
-                onClick={() => rerun(search)}
-                selected={selected.includes(search.id)}
-                onSelect={() => {
-                  if (!busy) toggle(search.id);
-                }}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        <>
+          <Grid container spacing={3}>
+            {records.map((search) => (
+              <Grid item xs={12} md={6} lg={4} key={search.id}>
+                <SavedSearchCard
+                  query={search.query}
+                  filters={search.filters}
+                  sort={search.sort}
+                  page={search.page}
+                  date={formatDate(search.createdAt)}
+                  onDelete={() => {
+                    if (!busy) void deleteIds([search.id]);
+                  }}
+                  onClick={() => rerun(search)}
+                  selected={selected.includes(search.id)}
+                  onSelect={() => {
+                    if (!busy) toggle(search.id);
+                  }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          {loadMoreError && <Alert severity="error">{loadMoreError}</Alert>}
+          {hasMore && (
+            <Button onClick={loadMore} disabled={loadingMore} sx={{ mt: 2 }}>
+              {loadingMore ? "Loading..." : "Load more"}
+            </Button>
+          )}
+        </>
       )}
     </PageSection>
   );
