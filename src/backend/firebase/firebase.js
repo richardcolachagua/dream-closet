@@ -1,6 +1,6 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import {
-  browserLocalPersistence,
+  browserSessionPersistence,
   connectAuthEmulator,
   getAuth,
   setPersistence,
@@ -66,10 +66,10 @@ if (useEmulators && !runtime.emulatorsConnected) {
 if (!runtime.persistencePromise) {
   runtime.persistencePromise = setPersistence(
     auth,
-    browserLocalPersistence,
+    browserSessionPersistence,
   ).catch((error) => {
     console.warn(
-      "[Dream Closet] Could not configure local auth persistence.",
+      "[Dream Closet] Could not configure session auth persistence.",
       error,
     );
   });

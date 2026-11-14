@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         setClaimsLoading(true);
-        setLoading(false);
+        setLoading(true);
 
         try {
           const token = await firebaseUser.getIdTokenResult();
@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }) => {
         } finally {
           if (active && currentGeneration === generation) {
             setClaimsLoading(false);
+            setLoading(false);
           }
         }
       },
