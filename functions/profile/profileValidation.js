@@ -1,40 +1,37 @@
-const validateProfileData = (data = {}) => {
+const normalizeName = (value) => value.replace(/\s+/g, ' ').trim();
+
+const validateProfileData = (data) => {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return ['Profile changes must be an object.'];
+  }
+  const keys = Object.keys(data);
   const errors = [];
-
-  if (
-    data.firstName &&
-    (typeof data.firstName !== 'string' ||
-      data.firstName.trim().length < 1 ||
-      data.firstName.trim().length > 50)
-  ) {
-    errors.push('Invalid first name.');
+  if (!keys.length) errors.push('Provide at least one name field.');
+  if (keys.some((key) => !['firstName', 'lastName'].includes(key))) {
+    errors.push(
+        'Only firstName and lastName may be changed. Email changes are disabled.',
+    );
   }
-
-  if (
-    data.lastName &&
-    (typeof data.lastName !== 'string' ||
-      data.lastName.trim().length < 1 ||
-      data.lastName.trim().length > 50)
-  ) {
-    errors.push('Invalid last name.');
+  for (const key of ['firstName', 'lastName']) {
+    if (
+      Object.prototype.hasOwnProperty.call(data, key) &&
+      (typeof data[key] !== 'string' || normalizeName(data[key]).length > 60)
+    ) {
+      errors.push(`Invalid ${key}; use a string of at most 60 characters.`);
+    }
   }
-
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push('Invalid email address.');
-  }
-
   return errors;
 };
 
 const isRecentlyAuthenticated = (context) => {
-  const authTime = Number(context.auth?.token?.auth_time || 0);
-  const now = Math.floor(Date.now() / 1000);
-  const fiveMinutes = 5 * 60;
-
-  return Boolean(authTime) && now - authTime < fiveMinutes;
+  const value = context.auth?.token?.auth_time;
+  if (typeof value !== 'number' || !Number.isFinite(value)) return false;
+  const age = Math.floor(Date.now() / 1000) - value;
+  return age >= 0 && age < 300;
 };
 
 module.exports = {
+  normalizeName,
   validateProfileData,
   isRecentlyAuthenticated,
 };

@@ -1,8 +1,8 @@
-import React from "react";
+import { Alert, Box } from "@mui/material";
 import { Navigate, useLocation } from "react-router-dom";
-import { useOnboardingStatus } from "../../features/onboarding/useOnboardingStatus";
+import { useOnboardingStatus } from "./useOnboardingStatus";
 import { useAuth } from "../auth/AuthContext";
-import AppLoadingScreen from "../../features/home/components/AppLoadingScreen";
+import AppLoadingScreen from "../home/components/AppLoadingScreen";
 import {
   ROUTES,
   buildCurrentPath,
@@ -11,34 +11,56 @@ import {
 import {
   getNextOnboardingPath,
   isOnboardingComplete,
-} from "../../features/onboarding/getNextOnboardingPath";
+} from "./getNextOnboardingPath";
 
-/**
- * Route guard that ensures:
- * - Authenticated users must complete onboarding before accessing core app routes.
- * - Completed users are pushed out of onboarding routes into search.
- * - Unauthenticated visitors bypass onboarding guard entirely.
- */
 export const OnboardingGuard = ({ children }) => {
   const location = useLocation();
-  const { user, loading: authLoading } = useAuth();
-  const { onboarding, loading: onboardingLoading } = useOnboardingStatus();
 
-  // Still resolving auth or onboarding — keep user in a branded loading state
-  if (authLoading || onboardingLoading) {
+  const { loading: authLoading, isRegistered } = useAuth();
+
+  const {
+    onboarding,
+    loading: onboardingLoading,
+    error,
+    hasProfile,
+  } = useOnboardingStatus();
+
+  if (authLoading) {
     return <AppLoadingScreen />;
   }
 
-  // No authenticated user → let public routes render freely
-  if (!user) {
+  if (!isRegistered) {
     return <>{children}</>;
   }
 
-  const completed = isOnboardingComplete(onboarding);
+  if (onboardingLoading) {
+    return <AppLoadingScreen />;
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">
+          We couldn’t load your onboarding status. Please reload the page. If
+          the problem continues, sign out and sign in again.
+        </Alert>
+      </Box>
+    );
+  }
+
   const currentPath = buildCurrentPath(location);
+
+  if (!hasProfile) {
+    return <Navigate to={ROUTES.LOGIN} replace state={{ from: currentPath }} />;
+  }
+
+  const completed = isOnboardingComplete(onboarding);
   const currentlyInOnboarding = isOnboardingRoute(location.pathname);
 
-  // Authenticated, not completed, and outside onboarding routes → redirect into next onboarding step
+  if (completed && currentlyInOnboarding) {
+    return <Navigate to={ROUTES.SEARCH} replace />;
+  }
+
   if (!completed && !currentlyInOnboarding) {
     return (
       <Navigate
@@ -49,11 +71,5 @@ export const OnboardingGuard = ({ children }) => {
     );
   }
 
-  // Authenticated, marked completed, but currently on onboarding route → send to main search surface
-  if (completed && currentlyInOnboarding) {
-    return <Navigate to={ROUTES.SEARCH} replace />;
-  }
-
-  // Authenticated and either fully onboarded or viewing non-onboarding routes
   return <>{children}</>;
 };

@@ -141,16 +141,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path={ROUTES.SEARCH}
-        element={
-          <ProtectedRoute>
-            <OnboardingGuard>
-              <SearchPage />
-            </OnboardingGuard>
-          </ProtectedRoute>
-        }
-      />
 
       {/* Subscription-gated route */}
       <Route

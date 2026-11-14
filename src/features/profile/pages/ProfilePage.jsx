@@ -1,734 +1,315 @@
-import { useEffect, useMemo, useState } from "react";
-import Footer from "../../../shared/ui/navigation/Footer.jsx";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useMemo, useState } from "react";
 import {
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "firebase/auth";
-import {
+  Alert,
   Box,
-  TextField,
-  Typography,
   Button,
   CircularProgress,
   Container,
   CssBaseline,
-  Grid,
-  IconButton,
-  InputAdornment,
-  Alert,
   Divider,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import ProfilePageHeader from "../../profile/components/ProfileHeader.jsx";
-import "react-toastify/dist/ReactToastify.css";
-import { toast, ToastContainer } from "react-toastify";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db, functions } from "../../../backend/firebase/firebase";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
+import { db, functions } from "../../../backend/firebase/firebase";
+import { useAuth } from "../../auth/AuthContext";
 import { ROUTES } from "../../../app/routes/routePaths";
-import { useAuth } from "../../auth/AuthContext.js";
-import GenderSelectStep from "../../onboarding/components/GenderStep.jsx";
-import CategoryMultiSelectStep from "../../onboarding/components/CategoryStep.jsx";
-import BrandMultiSelectStep from "../../onboarding/components/BrandStep.jsx";
+import ProfileHeader from "../components/ProfileHeader";
+import Footer from "../../../shared/ui/navigation/Footer";
+import GenderStep from "../../onboarding/components/GenderStep";
+import CategoryStep from "../../onboarding/components/CategoryStep";
+import BrandStep from "../../onboarding/components/BrandStep";
 import {
-  femaleCategories,
-  maleCategories,
-} from "../../onboarding/pages/OnboardingCategoriesPage.jsx";
-import { buildBrandGroupsForGender } from "../../onboarding/pages/OnboardingBrandsPage.jsx";
+  buildBrandGroupsForGender,
+  categoriesForGender,
+  validateOnboarding,
+} from "../../onboarding/utils/onboardingSchema";
+import { colors } from "../../../shared/ui/theme/designTokens";
 
-const validationSchema = Yup.object({
-  firstName: Yup.string(),
-  lastName: Yup.string(),
-  email: Yup.string().email("Invalid email address"),
+const theme = createTheme();
+const schema = Yup.object({
+  firstName: Yup.string().trim().max(60),
+  lastName: Yup.string().trim().max(60),
+  newPassword: Yup.string().min(8, "Use at least 8 characters"),
   currentPassword: Yup.string().when("newPassword", {
     is: (value) => Boolean(value),
-    then: (schema) =>
-      schema.required("Current password is required to change the password"),
+    then: (value) => value.required("Enter your current password"),
   }),
-  newPassword: Yup.string().min(8, "Password must be at least 8 characters"),
-  confirmNewPassword: Yup.string().oneOf(
-    [Yup.ref("newPassword")],
-    "Passwords must match",
-  ),
+  confirmNewPassword: Yup.string().when("newPassword", {
+    is: (value) => Boolean(value),
+    then: (value) =>
+      value
+        .required("Confirm your new password")
+        .oneOf([Yup.ref("newPassword")], "Passwords must match"),
+  }),
 });
-
-const DEFAULT_ONBOARDING = {
-  completed: false,
-  gender: "",
-  categories: [],
-  brands: [],
+const panel = {
+  p: { xs: 2, sm: 4 },
+  bgcolor: "white",
+  color: "black",
+  borderRadius: 3,
 };
 
-const defaultTheme = createTheme();
-
-const ProfilePage = () => {
+function ProfileEditor({ user, profile }) {
   const navigate = useNavigate();
-
-  const { user, loading: authLoading } = useAuth();
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [profileError, setProfileError] = useState("");
-
-  const [currentUserInfo, setCurrentUserInfo] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    onboarding: DEFAULT_ONBOARDING,
-  });
-
-  const [editGender, setEditGender] = useState("");
-  const [editCategories, setEditCategories] = useState([]);
-  const [editBrands, setEditBrands] = useState([]);
-  const [savingOnboarding, setSavingOnboarding] = useState(false);
-
-  const availableCategories = useMemo(() => {
-    if (editGender === "female") return femaleCategories;
-    if (editGender === "male") return maleCategories;
-    return [];
-  }, [editGender]);
-
-  const brandGroups = useMemo(
-    () => buildBrandGroupsForGender(editGender),
-    [editGender],
+  const [notice, setNotice] = useState(null);
+  const [styleBusy, setStyleBusy] = useState(false);
+  const [gender, setGender] = useState(profile.onboarding?.gender || "");
+  const [categories, setCategories] = useState(
+    profile.onboarding?.categories || [],
   );
-
-  const allowedBrands = useMemo(
-    () => brandGroups.flatMap((group) => group.brands),
-    [brandGroups],
+  const [brands, setBrands] = useState(profile.onboarding?.brands || []);
+  const hasPassword = user.providerData.some(
+    (provider) => provider.providerId === "password",
   );
+  const options = categoriesForGender(gender);
+  const groups = useMemo(() => buildBrandGroupsForGender(gender), [gender]);
+  const toggle = (setter, value) =>
+    setter((previous) =>
+      previous.includes(value)
+        ? previous.filter((item) => item !== value)
+        : [...previous, value],
+    );
 
   const formik = useFormik({
-    enableReinitialize: true,
     initialValues: {
-      firstName: currentUserInfo.firstName || "",
-      lastName: currentUserInfo.lastName || "",
-      email: currentUserInfo.email || "",
+      firstName: profile.firstName || "",
+      lastName: profile.lastName || "",
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
     },
-    validationSchema,
-    onSubmit: async (values, { resetForm, setSubmitting }) => {
+    validationSchema: schema,
+    onSubmit: async (values, helpers) => {
+      setNotice(null);
       try {
-        if (!user) {
-          toast.error("You must be logged in to update your profile");
-          return;
+        const changes = {};
+        for (const key of ["firstName", "lastName"]) {
+          const value = values[key].replace(/\s+/g, " ").trim();
+          if (value !== profile[key]) changes[key] = value;
         }
-
-        const updatedValues = {};
-        let passwordUpdated = false;
-
-        if (values.firstName !== currentUserInfo.firstName) {
-          updatedValues.firstName = values.firstName.trim();
-        }
-
-        if (values.lastName !== currentUserInfo.lastName) {
-          updatedValues.lastName = values.lastName.trim();
-        }
-
-        if (values.email !== currentUserInfo.email) {
-          updatedValues.email = values.email.trim();
-        }
-
-        if (values.newPassword) {
-          if (!values.currentPassword) {
-            toast.error("Current password is required to change password");
-            return;
+        let nameSaved = false;
+        if (Object.keys(changes).length) {
+          const result = await httpsCallable(
+            functions,
+            "updateUserProfile",
+          )(changes);
+          nameSaved = true;
+          if (!result.data.authDisplayNameSynced) {
+            setNotice({
+              severity: "warning",
+              text: "Profile saved. The sign-in display name could not be synchronized.",
+            });
           }
-
-          const credential = EmailAuthProvider.credential(
-            user.email,
-            values.currentPassword,
-          );
-
-          await reauthenticateWithCredential(user, credential);
-          await updatePassword(user, values.newPassword);
-          passwordUpdated = true;
         }
-
-        if (Object.keys(updatedValues).length > 0) {
-          const updateProfile = httpsCallable(functions, "updateUserProfile");
-          await updateProfile(updatedValues);
-
-          setCurrentUserInfo((prev) => ({
-            ...prev,
-            ...updatedValues,
-          }));
+        if (values.newPassword) {
+          if (!hasPassword)
+            throw new Error(
+              "Use your sign-in provider to manage your password.",
+            );
+          try {
+            const credential = EmailAuthProvider.credential(
+              user.email,
+              values.currentPassword,
+            );
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, values.newPassword);
+          } catch (failure) {
+            throw new Error(
+              `${nameSaved ? "Your name was saved, but the password was not changed. " : ""}${failure.message}`,
+            );
+          }
         }
-
-        if (passwordUpdated || Object.keys(updatedValues).length > 0) {
-          toast.success("Profile updated successfully");
-          resetForm({
-            values: {
-              firstName:
-                updatedValues.firstName ?? currentUserInfo.firstName ?? "",
-              lastName:
-                updatedValues.lastName ?? currentUserInfo.lastName ?? "",
-              email: updatedValues.email ?? currentUserInfo.email ?? "",
-              currentPassword: "",
-              newPassword: "",
-              confirmNewPassword: "",
+        helpers.setValues({
+          ...values,
+          currentPassword: "",
+          newPassword: "",
+          confirmNewPassword: "",
+        });
+        setNotice(
+          (previous) =>
+            previous || {
+              severity: "success",
+              text:
+                nameSaved || values.newPassword
+                  ? "Account changes saved."
+                  : "No changes detected.",
             },
-          });
-        } else {
-          toast.info("No changes detected");
-        }
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        toast.error(error.message || "An error occurred. Please try again.");
+        );
+      } catch (failure) {
+        setNotice({ severity: "error", text: failure.message });
       } finally {
-        setSubmitting(false);
+        helpers.setSubmitting(false);
       }
     },
   });
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchUserData = async () => {
-      if (authLoading) return;
-
-      if (!user) {
-        if (isMounted) {
-          setProfileError("No authenticated user found.");
-          setPageLoading(false);
-        }
-        return;
+  const field = (name, label, type = "text") => (
+    <TextField
+      key={name}
+      fullWidth
+      name={name}
+      label={label}
+      type={type}
+      value={formik.values[name]}
+      onChange={formik.handleChange}
+      onBlur={formik.handleBlur}
+      disabled={formik.isSubmitting}
+      error={Boolean(formik.touched[name] && formik.errors[name])}
+      helperText={formik.touched[name] && formik.errors[name]}
+      autoComplete={
+        name === "currentPassword"
+          ? "current-password"
+          : type === "password"
+            ? "new-password"
+            : undefined
       }
-
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (!isMounted) return;
-
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          const onboarding = {
-            completed: Boolean(userData?.onboarding?.completed),
-            gender: userData?.onboarding?.gender || "",
-            categories: Array.isArray(userData?.onboarding?.categories)
-              ? userData.onboarding.categories
-              : [],
-            brands: Array.isArray(userData?.onboarding?.brands)
-              ? userData.onboarding.brands
-              : [],
-          };
-
-          setCurrentUserInfo({
-            firstName: userData.firstName || "",
-            lastName: userData.lastName || "",
-            email: user.email || "",
-            onboarding,
-          });
-
-          setEditGender(onboarding.gender);
-          setEditCategories(onboarding.categories);
-          setEditBrands(onboarding.brands);
-        } else {
-          setCurrentUserInfo({
-            firstName: "",
-            lastName: "",
-            email: user.email || "",
-            onboarding: DEFAULT_ONBOARDING,
-          });
-          setEditGender("");
-          setEditCategories([]);
-          setEditBrands([]);
-        }
-      } catch (error) {
-        console.error("[ProfilePage] Error fetching user data:", error);
-        if (isMounted) {
-          setProfileError("Could not load your profile.");
-        }
-      } finally {
-        if (isMounted) {
-          setPageLoading(false);
-        }
-      }
-    };
-
-    fetchUserData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user, authLoading]);
-
-  useEffect(() => {
-    setEditCategories((prev) =>
-      prev.filter((category) => availableCategories.includes(category)),
-    );
-  }, [availableCategories]);
-
-  useEffect(() => {
-    setEditBrands((prev) =>
-      prev.filter((brand) => allowedBrands.includes(brand)),
-    );
-  }, [allowedBrands]);
-
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  const handleToggleCategory = (category) => {
-    setEditCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category],
-    );
-  };
-
-  const handleToggleBrand = (brand) => {
-    setEditBrands((prev) =>
-      prev.includes(brand)
-        ? prev.filter((item) => item !== brand)
-        : [...prev, brand],
-    );
-  };
-
-  const handleSaveOnboarding = async () => {
-    if (!user) {
-      toast.error("You must be logged in to update preferences");
-      return;
-    }
-
-    if (!editGender) {
-      toast.error("Please pick how you shop for clothes");
-      return;
-    }
-
-    if (editCategories.length === 0) {
-      toast.error("Pick at least one category you like");
-      return;
-    }
-
-    if (editBrands.length === 0) {
-      toast.error("Pick at least one brand you like");
-      return;
-    }
-
-    setSavingOnboarding(true);
-
+    />
+  );
+  const saveStyle = async () => {
+    setStyleBusy(true);
+    setNotice(null);
     try {
-      const ref = doc(db, "users", user.uid);
-      const nextOnboarding = {
-        gender: editGender,
-        categories: editCategories,
-        brands: editBrands,
+      const onboarding = validateOnboarding({
+        gender,
+        categories,
+        brands,
         completed: true,
-      };
-
-      await setDoc(
-        ref,
-        {
-          onboarding: nextOnboarding,
-        },
-        { merge: true },
-      );
-
-      setCurrentUserInfo((prev) => ({
-        ...prev,
-        onboarding: nextOnboarding,
-      }));
-
-      toast.success("Style preferences updated");
-    } catch (e) {
-      console.error("Error updating onboarding from profile:", e);
-      toast.error("Could not update style preferences");
+      });
+      await updateDoc(doc(db, "users", user.uid), {
+        onboarding,
+        updatedAt: serverTimestamp(),
+      });
+      setNotice({ severity: "success", text: "Style preferences saved." });
+    } catch (failure) {
+      setNotice({ severity: "error", text: failure.message });
     } finally {
-      setSavingOnboarding(false);
+      setStyleBusy(false);
     }
   };
-
-  if (authLoading || pageLoading) {
-    return (
+  return (
+    <Stack spacing={4}>
+      <Typography variant="h3">
+        Welcome, {profile.firstName || "there"}
+      </Typography>
+      {notice && <Alert severity={notice.severity}>{notice.text}</Alert>}
+      <Box
+        component="form"
+        onSubmit={formik.handleSubmit}
+        noValidate
+        sx={panel}
+      >
+        <Stack spacing={2}>
+          <Typography variant="h5">Update your profile</Typography>
+          {field("firstName", "First name")}
+          {field("lastName", "Last name")}
+          <TextField
+            fullWidth
+            label="Email"
+            value={user.email || profile.email || ""}
+            InputProps={{ readOnly: true }}
+            helperText="Email changes are currently unavailable."
+          />
+          {hasPassword ? (
+            <>
+              <Divider />
+              {field("currentPassword", "Current password", "password")}
+              {field("newPassword", "New password", "password")}
+              {field("confirmNewPassword", "Confirm new password", "password")}
+            </>
+          ) : (
+            <Alert severity="info">
+              Manage your password through your sign-in provider.
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={formik.isSubmitting}
+          >
+            {formik.isSubmitting ? "Saving..." : "Save profile"}
+          </Button>
+        </Stack>
+      </Box>
+      <Box>
+        <Typography variant="h5" gutterBottom>
+          Account settings
+        </Typography>
+        <Button variant="outlined" onClick={() => navigate(ROUTES.SETTINGS)}>
+          Open account settings
+        </Button>
+      </Box>
+      <Stack spacing={3}>
+        <Typography variant="h4">Style preferences</Typography>
+        <GenderStep
+          selectedGender={gender}
+          loading={styleBusy}
+          onChangeGender={(next) => {
+            setGender(next);
+            setCategories([]);
+            setBrands([]);
+          }}
+        />
+        <CategoryStep
+          categories={options}
+          selectedCategories={categories}
+          onToggleCategory={(value) => toggle(setCategories, value)}
+          loading={styleBusy}
+        />
+        <BrandStep
+          brandGroups={groups}
+          selectedBrands={brands}
+          onToggleBrand={(value) => toggle(setBrands, value)}
+          loading={styleBusy}
+        />
+        <Typography>Favorite brands are optional.</Typography>
+        <Button
+          variant="contained"
+          disabled={styleBusy || !gender || !categories.length}
+          onClick={saveStyle}
+        >
+          {styleBusy ? "Saving..." : "Save style preferences"}
+        </Button>
+      </Stack>
+    </Stack>
+  );
+}
+export default function ProfilePage() {
+  const { user, profile, loading, profileLoading, profileError } = useAuth();
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Box
         sx={{
           minHeight: "100vh",
+          bgcolor: colors.background,
+          color: colors.textPrimary,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "black",
+          flexDirection: "column",
         }}
       >
-        <CircularProgress sx={{ color: "turquoise" }} />
-      </Box>
-    );
-  }
-
-  return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "black",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        overflowX: "hidden",
-      }}
-    >
-      <ThemeProvider theme={defaultTheme}>
-        <CssBaseline />
-        <ProfilePageHeader />
-
-        <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
-          <Typography
-            variant="h3"
-            gutterBottom
-            sx={{
-              color: "turquoise",
-              fontWeight: "bold",
-              pb: 0.5,
-            }}
-          >
-            Welcome, {currentUserInfo.firstName || "there"}
-          </Typography>
-
-          {profileError && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {profileError}
-            </Alert>
+        <ProfileHeader />
+        <Container maxWidth="md" sx={{ flex: 1, py: 5 }}>
+          {loading || profileLoading ? (
+            <CircularProgress />
+          ) : profileError || !profile || !user ? (
+            <Alert severity="error">Your profile could not be loaded.</Alert>
+          ) : (
+            <ProfileEditor key={user.uid} user={user} profile={profile} />
           )}
-
-          <Box
-            component="form"
-            onSubmit={formik.handleSubmit}
-            noValidate
-            sx={{
-              mt: 2,
-              p: 4,
-              bgcolor: "white",
-              borderRadius: "20px",
-            }}
-          >
-            <Typography
-              component="h1"
-              variant="h5"
-              sx={{
-                mb: 3,
-                fontWeight: "bold",
-                color: "black",
-              }}
-            >
-              Update Your Profile
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="firstName"
-                  name="firstName"
-                  label="First Name"
-                  variant="outlined"
-                  value={formik.values.firstName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.firstName && Boolean(formik.errors.firstName)
-                  }
-                  helperText={
-                    formik.touched.firstName && formik.errors.firstName
-                  }
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="lastName"
-                  name="lastName"
-                  label="Last Name"
-                  variant="outlined"
-                  value={formik.values.lastName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.lastName && Boolean(formik.errors.lastName)
-                  }
-                  helperText={formik.touched.lastName && formik.errors.lastName}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="email"
-                  name="email"
-                  label="Email"
-                  variant="outlined"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="currentPassword"
-                  name="currentPassword"
-                  label="Current Password"
-                  type={showPassword ? "text" : "password"}
-                  value={formik.values.currentPassword}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.currentPassword &&
-                    Boolean(formik.errors.currentPassword)
-                  }
-                  helperText={
-                    formik.touched.currentPassword &&
-                    formik.errors.currentPassword
-                  }
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleTogglePasswordVisibility}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="newPassword"
-                  name="newPassword"
-                  label="New Password"
-                  type={showPassword ? "text" : "password"}
-                  value={formik.values.newPassword}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.newPassword &&
-                    Boolean(formik.errors.newPassword)
-                  }
-                  helperText={
-                    formik.touched.newPassword && formik.errors.newPassword
-                  }
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleTogglePasswordVisibility}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="confirmNewPassword"
-                  name="confirmNewPassword"
-                  label="Confirm New Password"
-                  type={showPassword ? "text" : "password"}
-                  value={formik.values.confirmNewPassword}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched.confirmNewPassword &&
-                    Boolean(formik.errors.confirmNewPassword)
-                  }
-                  helperText={
-                    formik.touched.confirmNewPassword &&
-                    formik.errors.confirmNewPassword
-                  }
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleTogglePasswordVisibility}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={formik.isSubmitting}
-                  fullWidth
-                  sx={{
-                    backgroundColor: "turquoise",
-                    textTransform: "none",
-                    fontSize: "15px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {formik.isSubmitting ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Update Profile"
-                  )}
-                </Button>
-              </Grid>
-            </Grid>
-          </Box>
-          <Box
-            sx={{
-              mt: 4,
-              p: 3,
-              borderRadius: 2,
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              bgcolor: "black",
-            }}
-          >
-            <Typography
-              variant="h5"
-              sx={{
-                color: "turquoise",
-                fontWeight: "bold",
-                mb: 1,
-              }}
-            >
-              Account settings
-            </Typography>
-
-            <Typography
-              sx={{
-                color: "rgba(255,255,255,0.72)",
-                mb: 2.5,
-                lineHeight: 1.7,
-              }}
-            >
-              Manage communication preferences, billing, subscription options,
-              and account-level actions in one place.
-            </Typography>
-
-            <Button
-              variant="outlined"
-              onClick={() => navigate(ROUTES.SETTINGS)}
-              sx={{
-                color: "turquoise",
-                borderColor: "rgba(64, 224, 208, 0.45)",
-                textTransform: "none",
-                fontWeight: "bold",
-                "&:hover": {
-                  borderColor: "turquoise",
-                  bgcolor: "rgba(64, 224, 208, 0.08)",
-                },
-              }}
-            >
-              Open account settings
-            </Button>
-          </Box>
-
-          <Box
-            sx={{
-              mt: 6,
-              p: 3,
-              borderRadius: 2,
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              bgcolor: "black",
-            }}
-          >
-            <Typography
-              variant="h4"
-              gutterBottom
-              sx={{
-                color: "turquoise",
-                fontWeight: "bold",
-              }}
-            >
-              Style Preferences
-            </Typography>
-
-            <Typography
-              variant="body2"
-              sx={{ color: "rgba(255,255,255,0.72)", mb: 3 }}
-            >
-              Update how Dream Closet tailors search and recommendations for
-              you.
-            </Typography>
-
-            <Divider sx={{ borderColor: "rgba(255,255,255,0.12)", mb: 3 }} />
-
-            <Box sx={{ mb: 3 }}>
-              <GenderSelectStep
-                selectedGender={editGender}
-                onChangeGender={setEditGender}
-                loading={false}
-              />
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <CategoryMultiSelectStep
-                categories={availableCategories}
-                selectedCategories={editCategories}
-                onToggleCategory={handleToggleCategory}
-                loading={false}
-              />
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <BrandMultiSelectStep
-                brandGroups={brandGroups}
-                selectedBrands={editBrands}
-                onToggleBrand={handleToggleBrand}
-                loading={savingOnboarding}
-              />
-            </Box>
-
-            <Button
-              variant="contained"
-              onClick={handleSaveOnboarding}
-              disabled={
-                !editGender ||
-                editCategories.length === 0 ||
-                editBrands.length === 0 ||
-                savingOnboarding
-              }
-              sx={{
-                bgcolor: "turquoise",
-                color: "black",
-                fontWeight: "bold",
-                textTransform: "none",
-              }}
-            >
-              {savingOnboarding ? (
-                <CircularProgress size={20} />
-              ) : (
-                "Save style preferences"
-              )}
-            </Button>
-          </Box>
         </Container>
-
         <Footer />
-        <ToastContainer />
-      </ThemeProvider>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
-};
-
-export default ProfilePage;
+}
