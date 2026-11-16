@@ -1,5 +1,8 @@
 import { buildSavedSearchPayload } from "./savedDataService";
-import { buildSavedItemPayload } from "../search/utils/buildSavedItemPayload";
+import {
+  buildSavedItemIdentity,
+  buildSavedItemPayload,
+} from "../search/utils/buildSavedItemPayload";
 jest.mock("../../backend/firebase/firebase", () => ({
   auth: {},
   db: {},
@@ -37,12 +40,12 @@ test("malformed saved searches are rejected before writing", () => {
     expect(() => buildSavedSearchPayload(value)).toThrow();
   }
 });
-test("saved products omit provider and ownership fields and preserve zero price", () => {
+test("saved products normalize canonical fields and preserve zero price", () => {
   const value = buildSavedItemPayload({
-    name: "Jacket",
-    source: "ASOS",
+    name: " Jacket ",
+    source: " ASOS ",
     productUrl: "https://example.com/p",
-    numericPrice: 0,
+    numericPrice: "0",
     price: 0,
     userId: "forged",
     itemId: "123",
@@ -50,19 +53,55 @@ test("saved products omit provider and ownership fields and preserve zero price"
   });
   expect(value.numericPrice).toBe(0);
   expect(value.price).toBe("0");
+  expect(value.name).toBe("Jacket");
+  expect(value.source).toBe("ASOS");
   expect(value).not.toHaveProperty("userId");
   expect(value).not.toHaveProperty("raw");
   expect(value).not.toHaveProperty("itemId");
 });
+test("saved products reject missing names and non-numeric price values", () => {
+  for (const product of [
+    { source: "ASOS", productUrl: "https://example.com/p" },
+    {
+      name: "Jacket",
+      source: "ASOS",
+      productUrl: "https://example.com/p",
+      numericPrice: true,
+    },
+    {
+      name: "Jacket",
+      source: "ASOS",
+      productUrl: "https://example.com/p",
+      numericPrice: "Infinity",
+    },
+  ]) {
+    expect(() => buildSavedItemPayload(product)).toThrow();
+  }
+});
+test("saved product identity normalizes source casing and URL scheme", () => {
+  const identity = buildSavedItemIdentity({
+    source: " ASOS ",
+    productUrl: "HTTPS://example.com/product#details",
+  });
+  expect(identity).toEqual(["asos", "https://example.com/product#details"]);
+  expect(
+    buildSavedItemIdentity({
+      source: "asos",
+      productUrl: "https://example.com/product#details",
+    }),
+  ).toEqual(identity);
+});
 test("unsafe URLs and invalid prices are rejected", () => {
   const invalidProducts = [
     // eslint-disable-next-line no-script-url -- Intentional unsafe URL used to test rejection.
-    { productUrl: "javascript:alert(1)" },
+    { name: "Jacket", productUrl: "javascript:alert(1)" },
     {
+      name: "Jacket",
       productUrl: "https://example.com/p",
       numericPrice: NaN,
     },
     {
+      name: "Jacket",
       productUrl: "https://example.com/p",
       numericPrice: -1,
     },

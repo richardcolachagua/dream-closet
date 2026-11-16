@@ -1,5 +1,15 @@
-import React from "react";
-import { Box, Button, Chip, Stack, Tooltip, Typography } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Snackbar,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ImageNotSupportedOutlinedIcon from "@mui/icons-material/ImageNotSupportedOutlined";
@@ -52,6 +62,8 @@ const getDetailValues = (result = {}) => {
 };
 
 function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const { name, brand, imageUrl, productUrl, source, availability } =
     result || {};
 
@@ -60,8 +72,17 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
   const canSave = Boolean(userId && onSaveItem);
   const hasProductUrl = Boolean(productUrl);
 
-  const handleSave = () => {
-    if (canSave) onSaveItem(result);
+  const handleSave = async () => {
+    if (!canSave || saving) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      await onSaveItem(result);
+    } catch (failure) {
+      setSaveError(failure.message || "Could not save this item.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -293,8 +314,14 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             >
               <Button
                 onClick={handleSave}
-                disabled={!canSave}
-                startIcon={<FavoriteBorderIcon />}
+                disabled={!canSave || saving}
+                startIcon={
+                  saving ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <FavoriteBorderIcon />
+                  )
+                }
                 sx={{
                   ...secondaryButtonSx,
                   width: "100%",
@@ -305,12 +332,21 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
                   },
                 }}
               >
-                Save
+                {saving ? "Saving..." : "Save"}
               </Button>
             </span>
           </Tooltip>
         </Stack>
       </Stack>
+      <Snackbar
+        open={Boolean(saveError)}
+        autoHideDuration={6000}
+        onClose={() => setSaveError("")}
+      >
+        <Alert severity="error" onClose={() => setSaveError("")}>
+          {saveError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

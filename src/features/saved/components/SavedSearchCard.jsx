@@ -16,8 +16,8 @@ import { interactiveCardSx } from "../../../shared/ui/theme/componentStyles";
 
 const SORT_LABELS = {
   relevance: "Relevance",
-  priceasc: "Price low to high",
-  pricedesc: "Price high to low",
+  price_asc: "Price low to high",
+  price_desc: "Price high to low",
   newest: "Newest",
 };
 
@@ -80,6 +80,7 @@ function SavedSearchCard({
   );
 
   const handleKeyDown = (event) => {
+    if (event.target !== event.currentTarget) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onClick?.();
@@ -88,7 +89,10 @@ function SavedSearchCard({
 
   return (
     <Box
-      onClick={onClick}
+      onClick={(event) => {
+        if (event.target.closest("button, input, [role='checkbox']")) return;
+        onClick?.();
+      }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
@@ -146,8 +150,9 @@ function SavedSearchCard({
           {typeof onSelect === "function" ? (
             <Checkbox
               checked={!!selected}
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
               onChange={(event) => {
-                event.stopPropagation();
                 onSelect();
               }}
               sx={{

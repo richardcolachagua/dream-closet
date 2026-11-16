@@ -1,13 +1,20 @@
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 
-function SaveSearchButton({ onSave, disabled = false, sx = {} }) {
+function SaveSearchButton({
+  onSave,
+  disabled = false,
+  saving = false,
+  sx = {},
+}) {
   return (
     <Button
       variant="outlined"
-      startIcon={<BookmarkBorderIcon />}
+      startIcon={
+        saving ? <CircularProgress size={16} /> : <BookmarkBorderIcon />
+      }
       onClick={onSave}
-      disabled={disabled}
+      disabled={disabled || saving}
       sx={{
         minHeight: 44,
         px: 2.25,
@@ -30,7 +37,7 @@ function SaveSearchButton({ onSave, disabled = false, sx = {} }) {
         ...sx,
       }}
     >
-      Save Search
+      {saving ? "Saving..." : "Save Search"}
     </Button>
   );
 }

@@ -10,7 +10,17 @@ export const useSavedSearches = () => {
 };
 export function SavedSearchesProvider({ children }) {
   const { user } = useAuth();
-  const { records, loading, error, refresh, remove } =
+  const {
+    records,
+    loading,
+    error,
+    refresh,
+    remove,
+    hasMore,
+    loadingMore,
+    loadMoreError,
+    loadMore,
+  } =
     useSavedCollection("savedSearches");
   const fetchSavedSearches = (uid) => {
     if (uid && uid !== user?.uid)
@@ -23,8 +33,13 @@ export function SavedSearchesProvider({ children }) {
         savedSearches: records,
         loading,
         error,
+        hasMore,
+        loadingMore,
+        loadMoreError,
+        loadMore,
         fetchSavedSearches,
         deleteSavedSearch: remove,
+        refresh,
       }}
     >
       {children}

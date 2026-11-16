@@ -7,7 +7,10 @@ import {
 } from "firebase/firestore";
 import { auth, authReady, db } from "../../backend/firebase/firebase";
 import catalog from "../../shared/data/profileCatalog.json";
-import { buildSavedItemPayload } from "../search/utils/buildSavedItemPayload";
+import {
+  buildSavedItemIdentity,
+  buildSavedItemPayload,
+} from "../search/utils/buildSavedItemPayload";
 
 export const requireSavedDataUser = async (uid) => {
   await authReady;
@@ -109,12 +112,7 @@ export const buildSavedSearchPayload = ({
 };
 
 export const savedItemReference = async (uid, item) => {
-  const payload = buildSavedItemPayload(item);
-
-  const identity = JSON.stringify([
-    payload.source.toLowerCase(),
-    payload.productUrl,
-  ]);
+  const identity = JSON.stringify(buildSavedItemIdentity(item));
 
   const digest = await globalThis.crypto.subtle.digest(
     "SHA-256",
@@ -131,8 +129,8 @@ export const savedItemReference = async (uid, item) => {
 export const saveItem = async (uid, item) => {
   await requireSavedDataUser(uid);
 
-  const reference = await savedItemReference(uid, item);
   const payload = buildSavedItemPayload(item);
+  const reference = await savedItemReference(uid, payload);
 
   await runTransaction(db, async (transaction) => {
     const snapshot = await transaction.get(reference);
@@ -148,8 +146,8 @@ export const saveItem = async (uid, item) => {
 export const toggleSavedItem = async (uid, item) => {
   await requireSavedDataUser(uid);
 
-  const reference = await savedItemReference(uid, item);
   const payload = buildSavedItemPayload(item);
+  const reference = await savedItemReference(uid, payload);
 
   return runTransaction(db, async (transaction) => {
     const snapshot = await transaction.get(reference);

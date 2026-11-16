@@ -7,9 +7,11 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Snackbar,
   Stack,
   Tooltip,
   Typography,
+  Alert,
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -42,6 +44,9 @@ function SavedItemCard({
 }) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [feedbackSeverity, setFeedbackSeverity] = useState("success");
 
   const description = useMemo(() => {
     return (
@@ -57,9 +62,12 @@ function SavedItemCard({
     try {
       await navigator.clipboard.writeText(productUrl);
       setCopied(true);
+      setFeedbackSeverity("success");
+      setFeedback("Product link copied.");
       window.setTimeout(() => setCopied(false), 1800);
-    } catch (error) {
-      console.error("Failed to copy product URL", error);
+    } catch {
+      setFeedbackSeverity("error");
+      setFeedback("Could not copy the product link.");
     }
   };
 
@@ -76,15 +84,29 @@ function SavedItemCard({
         }}
       >
         <Box
+          component="button"
+          type="button"
+          aria-label={`Preview ${title || "saved item"}`}
+          disabled={!imageUrl || imageFailed}
+          onClick={() => setPreviewOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              if (imageUrl && !imageFailed) setPreviewOpen(true);
+            }
+          }}
           sx={{
             position: "relative",
             aspectRatio: "4 / 5",
+            width: "100%",
             bgcolor: colors.surface2,
+            border: 0,
             borderBottom: `1px solid ${colors.border}`,
             overflow: "hidden",
-            cursor: imageUrl ? "zoom-in" : "default",
+            cursor: imageUrl && !imageFailed ? "zoom-in" : "default",
+            p: 0,
+            textAlign: "inherit",
           }}
-          onClick={() => imageUrl && setPreviewOpen(true)}
         >
           {badge ? (
             <Chip
@@ -102,12 +124,13 @@ function SavedItemCard({
             />
           ) : null}
 
-          {imageUrl ? (
+          {imageUrl && !imageFailed ? (
             <Box
               component="img"
               src={imageUrl}
               alt={title || "Saved item"}
               loading="lazy"
+              onError={() => setImageFailed(true)}
               sx={{
                 width: "100%",
                 height: "100%",
@@ -281,11 +304,12 @@ function SavedItemCard({
         </DialogTitle>
 
         <DialogContent>
-          {imageUrl ? (
+          {imageUrl && !imageFailed ? (
             <Box
               component="img"
               src={imageUrl}
               alt={title || "Saved item"}
+              onError={() => setImageFailed(true)}
               sx={{
                 width: "100%",
                 borderRadius: radius.md,
@@ -293,7 +317,17 @@ function SavedItemCard({
                 objectFit: "cover",
               }}
             />
-          ) : null}
+          ) : (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              spacing={1}
+              sx={{ minHeight: 180, color: colors.textMuted }}
+            >
+              <ImageNotSupportedOutlinedIcon />
+              <Typography>Image unavailable</Typography>
+            </Stack>
+          )}
 
           <Typography
             sx={{ color: colors.textSecondary, lineHeight: 1.75, mb: 2 }}
@@ -325,6 +359,19 @@ function SavedItemCard({
           </Stack>
         </DialogContent>
       </Dialog>
+      <Snackbar
+        open={Boolean(feedback)}
+        autoHideDuration={4000}
+        onClose={() => setFeedback("")}
+      >
+        <Alert
+          severity={feedbackSeverity}
+          onClose={() => setFeedback("")}
+          sx={{ width: "100%" }}
+        >
+          {feedback}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
