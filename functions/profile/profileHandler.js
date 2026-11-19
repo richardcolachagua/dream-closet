@@ -7,6 +7,9 @@ const createProfileHandler = ({
   HttpsError,
   logger = console,
 }) => {
+  const fieldValue =
+    FieldValue || (admin.firestore && admin.firestore.FieldValue);
+
   return async (data, context) => {
     if (
       !context.auth?.uid ||
@@ -23,10 +26,20 @@ const createProfileHandler = ({
     }
     const uid = context.auth.uid;
     const reference = db.collection('users').doc(uid);
+    const deletionReference = db.collection('accountDeletions').doc(uid);
     let names;
     try {
       names = await db.runTransaction(async (transaction) => {
-        const snapshot = await transaction.get(reference);
+        const [deletionSnapshot, snapshot] = await Promise.all([
+          transaction.get(deletionReference),
+          transaction.get(reference),
+        ]);
+        if (deletionSnapshot.exists) {
+          throw new HttpsError(
+              'failed-precondition',
+              'Account deletion is in progress.',
+          );
+        }
         if (!snapshot.exists) {
           throw new HttpsError(
               'failed-precondition',
@@ -53,8 +66,7 @@ const createProfileHandler = ({
         }
         transaction.update(reference, {
           ...next,
-          updatedAt: (FieldValue || admin.firestore?.FieldValue)
-              .serverTimestamp(),
+          updatedAt: fieldValue.serverTimestamp(),
         });
         return next;
       });

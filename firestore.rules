@@ -6,6 +6,10 @@ service cloud.firestore {
         && request.auth.uid == uid
         && request.auth.token.firebase.sign_in_provider != "anonymous";
     }
+    function canWriteAccountData(uid) {
+      return isOwner(uid)
+        && !exists(/databases/$(database)/documents/accountDeletions/$(uid));
+    }
     function exactKeys(data, keys) {
       return data is map && data.keys().hasAll(keys) && data.keys().hasOnly(keys);
     }
@@ -91,14 +95,14 @@ service cloud.firestore {
     match /users/{uid} {
       allow get: if isOwner(uid);
       allow list, delete: if false;
-      allow create: if isOwner(uid)
+      allow create: if canWriteAccountData(uid)
         && request.resource.data.keys().hasOnly(["firstName", "lastName", "email",
           "onboarding", "preferences", "createdAt", "updatedAt"])
         && profile(request.resource.data)
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
-      allow update: if isOwner(uid)
+      allow update: if canWriteAccountData(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           "firstName", "lastName", "onboarding", "preferences", "updatedAt"])
         && profile(request.resource.data)
@@ -106,19 +110,24 @@ service cloud.firestore {
         && request.resource.data.email == resource.data.email
         && request.resource.data.updatedAt == request.time;
       match /savedItems/{id} {
-        allow read, delete: if isOwner(uid);
-        allow create: if isOwner(uid) && savedItem(request.resource.data)
+        allow read: if isOwner(uid);
+        allow delete: if canWriteAccountData(uid);
+        allow create: if canWriteAccountData(uid) && savedItem(request.resource.data)
           && request.resource.data.createdAt == request.time;
-        allow update: if isOwner(uid) && savedItem(request.resource.data)
+        allow update: if canWriteAccountData(uid) && savedItem(request.resource.data)
           && request.resource.data.createdAt == resource.data.createdAt;
       }
       match /savedSearches/{id} {
-        allow read, delete: if isOwner(uid);
-        allow create: if isOwner(uid) && savedSearch(request.resource.data)
+        allow read: if isOwner(uid);
+        allow delete: if canWriteAccountData(uid);
+        allow create: if canWriteAccountData(uid) && savedSearch(request.resource.data)
           && request.resource.data.createdAt == request.time;
-        allow update: if isOwner(uid) && savedSearch(request.resource.data)
+        allow update: if canWriteAccountData(uid) && savedSearch(request.resource.data)
           && request.resource.data.createdAt == resource.data.createdAt;
       }
+    }
+    match /accountDeletions/{uid} {
+      allow read, write: if false;
     }
   }
 }

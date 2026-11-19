@@ -30,11 +30,16 @@ const fixture = (options = {}) => {
   const reference = {
     get: async () => ({ exists: Boolean(stored), data: () => stored }),
   };
+  const deletionReference = {
+    get: async () => ({ exists: options.deletionInProgress === true }),
+  };
   const db = {
-    collection: () => ({ doc: () => reference }),
+    collection: (name) => ({
+      doc: () => name === "accountDeletions" ? deletionReference : reference,
+    }),
     runTransaction: async (callback) =>
       callback({
-        get: reference.get,
+        get: (target) => target.get(),
         update: (_reference, changes) => {
           stored = { ...stored, ...changes };
         },
@@ -129,6 +134,16 @@ test("missing profile is not recreated by the Admin callable", async () => {
     code: "failed-precondition",
   });
   assert.equal(f.stored(), null);
+});
+test("profile updates are blocked after account deletion starts", async () => {
+  const f = fixture({ deletionInProgress: true });
+
+  await assert.rejects(f.handler({ firstName: "Bob" }, context), {
+    code: "failed-precondition",
+    message: "Account deletion is in progress.",
+  });
+  assert.equal(f.stored().firstName, "Alice");
+  assert.equal(f.authCalls(), 0);
 });
 test("display name sync failure returns an explicit partial-success result", async () => {
   const f = fixture({ authFailure: true });

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+const prompts = [
+  "I'm searching for a velour blue t-shirt",
+  "I'm searching for high waisted black shorts",
+  "I'm searching for a yellow sundress",
+  "I'm searching for a big black puffer",
+];
+
 const AnimatedSearchBar = () => {
   const [prompt, setPrompt] = useState("");
-  const prompts = [
-    "I'm searching for a velour blue t-shirt",
-    "I'm searching for high waisted black shorts",
-    "I'm searching for a yellow sundress",
-    "I'm searching for a big black puffer",
-  ];
 
   // "Search for products",
   //     "Find what you need",
@@ -23,7 +24,7 @@ const AnimatedSearchBar = () => {
       });
     }, 900);
     return () => clearInterval(interval);
-  }, [prompts]);
+  }, []);
 
   return (
     <motion.div

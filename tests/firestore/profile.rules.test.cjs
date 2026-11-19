@@ -328,6 +328,30 @@ test("direct client profile deletion is denied", async () => {
   await assertFails(deleteDoc(doc(registeredDb(), "users", "alice")));
 });
 
+test("deletion tombstone blocks writes while allowing profile recovery reads", async () => {
+  await seed();
+  await environment.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "accountDeletions", "alice"), {
+      status: "in_progress",
+    });
+  });
+
+  const db = registeredDb();
+  await assertSucceeds(getDoc(doc(db, "users", "alice")));
+  await assertFails(
+    updateDoc(doc(db, "users", "alice"), {
+      firstName: "Recreated",
+      updatedAt: serverTimestamp(),
+    }),
+  );
+  await assertFails(
+    deleteDoc(doc(db, "users", "alice", "savedItems", "item")),
+  );
+  await assertFails(
+    setDoc(doc(db, "users", "alice", "savedItems", "item"), {}),
+  );
+});
+
 test("future operational and quota collections are denied", async () => {
   const db = registeredDb();
 

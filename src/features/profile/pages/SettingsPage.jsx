@@ -119,6 +119,7 @@ function SettingsPage() {
 
   const isLoading = authLoading || loadingSettings;
   const canRenderSettings = Boolean(user?.uid) && !pageError;
+  const canRenderDeletion = Boolean(user?.uid);
 
   return (
     <ThemeProvider theme={theme}>
@@ -222,9 +223,10 @@ function SettingsPage() {
                   />
 
                   <ManageSubscriptionCard subscription={subscription} />
-
-                  <DeleteAccountCard />
                 </Stack>
+              ) : null}
+              {canRenderDeletion ? (
+                <DeleteAccountCard recoveryMode={Boolean(pageError)} />
               ) : null}
             </Stack>
           </Container>

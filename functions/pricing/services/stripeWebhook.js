@@ -1,6 +1,13 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const createStripeClient = require('stripe');
+const {
+  isAccountDeletionInProgress,
+  writeAccountProfileUnlessDeleting,
+} = require('./accountProfileWriter');
+const {
+  cancelSubscriptionForDeletedAccount,
+} = require('./stripeWebhookUtils');
 
 const db = admin.firestore();
 
@@ -117,44 +124,45 @@ const upsertSubscription = async (stripe, subscription, explicitUid = null) => {
       customerId: subscription?.customer,
       eventStatus: subscription?.status,
     });
-
     return;
   }
 
-  const userRef = db.doc(`users/${uid}`);
-  const userSnap = await userRef.get();
-
-  // Do not recreate a deleted Firestore user document if a delayed Stripe
-  // event arrives after account deletion.
-  if (!userSnap.exists) {
-    console.warn('Ignoring Stripe event for a deleted or missing user.', {
+  if (await isAccountDeletionInProgress(db, uid)) {
+    await cancelSubscriptionForDeletedAccount(stripe, uid, subscription?.id);
+    console.warn('Canceled delayed Stripe subscription event during deletion.', {
       uid,
       subscriptionId: subscription?.id,
     });
-
     return;
   }
 
   const price = getSubscriptionPrice(subscription);
+  const updated = await writeAccountProfileUnlessDeleting(db, uid, {
+    subscription: {
+      status: subscription?.status || 'unknown',
+      planId: price?.product || null,
+      priceId: price?.id || null,
+      currentPeriodEnd: subscription?.current_period_end || null,
+      cancelAtPeriodEnd: Boolean(subscription?.cancel_at_period_end),
+      stripeCustomerId:
+        typeof subscription?.customer === 'string' ?
+          subscription.customer :
+          subscription?.customer?.id || null,
+      stripeSubscriptionId: subscription?.id || null,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+  });
 
-  await userRef.set(
-      {
-        subscription: {
-          status: subscription?.status || 'unknown',
-          planId: price?.product || null,
-          priceId: price?.id || null,
-          currentPeriodEnd: subscription?.current_period_end || null,
-          cancelAtPeriodEnd: Boolean(subscription?.cancel_at_period_end),
-          stripeCustomerId:
-          typeof subscription?.customer === 'string' ?
-            subscription.customer :
-            subscription?.customer?.id || null,
-          stripeSubscriptionId: subscription?.id || null,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-      },
-      {merge: true},
-  );
+  if (!updated) {
+    if (await isAccountDeletionInProgress(db, uid)) {
+      await cancelSubscriptionForDeletedAccount(stripe, uid, subscription?.id);
+    }
+    console.warn('Ignoring Stripe event while account deletion is in progress.', {
+      uid,
+      subscriptionId: subscription?.id,
+    });
+    return;
+  }
 };
 
 const handleCheckoutCompleted = async (stripe, session) => {
@@ -169,18 +177,18 @@ const handleCheckoutCompleted = async (stripe, session) => {
     return;
   }
 
-  const userRef = db.doc(`users/${uid}`);
-  const userSnap = await userRef.get();
+  const subscriptionId =
+    typeof session?.subscription === 'string' ?
+      session.subscription :
+      session?.subscription?.id;
 
-  if (!userSnap.exists) {
-    console.warn(
-        'Ignoring checkout completion for a deleted or missing user.',
-        {
-          uid,
-          sessionId: session?.id,
-        },
-    );
-
+  if (await isAccountDeletionInProgress(db, uid)) {
+    await cancelSubscriptionForDeletedAccount(stripe, uid, subscriptionId);
+    console.warn('Canceled delayed checkout during account deletion.', {
+      uid,
+      sessionId: session?.id,
+      subscriptionId,
+    });
     return;
   }
 
@@ -189,21 +197,28 @@ const handleCheckoutCompleted = async (stripe, session) => {
       session.customer :
       session?.customer?.id || null;
 
-  await userRef.set(
-      {
-        stripeCustomerId: customerId,
-        subscription: {
-          stripeCustomerId: customerId,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-      },
-      {merge: true},
-  );
+  const updated = await writeAccountProfileUnlessDeleting(db, uid, {
+    stripeCustomerId: customerId,
+    subscription: {
+      stripeCustomerId: customerId,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+  });
 
-  const subscriptionId =
-    typeof session?.subscription === 'string' ?
-      session.subscription :
-      session?.subscription?.id;
+  if (!updated) {
+    if (await isAccountDeletionInProgress(db, uid)) {
+      await cancelSubscriptionForDeletedAccount(stripe, uid, subscriptionId);
+    }
+    console.warn(
+        'Ignoring checkout completion for a deleting, deleted, or missing user.',
+        {
+          uid,
+          sessionId: session?.id,
+        },
+    );
+
+    return;
+  }
 
   if (!subscriptionId) {
     return;

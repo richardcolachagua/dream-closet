@@ -25,6 +25,7 @@ const LoadingRoute = () => (
 export const ProtectedRoute = ({
   children,
   inverse = false,
+  allowMissingProfile = false,
   redirectPath,
   roles = [],
 }) => {
@@ -68,6 +69,10 @@ export const ProtectedRoute = ({
   }
 
   if (profileError) {
+    if (allowMissingProfile) {
+      return <>{children}</>;
+    }
+
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
@@ -79,6 +84,10 @@ export const ProtectedRoute = ({
   }
 
   if (!hasProfile) {
+    if (allowMissingProfile) {
+      return <>{children}</>;
+    }
+
     return <Navigate to={ROUTES.LOGIN} replace state={{ from: currentPath }} />;
   }
 

@@ -47,6 +47,15 @@ exports.createCustomerPortalSession = functions.https.onCall(
       '/settings';
 
       const userRef = db.doc(`users/${context.auth.uid}`);
+      const deletionSnapshot = await db
+          .doc(`accountDeletions/${context.auth.uid}`)
+          .get();
+      if (deletionSnapshot.exists) {
+        throw new functions.https.HttpsError(
+            'failed-precondition',
+            'Account deletion is in progress.',
+        );
+      }
       const userSnap = await userRef.get();
 
       if (!userSnap.exists) {

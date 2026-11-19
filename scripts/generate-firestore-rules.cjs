@@ -16,7 +16,30 @@ const values = {
   __MBRANDS__: brands("male"),
   __SORTS__: catalog.sorts,
 };
-let rules = template;
+let rules = template
+  .replace(
+    "    function exactKeys(data, keys) {",
+    "    function canWriteAccountData(uid) {\n" +
+      "      return isOwner(uid)\n" +
+      "        && !exists(/databases/$(database)/documents/accountDeletions/$(uid));\n" +
+      "    }\n" +
+      "    function exactKeys(data, keys) {",
+  )
+  .replace(/allow create: if isOwner\(uid\)/g, "allow create: if canWriteAccountData(uid)")
+  .replace(/allow update: if isOwner\(uid\)/g, "allow update: if canWriteAccountData(uid)")
+  .replace(
+    /allow read, delete: if isOwner\(uid\);/g,
+    "allow read: if isOwner(uid);\n" +
+      "        allow delete: if canWriteAccountData(uid);",
+  )
+  .replace(
+    "    }\n  }\n}\n",
+    "    }\n" +
+      "    match /accountDeletions/{uid} {\n" +
+      "      allow read, write: if false;\n" +
+      "    }\n" +
+      "  }\n}\n",
+  );
 for (const [key, value] of Object.entries(values)) {
   rules = rules.replace(key, JSON.stringify(value));
 }
