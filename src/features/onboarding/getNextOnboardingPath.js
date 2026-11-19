@@ -12,10 +12,6 @@ export const getNextOnboardingPath = (onboarding) => {
     return ROUTES.ONBOARDING_CATEGORIES;
   }
 
-  if (!Array.isArray(onboarding?.brands) || onboarding.brands.length === 0) {
-    return ROUTES.ONBOARDING_BRANDS;
-  }
-
   return ROUTES.ONBOARDING_BRANDS;
 };
 

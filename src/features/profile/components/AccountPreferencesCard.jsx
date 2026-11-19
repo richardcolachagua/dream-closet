@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -31,7 +31,15 @@ function AccountPreferencesCard({ initialEmailOptIn = true, onSave }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  useEffect(() => {
+    setEmailOptIn(Boolean(initialEmailOptIn));
+  }, [initialEmailOptIn]);
+
   const handleSave = async () => {
+    if (typeof onSave !== "function") {
+      setError("Preference saving is unavailable. Please reload and try again.");
+      return;
+    }
     setError("");
     setSuccess("");
     setSaving(true);
@@ -72,8 +80,9 @@ function AccountPreferencesCard({ initialEmailOptIn = true, onSave }) {
               maxWidth: 720,
             }}
           >
-            Choose whether Dream Closet can send you product updates, feature
-            news, and occasional account-related email communication.
+            Choose whether Dream Closet can send optional marketing and
+            product updates by email. Essential account and security messages
+            remain enabled.
           </Typography>
         </Box>
 
@@ -127,7 +136,7 @@ function AccountPreferencesCard({ initialEmailOptIn = true, onSave }) {
                     lineHeight: 1.55,
                   }}
                 >
-                  Receive occasional product news and account-related updates.
+                  Receive optional marketing and product news.
                 </Typography>
               </Box>
             </Stack>

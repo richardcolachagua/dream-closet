@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
 import ProfileHeader from "../components/ProfileHeader.jsx";
 import AccountPreferencesCard from "../components/AccountPreferencesCard.jsx";
 import ManageSubscriptionCard from "../components/ManageSubscriptionCard.jsx";
@@ -60,19 +60,22 @@ function SettingsPage() {
     const unsubscribe = onSnapshot(
       userRef,
       (snapshot) => {
-        setUserData(
-          snapshot.exists()
-            ? {
-                ...DEFAULT_USER_DATA,
-                ...snapshot.data(),
-                preferences: {
-                  ...DEFAULT_USER_DATA.preferences,
-                  ...(snapshot.data()?.preferences || {}),
-                },
-              }
-            : DEFAULT_USER_DATA,
-        );
-
+        if (!snapshot.exists()) {
+          setUserData(DEFAULT_USER_DATA);
+          setPageError(
+            "Your account profile is missing. Sign in again to initialize it.",
+          );
+          setLoadingSettings(false);
+          return;
+        }
+        setUserData({
+          ...DEFAULT_USER_DATA,
+          ...snapshot.data(),
+          preferences: {
+            ...DEFAULT_USER_DATA.preferences,
+            ...(snapshot.data()?.preferences || {}),
+          },
+        });
         setLoadingSettings(false);
       },
       (error) => {
@@ -108,6 +111,7 @@ function SettingsPage() {
         preferences: {
           emailNotifications: Boolean(nextValue),
         },
+        updatedAt: serverTimestamp(),
       },
       { merge: true },
     );

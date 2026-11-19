@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const {FieldValue, getFirestore} = require('firebase-admin/firestore');
 
 const isFunctionsEmulator = process.env.FUNCTIONS_EMULATOR === 'true';
 
@@ -21,9 +22,10 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-const db = admin.firestore();
+const db = getFirestore();
 
 module.exports = {
   admin,
   db,
+  FieldValue,
 };

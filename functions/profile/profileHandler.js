@@ -1,6 +1,12 @@
 const {normalizeName, validateProfileData} = require('./profileValidation');
 
-const createProfileHandler = ({db, admin, HttpsError, logger = console}) => {
+const createProfileHandler = ({
+  db,
+  admin,
+  FieldValue,
+  HttpsError,
+  logger = console,
+}) => {
   return async (data, context) => {
     if (
       !context.auth?.uid ||
@@ -47,13 +53,19 @@ const createProfileHandler = ({db, admin, HttpsError, logger = console}) => {
         }
         transaction.update(reference, {
           ...next,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: (FieldValue || admin.firestore?.FieldValue)
+              .serverTimestamp(),
         });
         return next;
       });
     } catch (error) {
       if (error instanceof HttpsError) throw error;
-      logger.error('Profile write failed', {uid, code: error.code});
+      logger.error('Profile write failed', {
+        uid,
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      });
       throw new HttpsError(
           'internal',
           'Could not save your profile. Please retry.',

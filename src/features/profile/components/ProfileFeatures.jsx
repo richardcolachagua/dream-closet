@@ -33,7 +33,7 @@ const featureCards = [
   {
     title: "Style settings",
     description:
-      "Refine the preferences Dream Closet uses to tailor results and future recommendations.",
+      "Update your shopping, category, and brand preferences.",
     icon: <TuneRoundedIcon />,
     cta: "Go to settings",
     to: ROUTES.SETTINGS,

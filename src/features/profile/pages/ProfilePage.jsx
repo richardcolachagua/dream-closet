@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -39,8 +39,14 @@ import { colors } from "../../../shared/ui/theme/designTokens";
 
 const theme = createTheme();
 const schema = Yup.object({
-  firstName: Yup.string().trim().max(60),
-  lastName: Yup.string().trim().max(60),
+  firstName: Yup.string()
+    .trim()
+    .required("First name is required")
+    .max(60, "Use 60 characters or fewer"),
+  lastName: Yup.string()
+    .trim()
+    .required("Last name is required")
+    .max(60, "Use 60 characters or fewer"),
   newPassword: Yup.string().min(8, "Use at least 8 characters"),
   currentPassword: Yup.string().when("newPassword", {
     is: (value) => Boolean(value),
@@ -65,11 +71,24 @@ function ProfileEditor({ user, profile }) {
   const navigate = useNavigate();
   const [notice, setNotice] = useState(null);
   const [styleBusy, setStyleBusy] = useState(false);
+  const authNameParts = String(user.displayName || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const fallbackFirstName =
+    String(profile.firstName || "").trim() || authNameParts[0] || "";
+  const fallbackLastName =
+    String(profile.lastName || "").trim() || authNameParts.slice(1).join(" ");
   const [gender, setGender] = useState(profile.onboarding?.gender || "");
   const [categories, setCategories] = useState(
     profile.onboarding?.categories || [],
   );
   const [brands, setBrands] = useState(profile.onboarding?.brands || []);
+  useEffect(() => {
+    setGender(profile.onboarding?.gender || "");
+    setCategories(profile.onboarding?.categories || []);
+    setBrands(profile.onboarding?.brands || []);
+  }, [profile.onboarding]);
   const hasPassword = user.providerData.some(
     (provider) => provider.providerId === "password",
   );
@@ -83,9 +102,10 @@ function ProfileEditor({ user, profile }) {
     );
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      firstName: profile.firstName || "",
-      lastName: profile.lastName || "",
+      firstName: fallbackFirstName,
+      lastName: fallbackLastName,
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
@@ -97,7 +117,12 @@ function ProfileEditor({ user, profile }) {
         const changes = {};
         for (const key of ["firstName", "lastName"]) {
           const value = values[key].replace(/\s+/g, " ").trim();
-          if (value !== profile[key]) changes[key] = value;
+          if (
+            value !==
+            (key === "firstName" ? fallbackFirstName : fallbackLastName)
+          ) {
+            changes[key] = value;
+          }
         }
         let nameSaved = false;
         if (Object.keys(changes).length) {
@@ -200,7 +225,7 @@ function ProfileEditor({ user, profile }) {
   return (
     <Stack spacing={4}>
       <Typography variant="h3">
-        Welcome, {profile.firstName || "there"}
+        Welcome, {fallbackFirstName || "there"}
       </Typography>
       {notice && <Alert severity={notice.severity}>{notice.text}</Alert>}
       <Box

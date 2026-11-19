@@ -6,12 +6,12 @@ import {
   createCheckoutSession,
   createCustomerPortalSession,
   ENABLE_BILLING,
-} from "../../billing/services/billingService";
+} from "../../pricing/services/billingService";
 import {
   formatSubscriptionStatus,
   getSubscriptionCallout,
   hasActiveSubscription,
-} from "../../billing/utils/subscriptionHelpers";
+} from "../../pricing/utils/subscriptionHelpers";
 import { ROUTES } from "../../../app/routes/routePaths";
 import { colors, radius } from "../../../shared/ui/theme/designTokens";
 import {

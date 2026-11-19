@@ -8,6 +8,8 @@ import {
   MenuItem,
   Button,
   Container,
+  Alert,
+  Snackbar,
   Stack,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -24,6 +26,7 @@ import {
 
 function ProfileHeader() {
   const [anchorElNav, setAnchorElNav] = useState(null);
+  const [logoutError, setLogoutError] = useState("");
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
@@ -41,6 +44,7 @@ function ProfileHeader() {
       navigate(ROUTES.HOME, { replace: true });
     } catch (error) {
       console.error("Logout failed", error);
+      setLogoutError("We couldn’t log you out. Please try again.");
     }
   };
 
@@ -51,6 +55,7 @@ function ProfileHeader() {
   ];
 
   return (
+    <>
     <AppBar
       position="static"
       elevation={0}
@@ -170,6 +175,20 @@ function ProfileHeader() {
         </Toolbar>
       </Container>
     </AppBar>
+    <Snackbar
+      open={Boolean(logoutError)}
+      autoHideDuration={6000}
+      onClose={() => setLogoutError("")}
+    >
+      <Alert
+        severity="error"
+        onClose={() => setLogoutError("")}
+        sx={{ width: "100%" }}
+      >
+        {logoutError}
+      </Alert>
+    </Snackbar>
+    </>
   );
 }
 

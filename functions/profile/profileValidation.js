@@ -13,11 +13,17 @@ const validateProfileData = (data) => {
     );
   }
   for (const key of ['firstName', 'lastName']) {
-    if (
-      Object.prototype.hasOwnProperty.call(data, key) &&
-      (typeof data[key] !== 'string' || normalizeName(data[key]).length > 60)
-    ) {
-      errors.push(`Invalid ${key}; use a string of at most 60 characters.`);
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      if (typeof data[key] !== 'string') {
+        errors.push(`Invalid ${key}; use a string of at most 60 characters.`);
+      } else {
+        const normalized = normalizeName(data[key]);
+        if (!normalized || normalized.length > 60) {
+          errors.push(
+              `Invalid ${key}; use a non-empty string of at most 60 characters.`,
+          );
+        }
+      }
     }
   }
   return errors;

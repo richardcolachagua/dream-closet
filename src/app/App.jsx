@@ -10,6 +10,7 @@ import HomePage from "../features/home/pages/HomePage";
 import SearchPage from "../features/search/pages/SearchPage";
 import SavedItemsAndSearches from "../features/saved/pages/SavedSearchDetailPage";
 import ProfilePage from "../features/profile/pages/ProfilePage";
+import SettingsPage from "../features/profile/pages/SettingsPage";
 import FreeSearchPage from "../features/search/pages/FreeSearchPage";
 import PricingPage from "../features/pricing/pages/PricingPage";
 
@@ -136,7 +137,7 @@ function App() {
         element={
           <ProtectedRoute>
             <OnboardingGuard>
-              <ProfilePage />
+              <SettingsPage />
             </OnboardingGuard>
           </ProtectedRoute>
         }

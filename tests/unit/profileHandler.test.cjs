@@ -67,6 +67,8 @@ test("validation rejects malformed input and all non-name fields", () => {
     {},
     { firstName: 0 },
     { lastName: false },
+    { firstName: "   " },
+    { lastName: "\n\t" },
     { firstName: "x".repeat(61) },
     { email: "alice@example.com" },
     { subscription: {} },
@@ -75,7 +77,7 @@ test("validation rejects malformed input and all non-name fields", () => {
     assert.ok(validateProfileData(input).length);
   }
   assert.deepEqual(
-    validateProfileData({ firstName: "", lastName: "Example" }),
+    validateProfileData({ firstName: "Alice", lastName: "Example" }),
     [],
   );
 });
