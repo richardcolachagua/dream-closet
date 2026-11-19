@@ -135,10 +135,8 @@ function App() {
       <Route
         path={ROUTES.SETTINGS}
         element={
-          <ProtectedRoute>
-            <OnboardingGuard>
-              <SettingsPage />
-            </OnboardingGuard>
+          <ProtectedRoute allowMissingProfile>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />

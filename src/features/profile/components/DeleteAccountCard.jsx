@@ -35,11 +35,12 @@ const cardSx = {
   py: { xs: 2.25, sm: 3 },
 };
 
-function DeleteAccountCard() {
+function DeleteAccountCard({ recoveryMode = false }) {
   const [open, setOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [deletionPending, setDeletionPending] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -52,6 +53,16 @@ function DeleteAccountCard() {
       ) ?? false,
     [user],
   );
+  const usesGoogleProvider = useMemo(
+    () =>
+      user?.providerData?.some(
+        (provider) => provider.providerId === "google.com",
+      ) ?? false,
+    [user],
+  );
+  const canReauthenticate =
+    Boolean(user && !user.isAnonymous) &&
+    (usesPasswordProvider || usesGoogleProvider);
 
   const isValidConfirmation = confirmText.trim() === "DELETE";
 
@@ -88,8 +99,14 @@ function DeleteAccountCard() {
       return;
     }
 
-    const provider = new GoogleAuthProvider();
-    await reauthenticateWithPopup(user, provider);
+    if (usesGoogleProvider) {
+      await reauthenticateWithPopup(user, new GoogleAuthProvider());
+      return;
+    }
+
+    throw new Error(
+      "Account deletion is not supported for this sign-in provider.",
+    );
   };
 
   const handleConfirmDelete = async () => {
@@ -108,11 +125,40 @@ function DeleteAccountCard() {
     setDeleting(true);
 
     try {
-      await reauthenticateUser();
-      await user.getIdToken(true);
+      if (!deletionPending) {
+        try {
+          await reauthenticateUser();
+          await user.getIdToken(true);
+        } catch (reauthenticationError) {
+          if (
+            !recoveryMode ||
+            reauthenticationError?.code !== "auth/user-not-found"
+          ) {
+            throw reauthenticationError;
+          }
+
+          await httpsCallable(functions, "deleteAccount")({
+            resumePendingDeletion: true,
+          });
+          try {
+            await signOut(auth);
+          } catch (signOutError) {
+            console.warn(
+              "Local sign-out after deletion was skipped:",
+              signOutError,
+            );
+          }
+          navigate(ROUTES.HOME, { replace: true });
+          return;
+        }
+      }
 
       const deleteAccount = httpsCallable(functions, "deleteAccount");
-      await deleteAccount();
+      if (deletionPending) {
+        await deleteAccount({ resumePendingDeletion: true });
+      } else {
+        await deleteAccount();
+      }
 
       try {
         await signOut(auth);
@@ -126,6 +172,9 @@ function DeleteAccountCard() {
       navigate(ROUTES.HOME, { replace: true });
     } catch (err) {
       console.error("Account deletion failed:", err);
+      if (err?.details?.deletionPending) {
+        setDeletionPending(true);
+      }
 
       if (
         err?.code === "auth/wrong-password" ||
@@ -184,7 +233,8 @@ function DeleteAccountCard() {
 
               <Typography sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>
                 Permanently delete your Dream Closet account, preferences, saved
-                items, saved searches, and account access.
+                items, saved searches, and account access. Any active Stripe
+                subscription will be canceled immediately.
               </Typography>
             </Box>
           </Stack>
@@ -251,6 +301,12 @@ function DeleteAccountCard() {
               <li>Your subscription access and billing connection</li>
             </Box>
 
+            <Alert severity="info" sx={{ borderRadius: radius.md }}>
+              Stripe may retain financial and transaction records. Deleting
+              your Dream Closet account does not erase those records from
+              Stripe.
+            </Alert>
+
             <Typography sx={{ color: "#ffb8c0", fontWeight: 700 }}>
               This action cannot be undone.
             </Typography>
@@ -289,10 +345,16 @@ function DeleteAccountCard() {
                   },
                 }}
               />
-            ) : (
+            ) : usesGoogleProvider ? (
               <Alert severity="info" sx={{ borderRadius: radius.md }}>
                 You will be asked to confirm with Google before your account is
                 deleted.
+              </Alert>
+            ) : (
+              <Alert severity="error" sx={{ borderRadius: radius.md }}>
+                {user?.isAnonymous
+                  ? "Anonymous accounts cannot be deleted here. Create or sign in to a registered account first."
+                  : "This sign-in provider does not support account deletion yet."}
               </Alert>
             )}
 
@@ -351,6 +413,7 @@ function DeleteAccountCard() {
             onClick={handleConfirmDelete}
             disabled={
               deleting ||
+              !canReauthenticate ||
               !isValidConfirmation ||
               (usesPasswordProvider && !currentPassword)
             }
@@ -365,7 +428,11 @@ function DeleteAccountCard() {
               },
             }}
           >
-            {deleting ? "Deleting..." : "Delete account"}
+            {deleting
+              ? "Deleting..."
+              : deletionPending
+                ? "Retry deletion"
+                : "Delete account"}
           </Button>
         </DialogActions>
       </Dialog>
