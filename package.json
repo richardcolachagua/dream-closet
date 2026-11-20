@@ -57,7 +57,10 @@
     "rules:generate": "node scripts/generate-firestore-rules.cjs",
     "rules:check": "node scripts/generate-firestore-rules.cjs --check",
     "test:profile-backend": "node --test tests/unit/profileHandler.test.cjs",
-    "test:phase2:ui": "react-scripts test --watchAll=false --runInBand --runTestsByPath src/features/auth/profileService.test.js src/features/saved/savedDataService.test.js src/features/onboarding/utils/onboardingSchema.test.js"
+    "test:phase2:ui": "react-scripts test --watchAll=false --runInBand --runTestsByPath src/features/auth/profileService.test.js src/features/saved/savedDataService.test.js src/features/onboarding/utils/onboardingSchema.test.js",
+    "test:search-quota-policy": "node --test tests/unit/searchQuotaPolicy.test.cjs",
+    "test:search-quota:emulator": "node --test --test-concurrency=1 tests/emulator/searchQuotaService.test.cjs",
+    "test:search-quota:local": "firebase emulators:exec --project demo-dream-closet-quota --only firestore \"npm run test:search-quota:emulator\""
   },
   "browserslist": {
     "production": [
