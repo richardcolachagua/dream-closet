@@ -1,198 +1,92 @@
-import React from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { useId, useRef } from "react";
+import { Box, Button, ButtonBase, Stack, Typography } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import WestRoundedIcon from "@mui/icons-material/WestRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
 import { colors } from "../../../shared/ui/theme/designTokens";
 
-const optionCardSx = (selected) => ({
-  flex: 1,
-  minHeight: 180,
-  p: 2.5,
-  borderRadius: "22px",
-  border: `1px solid ${
-    selected ? "rgba(89,230,219,0.28)" : "rgba(255,255,255,0.08)"
-  }`,
-  background: selected
-    ? "linear-gradient(180deg, rgba(89,230,219,0.14), rgba(89,230,219,0.06))"
-    : "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-  color: "white",
-  textAlign: "left",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  boxShadow: selected ? "0 16px 40px rgba(0,0,0,0.18)" : "none",
-  "&:hover": {
-    borderColor: "rgba(89,230,219,0.28)",
-    background:
-      "linear-gradient(180deg, rgba(89,230,219,0.10), rgba(255,255,255,0.04))",
-  },
-});
-
-const actionButtonSx = {
-  minHeight: 50,
-  px: 3.25,
-  borderRadius: "999px",
-  textTransform: "none",
-  fontWeight: 800,
+const options = [
+  { value: "female", title: "Women’s sections", description: "Styles commonly found in women’s shopping sections." },
+  { value: "male", title: "Men’s sections", description: "Styles commonly found in men’s shopping sections." },
+];
+const actionSx = {
+  minHeight: 48, px: 3, borderRadius: 12, textTransform: "none", fontWeight: 800,
+  "&.Mui-disabled": { bgcolor: "#263130", color: "#bdc8c7", border: "1px solid #3b4746" },
 };
 
-const GenderSelectStep = ({
-  selectedGender = "",
-  onChangeGender,
-  onBack,
-  onNext,
-  loading = false,
+export default function GenderSelectStep({
+  selectedGender = "", onChangeGender, onBack, onNext, loading = false,
   title = "How do you primarily shop for clothes?",
-  description = "This helps us tailor brands, categories, and recommendations while still showing a broad range of results.",
+  description = "Choose the shopping sections you usually explore.",
   nextLabel = "Continue",
-}) => {
-  const canContinue = Boolean(selectedGender) && !loading;
+}) {
+  const titleId = useId();
+  const descriptionId = useId();
+  const buttons = useRef([]);
+  const selectedIndex = options.findIndex((option) => option.value === selectedGender);
 
-  const options = [
-    {
-      value: "female",
-      title: "Women’s sections",
-      description:
-        "Prioritize brands, fits, and categories commonly found in women’s shopping sections.",
-    },
-    {
-      value: "male",
-      title: "Men’s sections",
-      description:
-        "Prioritize brands, fits, and categories commonly found in men’s shopping sections.",
-    },
-  ];
+  const handleKey = (event, index) => {
+    const keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"];
+    if (loading || !keys.includes(event.key)) return;
+    event.preventDefault();
+    let next = index;
+    if (["ArrowRight", "ArrowDown"].includes(event.key)) next = (index + 1) % options.length;
+    if (["ArrowLeft", "ArrowUp"].includes(event.key)) next = (index - 1 + options.length) % options.length;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = options.length - 1;
+    onChangeGender?.(options[next].value);
+    buttons.current[next]?.focus();
+  };
 
   return (
-    <Box>
-      <Typography
-        sx={{
-          color: "white",
-          fontWeight: 800,
-          fontSize: { xs: "1.3rem", md: "1.55rem" },
-          mb: 1,
-        }}
-      >
-        {title}
-      </Typography>
-
-      <Typography
-        sx={{
-          color: "rgba(255,255,255,0.68)",
-          fontSize: "0.98rem",
-          lineHeight: 1.7,
-          mb: 3,
-        }}
-      >
-        {description}
-      </Typography>
-
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        spacing={2}
-        sx={{ mb: 2.5 }}
-      >
-        {options.map((option) => {
-          const selected = selectedGender === option.value;
-
+    <Stack spacing={2.5}>
+      <Box>
+        <Typography id={titleId} component="h2" sx={{ fontWeight: 800, fontSize: { xs: "1.3rem", md: "1.6rem" }, mb: 1 }}>
+          {title}
+        </Typography>
+        <Typography id={descriptionId} sx={{ color: colors.textSecondary, lineHeight: 1.7 }}>{description}</Typography>
+      </Box>
+      <Box role="radiogroup" aria-labelledby={titleId} aria-describedby={descriptionId}
+        sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: 2 }}>
+        {options.map((option, index) => {
+          const selected = option.value === selectedGender;
           return (
-            <Button
-              key={option.value}
-              variant="outlined"
+            <ButtonBase key={option.value} role="radio" aria-checked={selected}
+              aria-label={option.title} disabled={loading}
+              tabIndex={index === (selectedIndex < 0 ? 0 : selectedIndex) ? 0 : -1}
+              ref={(element) => { buttons.current[index] = element; }}
+              onKeyDown={(event) => handleKey(event, index)}
               onClick={() => onChangeGender?.(option.value)}
-              sx={optionCardSx(selected)}
-            >
-              <Box>
-                <Typography
-                  sx={{ fontWeight: 800, fontSize: "1.04rem", mb: 1 }}
-                >
-                  {option.title}
-                </Typography>
-                <Typography
-                  sx={{
-                    color: selected
-                      ? "rgba(255,255,255,0.86)"
-                      : "rgba(255,255,255,0.7)",
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {option.description}
-                </Typography>
+              sx={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "flex-start",
+                width: "100%", minWidth: 0, minHeight: 156, p: { xs: 2.25, sm: 2.5 }, gap: 1.75,
+                textAlign: "left", textTransform: "none", color: "white", borderRadius: "20px",
+                border: `1px solid ${selected ? colors.accentBorder : colors.border}`,
+                bgcolor: selected ? colors.accentSoft : colors.surface2,
+                "&:hover": { borderColor: colors.accent, bgcolor: selected ? colors.accentSoft : colors.surface3 },
+                "&.Mui-focusVisible": { outline: `3px solid ${colors.accent}`, outlineOffset: 3 },
+                "&.Mui-disabled": { opacity: 0.65 } }}>
+              <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", justifyContent: "space-between", width: "100%" }}>
+                <Typography component="span" sx={{ fontWeight: 800, fontSize: "1.05rem", lineHeight: 1.4 }}>{option.title}</Typography>
+                {selected ? <CheckCircleRoundedIcon sx={{ color: colors.accent, flexShrink: 0 }} />
+                  : <RadioButtonUncheckedRoundedIcon sx={{ color: colors.textMuted, flexShrink: 0 }} />}
               </Box>
-
-              <Box
-                sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <CheckCircleRoundedIcon
-                  sx={{
-                    fontSize: 20,
-                    color: selected ? colors.accent : "rgba(255,255,255,0.24)",
-                  }}
-                />
-                <Typography
-                  sx={{
-                    color: selected ? colors.accent : "rgba(255,255,255,0.58)",
-                    fontWeight: 700,
-                    fontSize: "0.88rem",
-                  }}
-                >
-                  {selected ? "Selected" : "Tap to choose"}
-                </Typography>
-              </Box>
-            </Button>
+              <Typography component="span" sx={{ color: colors.textSecondary, lineHeight: 1.65 }}>{option.description}</Typography>
+              <Typography component="span" sx={{ color: selected ? colors.accent : colors.textMuted, fontWeight: 700, fontSize: "0.8rem", mt: "auto" }}>
+                {selected ? "Selected" : "Choose section"}
+              </Typography>
+            </ButtonBase>
           );
         })}
+      </Box>
+      <Typography variant="body2" sx={{ color: colors.textMuted }}>You can update this later in Settings.</Typography>
+      <Stack direction="row" spacing={1.5} justifyContent={onBack ? "space-between" : "flex-end"} sx={{ pt: 1 }}>
+        {onBack && <Button onClick={onBack} disabled={loading} startIcon={<WestRoundedIcon />}
+          sx={{ ...actionSx, color: colors.textSecondary }}>Back</Button>}
+        {onNext && <Button variant="contained" onClick={onNext} disabled={!selectedGender || loading}
+          endIcon={<ArrowForwardRoundedIcon />} sx={{ ...actionSx, bgcolor: colors.accent, color: "#061111",
+            "&:hover": { bgcolor: colors.accentHover } }}>{loading ? "Saving…" : nextLabel}</Button>}
       </Stack>
-
-      <Typography
-        sx={{
-          color: "rgba(255,255,255,0.55)",
-          fontSize: "0.88rem",
-          mb: 4,
-        }}
-      >
-        You can change this later in Settings, and this won’t limit your
-        results.
-      </Typography>
-
-      <Stack direction="row" spacing={1.5} justifyContent="space-between">
-        {onBack ? (
-          <Button
-            variant="text"
-            onClick={onBack}
-            startIcon={<WestRoundedIcon />}
-            sx={{
-              ...actionButtonSx,
-              color: "rgba(255,255,255,0.74)",
-            }}
-          >
-            Back
-          </Button>
-        ) : (
-          <Box />
-        )}
-
-        {onNext ? (
-          <Button
-            variant="contained"
-            onClick={onNext}
-            disabled={!canContinue}
-            endIcon={<ArrowForwardRoundedIcon />}
-            sx={{
-              ...actionButtonSx,
-              backgroundColor: colors.accent,
-              color: "#061111",
-              "&:hover": {
-                backgroundColor: colors.accentHover || "#34cfc0",
-              },
-            }}
-          >
-            {loading ? "Saving..." : nextLabel}
-          </Button>
-        ) : null}
-      </Stack>
-    </Box>
+    </Stack>
   );
-};
-
-export default GenderSelectStep;
+}
