@@ -63,7 +63,8 @@
     "test:search-quota:local": "firebase emulators:exec --project demo-dream-closet-quota --only firestore \"npm run test:search-quota:emulator\"",
     "test:search-execution:emulator": "node --test --test-concurrency=1 tests/emulator/searchExecutionService.test.cjs",
     "test:search-execution:local": "firebase emulators:exec --project demo-dream-closet-execution --only firestore \"npm run test:search-execution:emulator\"",
-    "test:search-backend": "node --test tests/unit/searchBackend.test.cjs"
+    "test:search-backend": "node --test tests/unit/searchBackend.test.cjs",
+    "test:search-frontend": "react-scripts test --watchAll=false --runInBand --runTestsByPath src/features/search/services/searchOperation.test.js src/features/search/services/searchSession.test.js src/features/search/services/fetchSearchResults.test.js src/features/search/hooks/useCallableSearch.test.js"
   },
   "browserslist": {
     "production": [

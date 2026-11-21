@@ -1,56 +1,73 @@
-export const SEARCH_API_URL = "/api/searchProducts";
+import { httpsCallable } from "firebase/functions";
+import {
+  authReady,
+  functions,
+} from "../../../backend/firebase/firebase";
+import { assertSearchIdentity } from "./searchSession";
 
-const buildDefaultResponse = ({ page, pageSize }) => ({
-  results: [],
-  total: 0,
-  page,
-  pageSize,
-  hasMore: false,
-  warnings: [],
-  sources: [],
+const searchCallable = httpsCallable(functions, "searchProducts", {
+  timeout: 125000,
 });
+const quotaCallable = httpsCallable(functions, "checkSearchLimit");
 
-export const fetchCombinedResults = async ({
+export const normalizePriceInput = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  if (
+    (typeof value !== "number" && typeof value !== "string") ||
+    (typeof value === "string" && !/^\d+(\.\d+)?$/.test(value.trim()))
+  ) {
+    throw new Error("Enter a valid non-negative price.");
+  }
+  const result = Number(value);
+  if (!Number.isFinite(result) || result < 0 || result > 1000000) {
+    throw new Error("Prices must be between 0 and 1,000,000.");
+  }
+  return result;
+};
+
+export const buildCallablePayload = ({
+  requestId,
+  action = "new",
   query,
   filters = {},
   onboardingGender = "",
   sort = "relevance",
   page = 1,
   pageSize = 24,
-}) => {
+}) => ({
+  requestId,
+  action,
+  query,
+  gender: onboardingGender || "",
+  filters: {
+    ...filters,
+    priceMin: normalizePriceInput(filters.priceMin),
+    priceMax: normalizePriceInput(filters.priceMax),
+  },
+  sort,
+  page,
+  pageSize,
+});
+
+const callForIdentity = async (callable, payload, expectedIdentity) => {
+  await authReady;
+  assertSearchIdentity(expectedIdentity);
   try {
-    console.log("Dream Closet search endpoint:", SEARCH_API_URL);
-
-    const response = await fetch(SEARCH_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: {
-          query,
-          gender: onboardingGender,
-          filters,
-          sort,
-          page,
-          pageSize,
-        },
-      }),
-    });
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      throw new Error(json?.error || "Unable to fetch search results.");
-    }
-
-    return json?.result || buildDefaultResponse({ page, pageSize });
+    const response = await callable(payload);
+    assertSearchIdentity(expectedIdentity);
+    return response.data;
   } catch (error) {
-    console.error("Error fetching combined search results:", error);
-    throw new Error(
-      error?.message || "Unable to fetch search results right now.",
-    );
+    assertSearchIdentity(expectedIdentity);
+    throw error;
   }
 };
+
+export const fetchCombinedResults = async (options) => {
+  const payload = buildCallablePayload(options);
+  return callForIdentity(searchCallable, payload, options.expectedIdentity);
+};
+
+export const fetchSearchQuota = async (expectedIdentity) =>
+  callForIdentity(quotaCallable, {}, expectedIdentity);
 
 export default fetchCombinedResults;
