@@ -45,6 +45,12 @@ const performSearch = async ({
     warnings.push('Marketplace search is temporarily unavailable.');
   }
 
+  if (providerCalls.every((call) => call.status === 'rejected')) {
+    const error = new Error('All search providers are temporarily unavailable.');
+    error.code = 'SEARCH_ALL_PROVIDERS_FAILED';
+    throw error;
+  }
+
   const normalizedResults = normalizeCombinedResults(
       asosResults,
       realtimeResults,
