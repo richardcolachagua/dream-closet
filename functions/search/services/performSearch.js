@@ -60,15 +60,19 @@ const performSearch = async ({
   const filteredResults = applyProductFilters(dedupedResults, filters);
   const sortedResults = sortProducts(filteredResults, sort);
 
-  const startIndex = Math.max(0, (Number(page) - 1) * Number(pageSize));
-  const endIndex = startIndex + Number(pageSize);
+  // A page is one upstream window per provider, not a combined slice.
+  const hasMore = Number(page) < 1000 && providerCalls.some((call) =>
+    call.status === 'fulfilled' && call.value.length >= Number(pageSize),
+  );
 
   return {
-    results: sortedResults.slice(startIndex, endIndex),
+    results: sortedResults,
     total: sortedResults.length,
+    totalScope: 'provider-window',
+    paginationMode: 'provider-window-v1',
     page: Number(page),
     pageSize: Number(pageSize),
-    hasMore: endIndex < sortedResults.length,
+    hasMore,
     warnings,
     sources: {
       asos: asosResults.length,

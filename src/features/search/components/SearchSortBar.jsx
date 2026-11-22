@@ -24,6 +24,7 @@ function SearchSortBar({
   value = "relevance",
   onChange,
   total = 0,
+  totalScope,
   visibleCount = 0,
   viewMode = "grid",
   onViewChange,
@@ -53,7 +54,9 @@ function SearchSortBar({
             fontSize: "1rem",
           }}
         >
-          {safeVisibleCount} of {safeTotal} result{safeTotal === 1 ? "" : "s"}
+          {totalScope === "provider-window"
+            ? `${safeVisibleCount} result${safeVisibleCount === 1 ? "" : "s"} loaded`
+            : `${safeVisibleCount} of ${safeTotal} result${safeTotal === 1 ? "" : "s"}`}
         </Typography>
 
         <Typography

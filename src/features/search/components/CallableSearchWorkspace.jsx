@@ -314,6 +314,7 @@ export default function CallableSearchWorkspace({ user, profile = null }) {
                     void refine({ sort: next });
                   }}
                   total={response?.total || 0}
+                  totalScope={response?.totalScope}
                   visibleCount={response?.results?.length || 0}
                   viewMode={viewMode}
                   onViewChange={setViewMode}
