@@ -94,6 +94,26 @@ const createSearchExecutionService = ({
     const attemptId = randomUUID();
 
     const claim = await db.runTransaction(async (transaction) => {
+      const deletion = await transaction.get(
+          db.collection('accountDeletions').doc(identity.uid),
+      );
+      if (deletion.exists) {
+        throw new HttpsError(
+            'failed-precondition', 'Account deletion is in progress.',
+            {reason: 'ACCOUNT_DELETION_IN_PROGRESS'},
+        );
+      }
+      const storedReservation = await transaction.get(
+          executionRef.parent.parent,
+      );
+      const expiresAtMs = storedReservation.data()?.expiresAtMs;
+      if (!storedReservation.exists || !Number.isSafeInteger(expiresAtMs) ||
+          expiresAtMs <= clock()) {
+        throw new HttpsError(
+            'failed-precondition', 'This search session has expired.',
+            {reason: 'SEARCH_RESERVATION_EXPIRED'},
+        );
+      }
       const snapshot = await transaction.get(executionRef);
 
       if (snapshot.exists) {
