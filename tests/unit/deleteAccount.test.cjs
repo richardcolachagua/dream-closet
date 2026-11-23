@@ -12,9 +12,10 @@ const {
 } = require('../../functions/pricing/services/stripeWebhookUtils');
 
 class HttpsError extends Error {
-  constructor(code, message) {
+  constructor(code, message, details) {
     super(message);
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -36,6 +37,8 @@ const fixture = (options = {}) => {
   let deletionData = options.deletionData || null;
   let recursiveDeletes = 0;
   let authDeletes = 0;
+  const searchDeletes = [];
+  const events = [];
 
   const deletionRef = {
     get: async () => ({
@@ -57,6 +60,11 @@ const fixture = (options = {}) => {
     }),
   };
   const db = {
+    collection: (name) => ({doc: (id) => {
+      if (name === 'accountDeletions') return deletionRef;
+      if (name === 'searchUsage') return {path: `searchUsage/${id}`};
+      throw new Error(`Unexpected collection ${name}`);
+    }}),
     doc: (path) => path.startsWith('accountDeletions/') ?
       deletionRef :
       userRef,
@@ -67,7 +75,16 @@ const fixture = (options = {}) => {
           deletionData = {...deletionData, ...value};
         },
       }),
-    recursiveDelete: async () => {
+    recursiveDelete: async (ref) => {
+      if (ref !== userRef) {
+        events.push('search');
+        searchDeletes.push(ref.path);
+        if (options.searchFailureAt === searchDeletes.length) {
+          throw new Error('Search cleanup unavailable');
+        }
+        return;
+      }
+      events.push('profile');
       recursiveDeletes += 1;
       if (options.recursiveFailureCount > 0) {
         options.recursiveFailureCount -= 1;
@@ -80,6 +97,7 @@ const fixture = (options = {}) => {
   const admin = {
     auth: () => ({
       deleteUser: async () => {
+        events.push('auth');
         authDeletes += 1;
         if (options.authDeleted) {
           const error = new Error('Not found');
@@ -112,6 +130,8 @@ const fixture = (options = {}) => {
     deletionData: () => deletionData,
     recursiveDeletes: () => recursiveDeletes,
     authDeletes: () => authDeletes,
+    searchDeletes: () => searchDeletes,
+    events: () => events,
   };
 };
 
@@ -457,4 +477,47 @@ test('delayed Stripe events cancel active subscriptions without restoring the pr
   await cancelSubscriptionForDeletedAccount(stripe, 'alice', 'sub_alice');
   assert.equal(cancellations, 1);
   assert.equal(subscriptionStatus, 'canceled');
+});
+
+
+const withoutStripe = async (operation) => {
+  const previous = process.env.STRIPE_SECRET_KEY;
+  delete process.env.STRIPE_SECRET_KEY;
+  try { await operation(); } finally {
+    if (previous === undefined) delete process.env.STRIPE_SECRET_KEY;
+    else process.env.STRIPE_SECRET_KEY = previous;
+  }
+};
+
+test('search cleanup completes before profile and Auth deletion', async () => {
+  await withoutStripe(async () => {
+    const f = fixture();
+    assert.deepEqual(await f.handler({}, context), {success: true});
+    assert.deepEqual(f.events(), ['search', 'search', 'profile', 'auth']);
+    assert.equal(new Set(f.searchDeletes()).size, 2);
+  });
+});
+
+test('partial search cleanup failure stays locked and resume completes', async () => {
+  await withoutStripe(async () => {
+    const f = fixture({searchFailureAt: 2});
+    await assert.rejects(f.handler({}, context), (e) => e.details.deletionPending === true);
+    assert.equal(f.deletionData().status, 'in_progress');
+    assert.equal(f.deletionData().stage, 'search_cleanup');
+    assert.equal(f.recursiveDeletes(), 0);
+    assert.equal(f.authDeletes(), 0);
+    assert.deepEqual(await f.handler({resumePendingDeletion: true}, context), {success: true});
+    assert.equal(f.searchDeletes().length, 4);
+    assert.equal(f.recursiveDeletes(), 1);
+    assert.equal(f.authDeletes(), 1);
+    assert.equal(f.deletionData().status, 'complete');
+  });
+});
+
+test('completed deletion does not repeat search cleanup', async () => {
+  await withoutStripe(async () => {
+    const f = fixture({deletionData: {status: 'complete'}});
+    assert.deepEqual(await f.handler({}, context), {success: true});
+    assert.equal(f.searchDeletes().length, 0);
+  });
 });

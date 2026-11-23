@@ -13,9 +13,22 @@ export const searchErrorMessage = (error) => {
       return "Too many requests. Wait a minute before trying again.";
     case "SEARCH_IN_PROGRESS":
       return "This search is still running. Wait briefly, then use Retry.";
-    case "SEARCH_EXECUTION_UNCERTAIN":
+    case "SEARCH_EXECUTION_UNCERTAIN": {
+      const seconds = Math.ceil((error?.details?.retryAfterMs || 0) / 1000);
+      return seconds > 0
+        ? `The previous outcome is uncertain. Wait ${seconds} seconds, then use Retry without another new-search charge.`
+        : "The previous outcome is uncertain. Use Retry to recover this search without another new-search charge.";
+    }
     case "SEARCH_RESULT_UNCONFIRMED":
-      return "The previous search outcome could not be confirmed. Do not repeatedly resubmit it; try again later.";
+      return "The result could not be confirmed. Use Retry with the same search; a saved result will be reused if available.";
+    case "SEARCH_EXECUTION_SUPERSEDED":
+      return "A newer attempt owns this search. Use Retry to retrieve its result.";
+    case "SEARCH_RECOVERY_LIMIT":
+      return "This search reached its recovery limit. Start a new search when allowance is available.";
+    case "SEARCH_RETRY_REQUIRED":
+      return "Use Retry to continue this search without another new-search charge.";
+    case "ACCOUNT_DELETION_IN_PROGRESS":
+      return "Account deletion is in progress. Searching is disabled.";
     case "SEARCH_RESERVATION_EXPIRED":
       return "This search session expired. Submit a new text search to continue.";
     case "PROFILE_REQUIRED":
