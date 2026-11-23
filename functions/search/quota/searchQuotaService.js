@@ -55,7 +55,7 @@ const identityFromAuth = (auth) => {
   };
 };
 
-const resolveTier = ({identity, profile, proPriceId}) => {
+const resolveTier = ({identity, profile, proPriceId, nowMs = Date.now()}) => {
   if (identity.kind === 'visitor') {
     return 'visitor';
   }
@@ -68,7 +68,10 @@ const resolveTier = ({identity, profile, proPriceId}) => {
     subscription?.status === 'active' &&
     subscription?.priceId === proPriceId &&
     typeof subscription?.stripeSubscriptionId === 'string' &&
-    subscription.stripeSubscriptionId.startsWith('sub_')
+    subscription.stripeSubscriptionId.startsWith('sub_') &&
+    (subscription.searchEntitlementVerifiedAtMs === undefined ||
+      (Number.isSafeInteger(subscription.searchEntitlementExpiresAtMs) &&
+        subscription.searchEntitlementExpiresAtMs > nowMs))
   ) {
     return 'pro';
   }
@@ -194,6 +197,7 @@ const createSearchQuotaService = ({
   db,
   clock = Date.now,
   getProPriceId = () => process.env.STRIPE_PRICE_ID,
+  refreshEntitlement = async () => {},
 }) => {
   if (!db || typeof db.runTransaction !== 'function') {
     throw new TypeError('A Firestore instance is required.');
@@ -243,6 +247,7 @@ const createSearchQuotaService = ({
     }
 
     const queryHash = hash(normalizeQuery(query));
+    await refreshEntitlement(identity);
 
     const usageRef = db.collection('searchUsage').doc(identity.key);
 
@@ -263,6 +268,7 @@ const createSearchQuotaService = ({
         identity,
         profile,
         proPriceId: getProPriceId(),
+        nowMs,
       });
 
       let reservation = null;
@@ -343,6 +349,9 @@ const createSearchQuotaService = ({
       transaction.set(usageRef, {
         version: 1,
         ...usage,
+        uid: identity.uid,
+        kind: identity.kind,
+        lastActivityAtMs: nowMs,
       });
 
       return {
@@ -356,6 +365,7 @@ const createSearchQuotaService = ({
 
   const getSearchQuota = async ({auth}) => {
     const identity = identityFromAuth(auth);
+    await refreshEntitlement(identity);
 
     const usageRef = db.collection('searchUsage').doc(identity.key);
 
@@ -369,6 +379,7 @@ const createSearchQuotaService = ({
         identity,
         profile,
         proPriceId: getProPriceId(),
+        nowMs,
       });
 
       return {

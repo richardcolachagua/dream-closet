@@ -4,7 +4,11 @@ const {db} = require('../config/firebase');
 const {createSearchQuotaService} = require('./quota/searchQuotaService');
 const {createSearchHandlers} = require('./searchHandlers');
 
-const quotaService = createSearchQuotaService({db});
+const {createEntitlementRefresh} = require('./quota/entitlementRefresh');
+const {searchAppCheckEnforced} = require('./utils/searchReleaseConfig');
+const quotaService = createSearchQuotaService({
+  db, refreshEntitlement: createEntitlementRefresh({db}).refresh,
+});
 
 const handlers = createSearchHandlers({
   quotaService,
@@ -22,7 +26,7 @@ const checkSearchLimit = functions
     .runWith({
       timeoutSeconds: 30,
       memory: '256MB',
-      enforceAppCheck: false,
+      enforceAppCheck: searchAppCheckEnforced(),
     })
     .https.onCall(handlers.checkSearchLimit);
 

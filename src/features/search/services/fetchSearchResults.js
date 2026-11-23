@@ -1,6 +1,7 @@
 import { httpsCallable } from "firebase/functions";
 import {
   authReady,
+  prepareSearchAppCheck,
   functions,
 } from "../../../backend/firebase/firebase";
 import { assertSearchIdentity } from "./searchSession";
@@ -51,6 +52,7 @@ export const buildCallablePayload = ({
 
 const callForIdentity = async (callable, payload, expectedIdentity) => {
   await authReady;
+  if (typeof prepareSearchAppCheck === "function") await prepareSearchAppCheck();
   assertSearchIdentity(expectedIdentity);
   try {
     const response = await callable(payload);

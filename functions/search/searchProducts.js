@@ -7,7 +7,11 @@ const {
 const {performSearch} = require('./services/performSearch');
 const {createSearchHandlers} = require('./searchHandlers');
 
-const quotaService = createSearchQuotaService({db});
+const {createEntitlementRefresh} = require('./quota/entitlementRefresh');
+const {searchAppCheckEnforced} = require('./utils/searchReleaseConfig');
+const quotaService = createSearchQuotaService({
+  db, refreshEntitlement: createEntitlementRefresh({db}).refresh,
+});
 
 const executionService = createSearchExecutionService({
   db,
@@ -24,7 +28,7 @@ const searchProducts = functions
     .runWith({
       timeoutSeconds: 120,
       memory: '512MB',
-      enforceAppCheck: false,
+      enforceAppCheck: searchAppCheckEnforced(),
     })
     .https.onCall(handlers.searchProducts);
 

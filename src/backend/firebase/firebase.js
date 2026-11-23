@@ -8,7 +8,7 @@ import {
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { getAnalytics, isSupported, logEvent } from "firebase/analytics";
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { getToken, initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB04zJ_CTxFziwVVW0d84ZuIcHgj6WXS0g",
@@ -19,6 +19,22 @@ const firebaseConfig = {
   appId: "1:626211370865:web:c547b9ab8b5d3f2a48e8d0",
   measurementId: "G-7H1K5D9B6J",
 };
+
+if (process.env.REACT_APP_FIREBASE_PROJECT_ID) {
+  const overrides = {
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  };
+  if (Object.values(overrides).some((value) => !value)) {
+    throw new Error("Provide all six Firebase overrides for an isolated staging build.");
+  }
+  Object.assign(firebaseConfig, overrides);
+  delete firebaseConfig.measurementId;
+}
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const emulatorFlag = process.env.REACT_APP_USE_FIREBASE_EMULATORS;
@@ -118,6 +134,13 @@ const telemetryReady = runtime.telemetryPromise.then(() => {
   appCheck = runtime.appCheck;
 });
 
+const prepareSearchAppCheck = async () => {
+  await telemetryReady;
+  if (useEmulators || process.env.REACT_APP_REQUIRE_SEARCH_APPCHECK !== "true") return;
+  if (!runtime.appCheck) throw new Error("Search verification is not configured.");
+  await getToken(runtime.appCheck, false);
+};
+
 const logAnalyticsEvent = (eventName, parameters = {}) => {
   if (!runtime.analytics) {
     return;
@@ -142,6 +165,7 @@ export {
   appCheck,
   authReady,
   telemetryReady,
+  prepareSearchAppCheck,
   useEmulators,
   logAnalyticsEvent,
 };
