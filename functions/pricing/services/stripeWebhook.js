@@ -10,6 +10,7 @@ const {
 } = require('./stripeWebhookUtils');
 
 const db = admin.firestore();
+const {subscriptionPeriodEnd} = require('../../search/quota/entitlementRefresh');
 
 const getStripeClient = () => {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -142,7 +143,7 @@ const upsertSubscription = async (stripe, subscription, explicitUid = null) => {
       status: subscription?.status || 'unknown',
       planId: price?.product || null,
       priceId: price?.id || null,
-      currentPeriodEnd: subscription?.current_period_end || null,
+      currentPeriodEnd: subscriptionPeriodEnd(subscription),
       cancelAtPeriodEnd: Boolean(subscription?.cancel_at_period_end),
       stripeCustomerId:
         typeof subscription?.customer === 'string' ?
@@ -274,7 +275,9 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        await upsertSubscription(stripe, event.data.object);
+        // Resolve current state instead of replaying an old event snapshot.
+        const latest = await stripe.subscriptions.retrieve(event.data.object.id);
+        await upsertSubscription(stripe, latest);
         break;
       }
 

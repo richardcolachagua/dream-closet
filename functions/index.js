@@ -30,3 +30,5 @@ exports.createCheckoutSession = createCheckoutSession;
 exports.createCustomerPortalSession = createCustomerPortalSession;
 exports.stripeWebhook = stripeWebhook;
 exports.deleteAccount = deleteAccount;
+exports.cleanupSearchData =
+  require('./search/services/cleanupSearchData').cleanupSearchData;

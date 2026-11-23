@@ -1,0 +1,16 @@
+const fs = require('node:fs');
+const {execFileSync} = require('node:child_process');
+const operations = [{"path": "functions/search/services/searchExecutionService.js", "sha": "a29e18aeefd465c215584dd0435f9b23f336a971", "changes": [["    const claim = await db.runTransaction(async (transaction) => {\n", "    const claim = await db.runTransaction(async (transaction) => {\n      const deletion = await transaction.get(\n          db.collection('accountDeletions').doc(identity.uid),\n      );\n      if (deletion.exists) {\n        throw new HttpsError(\n            'failed-precondition', 'Account deletion is in progress.',\n            {reason: 'ACCOUNT_DELETION_IN_PROGRESS'},\n        );\n      }\n      const storedReservation = await transaction.get(\n          executionRef.parent.parent,\n      );\n      const expiresAtMs = storedReservation.data()?.expiresAtMs;\n      if (!storedReservation.exists || !Number.isSafeInteger(expiresAtMs) ||\n          expiresAtMs <= clock()) {\n        throw new HttpsError(\n            'failed-precondition', 'This search session has expired.',\n            {reason: 'SEARCH_RESERVATION_EXPIRED'},\n        );\n      }\n"]]}, {"path": "functions/pricing/services/deleteAccount.js", "sha": "08fe06d1caca61f16360035fbdc36bdc7cd93232", "changes": [["const createStripeClient = require('stripe');", "const createStripeClient = require('stripe');\nconst {\n  createSearchDataLifecycle,\n} = require('../../search/services/searchDataLifecycle');"], ["      await setStage(deletionRef, 'firestore_cleanup');", "      await setStage(deletionRef, 'search_cleanup');\n      await createSearchDataLifecycle({db}).deleteForUid(uid);\n\n      await setStage(deletionRef, 'firestore_cleanup');"]]}, {"path": "functions/index.js", "sha": "babd7f2fe2c964c64151f08d8ca66d44f088d60d", "changes": [["exports.deleteAccount = deleteAccount;", "exports.deleteAccount = deleteAccount;\nexports.cleanupSearchData =\n  require('./search/services/cleanupSearchData').cleanupSearchData;"]]}, {"path": "firestore.indexes.json", "sha": "2ddb5ce9c1b4f9bc6eee60696588042f5d5961aa", "changes": [["\"fieldOverrides\": []", "\"fieldOverrides\": [\n    {\n      \"collectionGroup\": \"reservations\",\n      \"fieldPath\": \"expiresAtMs\",\n      \"indexes\": [\n        { \"order\": \"ASCENDING\", \"queryScope\": \"COLLECTION\" },\n        { \"order\": \"DESCENDING\", \"queryScope\": \"COLLECTION\" },\n        { \"arrayConfig\": \"CONTAINS\", \"queryScope\": \"COLLECTION\" },\n        { \"order\": \"ASCENDING\", \"queryScope\": \"COLLECTION_GROUP\" }\n      ]\n    }\n  ]"]]}];
+const pending = operations.map(({path, sha, changes}) => {
+  const before = fs.readFileSync(path, 'utf8');
+  const actual = execFileSync('git', ['hash-object', path], {encoding: 'utf8'}).trim();
+  if (actual !== sha) throw new Error(`Unexpected source: ${path}; no existing files changed.`);
+  let after = before;
+  for (const [from, to] of changes) {
+    if (after.split(from).length !== 2) throw new Error(`Ambiguous patch: ${path}`);
+    after = after.replace(from, to);
+  }
+  return {path, after};
+});
+for (const {path, after} of pending) fs.writeFileSync(path, after);
+console.log('Applied lifecycle integration, claim guard, scheduler export and expiry index.');

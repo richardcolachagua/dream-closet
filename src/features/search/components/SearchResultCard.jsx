@@ -20,6 +20,9 @@ import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import useSavedItemState from "../../saved/useSavedItemsState";
+import { saveItem } from "../../saved/savedDataService";
 
 const formatPrice = (result) => {
   if (result?.price && String(result.price).trim()) return result.price;
@@ -70,14 +73,21 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
   const isList = viewMode === "list";
   const detailChips = getDetailValues(result);
   const canSave = Boolean(userId && onSaveItem);
+  const {
+    saved,
+    checking: checkingSaved,
+    error: savedStateError,
+  } = useSavedItemState(userId, result);
   const hasProductUrl = Boolean(productUrl);
 
   const handleSave = async () => {
-    if (!canSave || saving) return;
+    if (!canSave || saving || checkingSaved || saved) return;
+
     setSaving(true);
     setSaveError("");
+
     try {
-      await onSaveItem(result);
+      await saveItem(userId, result);
     } catch (failure) {
       setSaveError(failure.message || "Could not save this item.");
     } finally {
@@ -305,7 +315,15 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             View item
           </Button>
 
-          <Tooltip title={canSave ? "Save for later" : "Sign in to save items"}>
+          <Tooltip
+            title={
+              !canSave
+                ? "Sign in to save items"
+                : saved
+                  ? "Already in your saved items"
+                  : "Save for later"
+            }
+          >
             <span
               style={{
                 display: isList ? "inline-flex" : "block",
@@ -314,10 +332,13 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
             >
               <Button
                 onClick={handleSave}
-                disabled={!canSave || saving}
+                disabled={!canSave || saving || checkingSaved || saved}
+                variant={saved ? "contained" : "outlined"}
                 startIcon={
-                  saving ? (
-                    <CircularProgress size={16} />
+                  saving || checkingSaved ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : saved ? (
+                    <FavoriteIcon />
                   ) : (
                     <FavoriteBorderIcon />
                   )
@@ -326,25 +347,41 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
                   ...secondaryButtonSx,
                   width: "100%",
                   minHeight: 44,
+                  ...(saved
+                    ? {
+                        bgcolor: colors.accentSoft,
+                        color: colors.accent,
+                        border: `1px solid ${colors.accentBorder}`,
+                      }
+                    : {}),
                   "&.Mui-disabled": {
-                    borderColor: colors.border,
-                    color: colors.textFaint,
+                    bgcolor: saved ? colors.accentSoft : "transparent",
+                    border: `1px solid ${
+                      saved ? colors.accentBorder : colors.border
+                    }`,
+                    color: saved ? colors.accent : colors.textFaint,
                   },
                 }}
               >
-                {saving ? "Saving..." : "Save"}
+                {saving
+                  ? "Saving..."
+                  : checkingSaved
+                    ? "Checking..."
+                    : saved
+                      ? "Saved"
+                      : "Save"}
               </Button>
             </span>
           </Tooltip>
         </Stack>
       </Stack>
       <Snackbar
-        open={Boolean(saveError)}
+        open={Boolean(saveError || savedStateError)}
         autoHideDuration={6000}
         onClose={() => setSaveError("")}
       >
         <Alert severity="error" onClose={() => setSaveError("")}>
-          {saveError}
+          {saveError || savedStateError}
         </Alert>
       </Snackbar>
     </Box>

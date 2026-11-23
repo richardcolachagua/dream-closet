@@ -1,41 +1,36 @@
-const functions = require('firebase-functions');
-const cors = require('../config/cors');
-const {validateSearchPayload} = require('./utils/searchValidation');
+const functions = require('firebase-functions/v1');
+const {db} = require('../config/firebase');
+const {createSearchQuotaService} = require('./quota/searchQuotaService');
+const {
+  createSearchExecutionService,
+} = require('./services/searchExecutionService');
 const {performSearch} = require('./services/performSearch');
+const {createSearchHandlers} = require('./searchHandlers');
 
-const searchProducts = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => {
-    if (req.method !== 'POST') {
-      res.status(405).json({
-        error: 'Method not allowed.',
-      });
-
-      return;
-    }
-
-    try {
-      const payload = validateSearchPayload(req.body?.data || req.body || {});
-
-      const result = await performSearch(payload);
-
-      res.status(200).json({result});
-    } catch (error) {
-      console.error('Product search failed:', error);
-
-      if (error instanceof functions.https.HttpsError) {
-        res.status(400).json({
-          error: error.message,
-        });
-
-        return;
-      }
-
-      res.status(500).json({
-        error: error?.message || 'Search failed.',
-      });
-    }
-  });
+const {createEntitlementRefresh} = require('./quota/entitlementRefresh');
+const {searchAppCheckEnforced} = require('./utils/searchReleaseConfig');
+const quotaService = createSearchQuotaService({
+  db, refreshEntitlement: createEntitlementRefresh({db}).refresh,
 });
+
+const executionService = createSearchExecutionService({
+  db,
+  quotaService,
+  performSearch,
+});
+
+const handlers = createSearchHandlers({
+  quotaService,
+  executionService,
+});
+
+const searchProducts = functions
+    .runWith({
+      timeoutSeconds: 120,
+      memory: '512MB',
+      enforceAppCheck: searchAppCheckEnforced(),
+    })
+    .https.onCall(handlers.searchProducts);
 
 module.exports = {
   searchProducts,

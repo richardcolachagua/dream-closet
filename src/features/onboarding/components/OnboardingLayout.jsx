@@ -1,200 +1,52 @@
 import { Box, Container, CssBaseline, Stack, Typography } from "@mui/material";
 import OnboardingProgress from "./OnboardingProgress";
-import { colors, typography } from "../../../shared/ui/theme/designTokens";
+import { colors } from "../../../shared/ui/theme/designTokens";
 
-const OnboardingLayout = ({
-  children,
-  title,
-  subtitle,
-  stepLabel,
-  currentStep = 0,
+export default function OnboardingLayout({
+  children, title, subtitle, stepLabel, currentStep = 0,
   eyebrow = "Personalization setup",
   helperText = "You can update these preferences later in Settings.",
-}) => {
+}) {
   return (
     <>
       <CssBaseline />
-      <Box
-        sx={{
-          minHeight: "100vh",
-          background:
-            "radial-gradient(circle at top, rgba(89,230,219,0.14) 0%, rgba(89,230,219,0.05) 22%, rgba(0,0,0,0) 48%), linear-gradient(180deg, #050505 0%, #090909 100%)",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          py: { xs: 3, md: 5 },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box
-            sx={{
-              maxWidth: 1040,
-              mx: "auto",
-              borderRadius: "28px",
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.08)",
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))",
-              boxShadow: "0 24px 80px rgba(0,0,0,0.36)",
-              backdropFilter: "blur(18px)",
-            }}
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "0.95fr 1.05fr" },
-                minHeight: { md: 700 },
-              }}
-            >
-              <Box
-                sx={{
-                  p: { xs: 3, sm: 4, md: 5 },
-                  borderRight: { md: "1px solid rgba(255,255,255,0.06)" },
-                  borderBottom: {
-                    xs: "1px solid rgba(255,255,255,0.06)",
-                    md: "none",
-                  },
-                  background:
-                    "linear-gradient(180deg, rgba(89,230,219,0.10) 0%, rgba(255,255,255,0.02) 100%)",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Stack spacing={3}>
-                  <Box>
-                    <Typography
-                      sx={{
-                        color: colors.accent,
-                        fontSize: typography.overline || "0.78rem",
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.12em",
-                        mb: 1.5,
-                      }}
-                    >
-                      {eyebrow}
-                    </Typography>
-
-                    {stepLabel ? (
-                      <Typography
-                        sx={{
-                          color: "rgba(255,255,255,0.55)",
-                          fontSize: "0.8rem",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.12em",
-                          mb: 2,
-                        }}
-                      >
-                        {stepLabel}
-                      </Typography>
-                    ) : null}
-
-                    {title ? (
-                      <Typography
-                        variant="h3"
-                        sx={{
-                          fontWeight: 800,
-                          lineHeight: 1.05,
-                          fontSize: { xs: "2rem", md: "3rem" },
-                          mb: subtitle ? 1.5 : 0,
-                        }}
-                      >
-                        {title}
-                      </Typography>
-                    ) : null}
-
-                    {subtitle ? (
-                      <Typography
-                        sx={{
-                          color: "rgba(255,255,255,0.72)",
-                          fontSize: { xs: "0.98rem", md: "1.04rem" },
-                          lineHeight: 1.7,
-                          maxWidth: 460,
-                        }}
-                      >
-                        {subtitle}
-                      </Typography>
-                    ) : null}
-                  </Box>
-
-                  <OnboardingProgress currentStep={currentStep} />
-                </Stack>
-
-                <Stack spacing={2.25} sx={{ mt: { xs: 4, md: 6 } }}>
-                  <Box
-                    sx={{
-                      borderRadius: "20px",
-                      p: 2.25,
-                      backgroundColor: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <Typography
-                      sx={{ color: "white", fontWeight: 700, mb: 0.5 }}
-                    >
-                      Why we ask
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: "rgba(255,255,255,0.68)",
-                        fontSize: "0.94rem",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      Your answers help Dream Closet prioritize better search
-                      results, tailor recommendations, and make the experience
-                      feel more like your own closet.
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      borderRadius: "20px",
-                      p: 2.25,
-                      backgroundColor: "rgba(89,230,219,0.08)",
-                      border: "1px solid rgba(89,230,219,0.16)",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: colors.accent,
-                        fontWeight: 800,
-                        fontSize: "0.92rem",
-                        mb: 0.5,
-                      }}
-                    >
-                      Good to know
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: "rgba(255,255,255,0.78)",
-                        fontSize: "0.93rem",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {helperText}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Box>
-
-              <Box
-                sx={{
-                  p: { xs: 3, sm: 4, md: 5 },
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <Box sx={{ width: "100%" }}>{children}</Box>
-              </Box>
+      <Box sx={{ minHeight: "100vh", color: "white", py: { xs: 2, md: 5 },
+        background: "radial-gradient(ellipse at top, rgba(89,230,219,0.09), transparent 55%), #050505" }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 3 } }}>
+          <Box sx={{ borderRadius: { xs: 3, md: 5 }, border: `1px solid ${colors.border}`,
+            bgcolor: colors.backgroundElevated, boxShadow: "0 24px 70px rgba(0,0,0,0.25)",
+            display: "grid", gridTemplateColumns: { xs: "minmax(0,1fr)", md: "300px minmax(0,1fr)" },
+            alignItems: "start" }}>
+            <Box component="aside" aria-label={stepLabel || "Onboarding progress"}
+              sx={{ minWidth: 0, p: { xs: 2.5, sm: 3, md: 3.5 }, alignSelf: "start",
+                background: "linear-gradient(155deg, rgba(89,230,219,0.12), rgba(89,230,219,0.02))",
+                borderRadius: { xs: "20px 20px 0 0", md: "36px 0 0 0" },
+                borderBottom: { xs: `1px solid ${colors.border}`, md: 0 } }}>
+              <Stack spacing={2.5}>
+                <Box>
+                  <Typography sx={{ color: colors.accent, fontSize: "0.72rem", fontWeight: 800,
+                    letterSpacing: "0.12em", textTransform: "uppercase", mb: 1.25 }}>{eyebrow}</Typography>
+                  {title && <Typography component="h1" sx={{ fontSize: { xs: "1.7rem", md: "2.1rem" },
+                    lineHeight: 1.15, fontWeight: 800 }}>{title}</Typography>}
+                  {subtitle && <Typography sx={{ display: { xs: "none", md: "block" },
+                    color: colors.textSecondary, lineHeight: 1.7, fontSize: "0.94rem", mt: 1.5 }}>{subtitle}</Typography>}
+                </Box>
+                <OnboardingProgress currentStep={currentStep} />
+                <Box sx={{ display: { xs: "none", md: "block" }, pt: 2, borderTop: `1px solid ${colors.border}` }}>
+                  <Typography sx={{ color: colors.accent, fontSize: "0.85rem", fontWeight: 700, mb: 0.75 }}>Your preferences, your choice</Typography>
+                  <Typography sx={{ color: colors.textSecondary, fontSize: "0.9rem", lineHeight: 1.7 }}>{helperText}</Typography>
+                </Box>
+              </Stack>
+            </Box>
+            <Box component="main" sx={{ minWidth: 0, p: { xs: 2.5, sm: 3.5, md: 4.5 },
+              borderLeft: { md: `1px solid ${colors.border}` } }}>
+              {children}
+              <Typography sx={{ display: { xs: "block", md: "none" }, color: colors.textMuted,
+                fontSize: "0.85rem", lineHeight: 1.6, mt: 3 }}>{helperText}</Typography>
             </Box>
           </Box>
         </Container>
       </Box>
     </>
   );
-};
-
-export default OnboardingLayout;
+}

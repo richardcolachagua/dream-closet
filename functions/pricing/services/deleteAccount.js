@@ -2,6 +2,9 @@ const functions = require('firebase-functions/v1');
 const {FieldValue} = require('firebase-admin/firestore');
 const {admin, db} = require('../../config/firebase');
 const createStripeClient = require('stripe');
+const {
+  createSearchDataLifecycle,
+} = require('../../search/services/searchDataLifecycle');
 
 const SUPPORTED_PROVIDERS = new Set(['password', 'google.com']);
 const TERMINAL_SUBSCRIPTION_STATUSES = new Set([
@@ -334,6 +337,9 @@ const createDeleteAccountHandler = ({
           }
         }
       }
+
+      await setStage(deletionRef, 'search_cleanup');
+      await createSearchDataLifecycle({db}).deleteForUid(uid);
 
       await setStage(deletionRef, 'firestore_cleanup');
       await db.recursiveDelete(userRef);

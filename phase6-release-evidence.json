@@ -1,0 +1,65 @@
+{
+  "stagingProject": "REQUIRED",
+  "gates": {
+    "automated": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "callable-auth-errors": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "visitor-free-pro": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "account-transitions": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "multi-tab-concurrency": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "pagination-provider-failures": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "recovery-deletion": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "entitlement-refresh": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "cleanup-index-scheduler": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "appcheck-monitor": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "appcheck-enforced-valid-invalid": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    },
+    "rollback-reviewed": {
+      "status": "pending",
+      "commit": "",
+      "evidence": ""
+    }
+  }
+}
