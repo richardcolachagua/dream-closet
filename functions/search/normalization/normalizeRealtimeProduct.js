@@ -1,42 +1,44 @@
 const {parsePriceValue} = require('../../shared/priceUtils');
-const {
-  inferAvailability,
-  inferBrand,
-  inferCategory,
-  inferColors,
-  inferGender,
-} = require('./inferProductAttributes');
+const {record, text, normalizeProductUrl, normalizeCurrency,
+  productIdentity, imageUrl, displayPrice} = require('../../shared/productUtils');
+const {inferAvailability, inferBrand, inferCategory, inferColors,
+  inferGender} = require('./inferProductAttributes');
 
-const normalizeRealtimeProduct = (product = {}) => {
-  const name = product.product_title || product.productTitle || '';
-  const rawPrice = product.offer?.price || 'Price unavailable';
-
-  const source =
-    product.offer?.store_name || product.offer?.storeName || 'Unknown';
-
+const normalizeRealtimeProduct = (product) => {
+  if (!record(product)) {
+    return null;
+  }
+  const offer = record(product.offer) ? product.offer : {};
+  const name = text(product.product_title) || text(product.productTitle);
+  const productUrl = normalizeProductUrl(offer.offer_page_url) ||
+    normalizeProductUrl(offer.offerPageUrl);
+  if (!name || !productUrl) {
+    return null;
+  }
+  const source = text(offer.store_name, 100) || text(offer.storeName, 100) ||
+    new URL(productUrl).hostname;
+  const rawPrice = offer.price;
+  const numericPrice = parsePriceValue(rawPrice);
+  const currency = normalizeCurrency(offer.currency) ||
+    normalizeCurrency(offer.currency_code) ||
+    normalizeCurrency(product.currency);
+  const photos = [
+    ...(Array.isArray(product.product_photos) ? product.product_photos : []),
+    ...(Array.isArray(product.productPhotos) ? product.productPhotos : []),
+  ];
+  const providerId = product.product_id ?? product.productId;
+  const id = productIdentity('realtime', providerId == null ? null :
+    `${source.toLowerCase()}:${providerId}`, productUrl);
   return {
-    itemId: product.product_id || product.productId || null,
-    name,
-    title: name,
-    price: rawPrice,
-    numericPrice: parsePriceValue(rawPrice),
-    currency: 'USD',
-    imageUrl: product.product_photos?.[0] || product.productPhotos?.[0] || '',
-    productUrl:
-      product.offer?.offer_page_url || product.offer?.offerPageUrl || '',
-    source,
-    brand: inferBrand(product, source),
-    gender: inferGender(name),
-    category: inferCategory(name),
-    subcategory: '',
-    size: [],
-    color: inferColors(name),
-    material: '',
-    availability: inferAvailability(product),
-    rawData: product,
+    id, itemId: id, provider: 'realtime', name, title: name,
+    price: displayPrice(numericPrice, currency),
+    numericPrice, currency, imageUrl: imageUrl(photos), productUrl, source,
+    brand: text(inferBrand(product)), gender: inferGender(name),
+    category: inferCategory(name), subcategory: '', size: [],
+    color: inferColors(name), material: '',
+    availability: inferAvailability({...product,
+      inStock: typeof offer.inStock === 'boolean' ? offer.inStock : product.inStock,
+      availability: offer.availability ?? product.availability}),
   };
 };
-
-module.exports = {
-  normalizeRealtimeProduct,
-};
+module.exports = {normalizeRealtimeProduct};

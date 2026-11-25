@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { formatProductPrice } from "../utils/formatProductPrice";
 import {
   Alert,
   Box,
@@ -24,13 +25,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import useSavedItemState from "../../saved/useSavedItemsState";
 import { saveItem } from "../../saved/savedDataService";
 
-const formatPrice = (result) => {
-  if (result?.price && String(result.price).trim()) return result.price;
-  if (typeof result?.numericPrice === "number") {
-    return `$${result.numericPrice.toFixed(2)}`;
-  }
-  return "Price unavailable";
-};
+const formatPrice = formatProductPrice;
 
 const getSourceLabel = (source) => {
   if (!source) return "Unknown source";
@@ -220,16 +215,17 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
 
           {availability ? (
             <Chip
-              label={String(availability).replace(/_/g, " ")}
+              label={availability === "instock" ? "In stock" :
+                availability === "outofstock" ? "Out of stock" : "Stock unknown"}
               size="small"
               sx={{
                 textTransform: "capitalize",
                 bgcolor:
-                  availability === "in_stock"
+                  availability === "instock"
                     ? "rgba(110, 231, 183, 0.14)"
                     : colors.surface2,
                 color:
-                  availability === "in_stock"
+                  availability === "instock"
                     ? colors.success || "#7DFFB3"
                     : colors.textSecondary,
                 border: `1px solid ${colors.border}`,

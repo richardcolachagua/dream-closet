@@ -80,7 +80,7 @@ function SearchResults({
             lg={viewMode === "list" ? 12 : 4}
             xl={viewMode === "list" ? 12 : 3}
             key={
-              result?.itemId || result?.productUrl || `${result?.name}-${index}`
+              result?.id || `${result?.source || "unknown"}:${result?.itemId || result?.productUrl || `${result?.name}-${index}`}`
             }
           >
             <SearchResultCard

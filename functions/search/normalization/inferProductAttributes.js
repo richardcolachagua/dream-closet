@@ -1,76 +1,56 @@
 const CATEGORY_KEYWORDS = require('../constants/categoryKeywords');
 const COLOR_KEYWORDS = require('../constants/colorKeywords');
 const GENDER_KEYWORDS = require('../constants/genderKeywords');
-const {
-  normalizeString,
-  includesKeyword,
-} = require('../../shared/stringUtils');
+const {normalizeString, includesKeyword} = require('../../shared/stringUtils');
 
-const inferCategory = (productName = '') => {
-  const normalizedName = normalizeString(productName);
-
+const inferCategory = (name = '') => {
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    if (includesKeyword(normalizedName, keywords)) {
+    if (includesKeyword(name, keywords)) {
       return category;
     }
   }
-
   return 'unknown';
 };
-
-const inferColors = (productName = '') => {
-  const normalizedName = normalizeString(productName);
-
-  return Object.entries(COLOR_KEYWORDS)
-      .filter(([, keywords]) => includesKeyword(normalizedName, keywords))
-      .map(([color]) => color);
-};
-
-const inferGender = (productName = '') => {
-  const normalizedName = normalizeString(productName);
-
-  for (const [gender, keywords] of Object.entries(GENDER_KEYWORDS)) {
-    if (includesKeyword(normalizedName, keywords)) {
-      return gender;
-    }
+const inferColors = (name = '') => Object.entries(COLOR_KEYWORDS)
+    .filter(([, keywords]) => includesKeyword(name, keywords))
+    .map(([color]) => color);
+const inferGender = (name = '') => {
+  const matches = Object.entries(GENDER_KEYWORDS)
+      .filter(([, keywords]) => includesKeyword(name, keywords))
+      .map(([gender]) => gender);
+  if (matches.includes('unisex')) {
+    return 'unisex';
   }
-
-  return 'unknown';
+  return matches.length === 1 ? matches[0] : 'unknown';
 };
-
-const inferAvailability = (product = {}) => {
+const inferAvailability = (value = {}) => {
+  const product = value && typeof value === 'object' && !Array.isArray(value) ?
+    value : {};
   if (typeof product.inStock === 'boolean') {
     return product.inStock ? 'instock' : 'outofstock';
   }
-
   const availability = normalizeString(product.availability);
-
-  if (availability.includes('in stock') || availability.includes('available')) {
-    return 'instock';
-  }
-
-  if (
-    availability.includes('out of stock') ||
-    availability.includes('unavailable') ||
-    availability.includes('sold out')
-  ) {
+  if (includesKeyword(availability, [
+    'out of stock', 'outofstock', 'unavailable', 'sold out', 'not available',
+    'not in stock',
+  ])) {
     return 'outofstock';
   }
-
+  if (includesKeyword(availability, ['not', 'no', 'unknown'])) {
+    return 'unknown';
+  }
+  if (includesKeyword(availability, ['in stock', 'instock', 'available'])) {
+    return 'instock';
+  }
   return 'unknown';
 };
-
-const inferBrand = (product = {}, fallbackSource = 'Unknown') =>
-  product.brandName ||
-  product.brand ||
-  product.offer?.store_name ||
-  product.offer?.storeName ||
-  fallbackSource;
-
-module.exports = {
-  inferCategory,
-  inferColors,
-  inferGender,
-  inferAvailability,
-  inferBrand,
+const inferBrand = (product = {}) => {
+  for (const value of [product?.brandName, product?.brand]) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return '';
 };
+module.exports = {inferCategory, inferColors, inferGender, inferAvailability,
+  inferBrand};
