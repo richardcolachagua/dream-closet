@@ -7,10 +7,10 @@ const mapSortForAsos = (sort = 'relevance') => {
     case 'newest':
       return 'freshness';
     default:
-      return 'freshness';
+      // Omit sort: provider-default ordering, NOT verified relevance.
+      return undefined;
   }
 };
-
 const mapSortForRealtime = (sort = 'relevance') => {
   switch (sort) {
     case 'price_asc':
@@ -23,8 +23,4 @@ const mapSortForRealtime = (sort = 'relevance') => {
       return 'BEST_MATCH';
   }
 };
-
-module.exports = {
-  mapSortForAsos,
-  mapSortForRealtime,
-};
+module.exports = {mapSortForAsos, mapSortForRealtime};

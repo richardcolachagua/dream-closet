@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-
+const runtime = require("../../functions/search/services/providerExecution");
 const sourcePath = path.resolve(
   __dirname,
   "../../functions/search/services/performSearch.js",
@@ -19,6 +19,7 @@ const fixture = ({
     return value;
   };
   const dependencies = {
+    "./providerExecution": runtime,
     "../providers/asosProvider": { searchAsos: provider(asos) },
     "../providers/realTimeProductProvider": {
       searchRealTimeProducts: provider(realtime),
@@ -48,7 +49,6 @@ const fixture = ({
   return { run: sandbox.module.exports.performSearch, calls };
 };
 const input = { query: "linen shirt" };
-
 test("all providers failing throws rather than returning empty success", async () => {
   const { run, calls } = fixture({
     asos: new Error("private A"),
@@ -62,14 +62,12 @@ test("all providers failing throws rather than returning empty success", async (
   assert.equal(calls.normalize, 0);
   assert.equal(calls.errors.length, 2);
 });
-
 test("both providers returning empty is a valid empty success", async () => {
   const result = await fixture().run(input);
   assert.equal(result.results.length, 0);
   assert.equal(result.warnings.length, 0);
   assert.equal(result.total, 0);
 });
-
 for (const failed of ["asos", "realtime"]) {
   test(`${failed} failure preserves results from the other provider`, async () => {
     const healthy = failed === "asos" ? "realtime" : "asos";
@@ -89,7 +87,6 @@ for (const failed of ["asos", "realtime"]) {
     assert.equal(result.warnings.length, 1);
   });
 }
-
 test("successful results filtered to empty are not a provider outage", async () => {
   const result = await fixture({ asos: [{ id: "a" }], filter: () => [] }).run(
     input,
@@ -97,7 +94,6 @@ test("successful results filtered to empty are not a provider outage", async () 
   assert.equal(result.results.length, 0);
   assert.equal(result.warnings.length, 0);
 });
-
 test("both successful providers contribute results", async () => {
   const result = await fixture({
     asos: [{ id: "a" }],

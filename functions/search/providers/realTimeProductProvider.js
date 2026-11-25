@@ -2,6 +2,10 @@ const axios = require('axios');
 const {getRapidApiKey} = require('../utils/rapidApi');
 const {buildSearchQuery} = require('../utils/buildSearchQuery');
 const {mapSortForRealtime} = require('../utils/sortMappings');
+const {
+  PROVIDER_TIMEOUT_MS,
+  requireProductArray,
+} = require('../services/providerExecution');
 
 const searchRealTimeProducts = async ({
   query,
@@ -9,16 +13,16 @@ const searchRealTimeProducts = async ({
   page = 1,
   pageSize = 24,
   sort = 'relevance',
+  signal,
 }) => {
   const apiKey = getRapidApiKey();
-  const finalQuery = buildSearchQuery(query, gender);
-
   const response = await axios.request({
     method: 'GET',
     url: 'https://real-time-product-search.p.rapidapi.com/search-v2',
-    timeout: 9000,
+    timeout: PROVIDER_TIMEOUT_MS,
+    signal,
     params: {
-      q: finalQuery,
+      q: buildSearchQuery(query, gender),
       country: 'us',
       language: 'en',
       page: String(page),
@@ -33,10 +37,6 @@ const searchRealTimeProducts = async ({
       'x-rapidapi-host': 'real-time-product-search.p.rapidapi.com',
     },
   });
-
-  return response.data?.data?.products || [];
+  return requireProductArray(response.data?.data?.products);
 };
-
-module.exports = {
-  searchRealTimeProducts,
-};
+module.exports = {searchRealTimeProducts};

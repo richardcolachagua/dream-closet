@@ -1,23 +1,27 @@
-const {normalizeString} = require('../../shared/stringUtils');
+const {
+  normalizeString,
+  includesKeyword,
+} = require('../../shared/stringUtils');
+const GENDER_KEYWORDS = require('../constants/genderKeywords');
 
 const buildSearchQuery = (query, gender) => {
-  const normalizedGender = normalizeString(gender);
-
-  if (normalizedGender === 'female') {
-    return `women ${query}`;
+  const text =
+    typeof query === 'string' ?
+      query.normalize('NFKC').replace(/\s+/gu, ' ').trim() :
+      '';
+  if (!text) {
+    return '';
   }
-
-  if (normalizedGender === 'male') {
-    return `men ${query}`;
+  const hasExplicitGender = Object.values(GENDER_KEYWORDS).some((keywords) =>
+    includesKeyword(text, keywords),
+  );
+  if (hasExplicitGender) {
+    // Explicit query wording wins. Never rewrite or contradict it.
+    return text;
   }
-
-  if (normalizedGender === 'unisex') {
-    return `unisex ${query}`;
-  }
-
-  return query;
+  const prefixes = {female: 'women', male: 'men', unisex: 'unisex'};
+  const selected = normalizeString(gender);
+  const prefix = Object.hasOwn(prefixes, selected) ? prefixes[selected] : '';
+  return prefix ? `${prefix} ${text}` : text;
 };
-
-module.exports = {
-  buildSearchQuery,
-};
+module.exports = {buildSearchQuery};
