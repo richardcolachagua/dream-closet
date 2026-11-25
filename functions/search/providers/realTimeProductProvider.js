@@ -16,6 +16,7 @@ const searchRealTimeProducts = async ({
   signal,
 }) => {
   const apiKey = getRapidApiKey();
+
   const response = await axios.request({
     method: 'GET',
     url: 'https://real-time-product-search.p.rapidapi.com/search-v2',
@@ -37,6 +38,8 @@ const searchRealTimeProducts = async ({
       'x-rapidapi-host': 'real-time-product-search.p.rapidapi.com',
     },
   });
+
   return requireProductArray(response.data?.data?.products);
 };
+
 module.exports = {searchRealTimeProducts};
