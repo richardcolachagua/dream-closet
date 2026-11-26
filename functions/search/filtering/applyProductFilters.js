@@ -1,59 +1,39 @@
 const {normalizeString} = require('../../shared/stringUtils');
 
-const matchesArrayFilter = (productValue, selectedValues = []) => {
-  if (!selectedValues.length) {
+const matchesArrayFilter = (productValue, selected = []) => {
+  if (!selected.length) {
     return true;
   }
-
-  if (Array.isArray(productValue)) {
-    return productValue.some((value) =>
-      selectedValues.includes(normalizeString(value)),
-    );
-  }
-
-  return selectedValues.includes(normalizeString(productValue));
+  return Array.isArray(productValue) ? productValue.some((value) =>
+    selected.includes(normalizeString(value))) :
+    selected.includes(normalizeString(productValue));
 };
-
-const matchesPriceFilter = (numericPrice, priceMin, priceMax) => {
-  if (!priceMin && !priceMax) {
+const matchesPriceFilter = (price, min, max) => {
+  const hasMin = min !== '' && min != null;
+  const hasMax = max !== '' && max != null;
+  if (!hasMin && !hasMax) {
     return true;
   }
-
-  if (numericPrice === null || numericPrice === undefined) {
+  if (!Number.isFinite(price) || price < 0) {
     return false;
   }
-
-  const min = priceMin !== '' ? Number(priceMin) : null;
-  const max = priceMax !== '' ? Number(priceMax) : null;
-
-  if (min !== null && numericPrice < min) {
-    return false;
-  }
-
-  if (max !== null && numericPrice > max) {
-    return false;
-  }
-
-  return true;
+  return (!hasMin || price >= Number(min)) &&
+    (!hasMax || price <= Number(max));
 };
-
-const matchesBrandFilter = (brand, selectedBrands = []) => {
-  if (!selectedBrands.length) {
+const matchesBrandFilter = (brand, selected = []) => {
+  if (!selected.length) {
     return true;
   }
-
-  const normalizedBrand = normalizeString(brand);
-
-  return selectedBrands.some((selectedBrand) => {
-    const normalizedSelectedBrand = normalizeString(selectedBrand);
-
-    return (
-      normalizedBrand.includes(normalizedSelectedBrand) ||
-      normalizedSelectedBrand.includes(normalizedBrand)
-    );
+  const value = normalizeString(brand);
+  if (!value) {
+    return false;
+  }
+  return selected.some((candidate) => {
+    const expected = normalizeString(candidate);
+    return Boolean(expected) &&
+      (value.includes(expected) || expected.includes(value));
   });
 };
-
 const normalizeFilters = (filters = {}) => ({
   gender: (filters.gender || []).map(normalizeString),
   category: (filters.category || []).map(normalizeString),
@@ -62,40 +42,21 @@ const normalizeFilters = (filters = {}) => ({
   brand: (filters.brand || []).map(normalizeString),
   store: (filters.store || []).map(normalizeString),
   availability: (filters.availability || []).map(normalizeString),
-  priceMin: filters.priceMin ?? '',
-  priceMax: filters.priceMax ?? '',
+  priceMin: filters.priceMin ?? '', priceMax: filters.priceMax ?? '',
 });
-
 const applyProductFilters = (products = [], filters = {}) => {
-  const normalizedFilters = normalizeFilters(filters);
-
+  const selected = normalizeFilters(filters);
   return products.filter((product) => {
-    const matchesSize =
-      !normalizedFilters.size.length ||
-      !Array.isArray(product.size) ||
-      !product.size.length ||
-      matchesArrayFilter(product.size, normalizedFilters.size);
-
-    return (
-      matchesArrayFilter(product.gender, normalizedFilters.gender) &&
-      matchesArrayFilter(product.category, normalizedFilters.category) &&
-      matchesSize &&
-      matchesArrayFilter(product.color, normalizedFilters.color) &&
-      matchesArrayFilter(
-          product.availability,
-          normalizedFilters.availability,
-      ) &&
-      matchesArrayFilter(product.source, normalizedFilters.store) &&
-      matchesBrandFilter(product.brand, normalizedFilters.brand) &&
-      matchesPriceFilter(
-          product.numericPrice,
-          normalizedFilters.priceMin,
-          normalizedFilters.priceMax,
-      )
-    );
+    const matchesSize = !selected.size.length ||
+      !Array.isArray(product.size) || !product.size.length ||
+      matchesArrayFilter(product.size, selected.size);
+    return matchesArrayFilter(product.gender, selected.gender) &&
+      matchesArrayFilter(product.category, selected.category) && matchesSize &&
+      matchesArrayFilter(product.color, selected.color) &&
+      matchesArrayFilter(product.availability, selected.availability) &&
+      matchesArrayFilter(product.source, selected.store) &&
+      matchesBrandFilter(product.brand, selected.brand) &&
+      matchesPriceFilter(product.numericPrice, selected.priceMin, selected.priceMax);
   });
 };
-
-module.exports = {
-  applyProductFilters,
-};
+module.exports = {applyProductFilters};
