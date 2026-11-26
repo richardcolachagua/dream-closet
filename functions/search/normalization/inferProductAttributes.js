@@ -1,19 +1,35 @@
 const CATEGORY_KEYWORDS = require('../constants/categoryKeywords');
 const COLOR_KEYWORDS = require('../constants/colorKeywords');
 const GENDER_KEYWORDS = require('../constants/genderKeywords');
-const {normalizeString, includesKeyword} = require('../../shared/stringUtils');
+const {
+  normalizeString,
+  includesKeyword,
+} = require('../../shared/stringUtils');
+
+const PRIORITY_CATEGORIES = ['shoes'];
+
+const stripFalseFootwear = (name) =>
+  String(name).replace(/\bboot[\s-]?cut\b/gi, ' ');
 
 const inferCategory = (name = '') => {
-  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    if (includesKeyword(name, keywords)) {
+  const input = stripFalseFootwear(name);
+  const entries = Object.entries(CATEGORY_KEYWORDS);
+  const ordered = [
+    ...entries.filter(([category]) => PRIORITY_CATEGORIES.includes(category)),
+    ...entries.filter(([category]) => !PRIORITY_CATEGORIES.includes(category)),
+  ];
+  for (const [category, keywords] of ordered) {
+    if (includesKeyword(input, keywords)) {
       return category;
     }
   }
   return 'unknown';
 };
-const inferColors = (name = '') => Object.entries(COLOR_KEYWORDS)
-    .filter(([, keywords]) => includesKeyword(name, keywords))
-    .map(([color]) => color);
+
+const inferColors = (name = '') =>
+  Object.entries(COLOR_KEYWORDS)
+      .filter(([, keywords]) => includesKeyword(name, keywords))
+      .map(([color]) => color);
 const inferGender = (name = '') => {
   const matches = Object.entries(GENDER_KEYWORDS)
       .filter(([, keywords]) => includesKeyword(name, keywords))
@@ -24,16 +40,22 @@ const inferGender = (name = '') => {
   return matches.length === 1 ? matches[0] : 'unknown';
 };
 const inferAvailability = (value = {}) => {
-  const product = value && typeof value === 'object' && !Array.isArray(value) ?
-    value : {};
+  const product =
+    value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   if (typeof product.inStock === 'boolean') {
     return product.inStock ? 'instock' : 'outofstock';
   }
   const availability = normalizeString(product.availability);
-  if (includesKeyword(availability, [
-    'out of stock', 'outofstock', 'unavailable', 'sold out', 'not available',
-    'not in stock',
-  ])) {
+  if (
+    includesKeyword(availability, [
+      'out of stock',
+      'outofstock',
+      'unavailable',
+      'sold out',
+      'not available',
+      'not in stock',
+    ])
+  ) {
     return 'outofstock';
   }
   if (includesKeyword(availability, ['not', 'no', 'unknown'])) {
@@ -52,5 +74,10 @@ const inferBrand = (product = {}) => {
   }
   return '';
 };
-module.exports = {inferCategory, inferColors, inferGender, inferAvailability,
-  inferBrand};
+module.exports = {
+  inferCategory,
+  inferColors,
+  inferGender,
+  inferAvailability,
+  inferBrand,
+};

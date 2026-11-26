@@ -24,6 +24,7 @@ import {
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import useSavedItemState from "../../saved/useSavedItemsState";
 import { saveItem } from "../../saved/savedDataService";
+import { isMarketplaceUrl } from "../utils/isMarketplaceUrl";
 
 const formatPrice = formatProductPrice;
 
@@ -74,6 +75,8 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
     error: savedStateError,
   } = useSavedItemState(userId, result);
   const hasProductUrl = Boolean(productUrl);
+  const isMarketplaceLink =
+    result?.linkType === "marketplace" || isMarketplaceUrl(productUrl);
 
   const handleSave = async () => {
     if (!canSave || saving || checkingSaved || saved) return;
@@ -215,8 +218,13 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
 
           {availability ? (
             <Chip
-              label={availability === "instock" ? "In stock" :
-                availability === "outofstock" ? "Out of stock" : "Stock unknown"}
+              label={
+                availability === "instock"
+                  ? "In stock"
+                  : availability === "outofstock"
+                    ? "Out of stock"
+                    : "Stock unknown"
+              }
               size="small"
               sx={{
                 textTransform: "capitalize",
@@ -281,7 +289,9 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
           }}
         >
           {hasProductUrl
-            ? "Open the retailer page to confirm stock, sizing, shipping, and current product details."
+            ? isMarketplaceLink
+              ? "Opens Google Shopping. Confirm stock, sizing, shipping, and the final price with the retailer."
+              : "Open the retailer page to confirm stock, sizing, shipping, and current product details."
             : "Product link unavailable for this result."}
         </Typography>
 
@@ -308,7 +318,7 @@ function SearchResultCard({ result, viewMode = "grid", onSaveItem, userId }) {
               },
             }}
           >
-            View item
+            {isMarketplaceLink ? "View on Google Shopping" : "View item"}
           </Button>
 
           <Tooltip

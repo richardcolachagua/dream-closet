@@ -16,6 +16,14 @@ const {
   inferGender,
 } = require('./inferProductAttributes');
 
+const isMarketplaceUrl = (url) => {
+  try {
+    return /(^|\.)google\.[a-z.]+$/i.test(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+};
+
 const normalizeRealtimeProduct = (product) => {
   if (!record(product)) {
     return null;
@@ -42,9 +50,15 @@ const normalizeRealtimeProduct = (product) => {
     text(selected.storeName, 100) ||
     new URL(productUrl).hostname;
   const numericPrice = parsePriceValue(selected.price);
-  const currency =
+  const explicitCurrency =
     normalizeCurrency(selected.currency) ||
     normalizeCurrency(selected.currency_code);
+  const currency = explicitCurrency || (numericPrice === null ? null : 'USD');
+  const currencyBasis = explicitCurrency ?
+    'provider' :
+    currency ?
+      'assumed-us-market' :
+      'unknown';
   const photos = [
     ...(Array.isArray(product.product_photos) ? product.product_photos : []),
     ...(Array.isArray(product.productPhotos) ? product.productPhotos : []),
@@ -72,6 +86,8 @@ const normalizeRealtimeProduct = (product) => {
     price: displayPrice(numericPrice, currency),
     numericPrice,
     currency,
+    currencyBasis,
+    linkType: isMarketplaceUrl(productUrl) ? 'marketplace' : 'retailer',
     imageUrl: imageUrl(photos),
     productUrl,
     source,

@@ -24,6 +24,7 @@ import {
   primaryButtonSx,
   secondaryButtonSx,
 } from "../../../shared/ui/theme/componentStyles";
+import { isMarketplaceUrl } from "../../search/utils/isMarketplaceUrl";
 
 const buildSourceLabel = (source) => {
   if (!source) return "Unknown retailer";
@@ -48,14 +49,17 @@ function SavedItemCard({
   const [feedback, setFeedback] = useState("");
   const [feedbackSeverity, setFeedbackSeverity] = useState("success");
 
+  const hasProductUrl = Boolean(productUrl);
+  const isMarketplaceLink = isMarketplaceUrl(productUrl);
+
   const description = useMemo(() => {
     return (
       savedItem?.description ||
-      "Saved from your Dream Closet results so you can revisit it later."
+      (isMarketplaceLink
+        ? "Saved from your Dream Closet results. Opens Google Shopping, so confirm stock and the final price with the retailer."
+        : "Saved from your Dream Closet results so you can revisit it later.")
     );
-  }, [savedItem]);
-
-  const hasProductUrl = Boolean(productUrl);
+  }, [savedItem, isMarketplaceLink]);
 
   const handleCopyLink = async () => {
     if (!productUrl) return;
@@ -250,7 +254,7 @@ function SavedItemCard({
               disabled={!hasProductUrl}
               sx={{ ...primaryButtonSx, flex: 1, minHeight: 44 }}
             >
-              View item
+              {isMarketplaceLink ? "Google Shopping" : "View item"}
             </Button>
 
             <Tooltip
@@ -345,7 +349,9 @@ function SavedItemCard({
               disabled={!hasProductUrl}
               sx={primaryButtonSx}
             >
-              Open retailer page
+              {isMarketplaceLink
+                ? "Open on Google Shopping"
+                : "Open retailer page"}
             </Button>
 
             <Button
